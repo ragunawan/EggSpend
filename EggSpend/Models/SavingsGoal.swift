@@ -99,6 +99,32 @@ final class SavingsGoal {
         max(0, targetAmount - currentAmount)
     }
 
+    func monthlySavingsNeeded(asOf date: Date = Date.now, calendar: Calendar = .current) -> Double? {
+        guard let targetDate else { return nil }
+        guard remainingAmount > 0 else { return 0 }
+
+        let start = calendar.startOfDay(for: date)
+        let target = calendar.startOfDay(for: targetDate)
+        guard target >= start else { return nil }
+
+        let startMonth = calendar.dateComponents([.year, .month], from: start)
+        let targetMonth = calendar.dateComponents([.year, .month], from: target)
+        guard let startMonthDate = calendar.date(from: startMonth),
+              let targetMonthDate = calendar.date(from: targetMonth) else {
+            return nil
+        }
+
+        let monthCount = calendar.dateComponents([.month], from: startMonthDate, to: targetMonthDate).month ?? 0
+        return remainingAmount / Double(max(monthCount, 1))
+    }
+
+    var monthlySavingsLabel: String {
+        if isGoalMet { return "Target reached" }
+        guard targetDate != nil else { return "No target date" }
+        guard let needed = monthlySavingsNeeded() else { return "Target date passed" }
+        return "Save \(needed.formatted(.currency(code: "USD")))/mo"
+    }
+
     var isGoalMet: Bool {
         targetAmount > 0 && currentAmount >= targetAmount
     }

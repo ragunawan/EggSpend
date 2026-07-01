@@ -246,6 +246,11 @@ struct SavingsGoalRowView: View {
                                 .foregroundStyle(daysRemaining < 0 ? .red : Color.twig)
                         }
                     }
+
+                    Text(goal.monthlySavingsLabel)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(goal.isGoalMet ? Color.nestLeafGreen : Color.twig)
+                        .lineLimit(1)
                 }
 
                 Spacer(minLength: 0)

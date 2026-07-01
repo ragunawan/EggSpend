@@ -4,10 +4,9 @@ import SwiftUI
 
 /// Drop-in replacement for `LinearGradient.nestCanopy.ignoresSafeArea()`.
 ///
-/// Combines the existing canopy gradient with a slow, drifting shaft of
-/// dappled light and a handful of gently falling leaves so every screen that
-/// uses the canopy backdrop has continuous, ambient motion rather than a
-/// static wash. Non-interactive — safe to place behind any content.
+/// Combines the existing canopy gradient with a static warm top glow and a
+/// handful of gently drifting leaves. Non-interactive — safe to place behind
+/// any content.
 ///
 /// Usage:
 /// ```swift
@@ -17,39 +16,35 @@ import SwiftUI
 /// }
 /// ```
 struct AnimatedCanopyBackground: View {
-
-    @State private var lightOffset: CGFloat = -0.3
-
     var body: some View {
         ZStack {
             LinearGradient.nestCanopy
 
-            GeometryReader { geo in
-                // `.yolk` (not `.nestCream`) so this reads as warm light in both
-                // color schemes — `nestCream` is deliberately dark in dark mode
-                // as a background tint, which turned this into a murky smudge.
-                RadialGradient(
-                    colors: [Color.yolk.opacity(0.16), Color.yolk.opacity(0)],
-                    center: .center,
-                    startRadius: 0,
-                    endRadius: geo.size.width * 0.6
+            LinearGradient(
+                colors: [
+                    Color.yolk.opacity(0.18),
+                    Color.nestLeafGreen.opacity(0.08),
+                    Color.nestCream.opacity(0)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .mask(
+                LinearGradient(
+                    stops: [
+                        .init(color: .black, location: 0),
+                        .init(color: .black.opacity(0.75), location: 0.28),
+                        .init(color: .clear, location: 0.55)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
-                .frame(width: geo.size.width * 0.9, height: geo.size.width * 0.9)
-                .position(
-                    x: geo.size.width * (0.5 + lightOffset),
-                    y: geo.size.height * 0.25
-                )
-            }
+            )
 
             FloatingLeavesView()
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
-        .onAppear {
-            withAnimation(.easeInOut(duration: 20).repeatForever(autoreverses: true)) {
-                lightOffset = 0.3
-            }
-        }
     }
 }
 

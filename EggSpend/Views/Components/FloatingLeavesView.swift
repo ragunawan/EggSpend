@@ -2,8 +2,8 @@ import SwiftUI
 
 // MARK: - FloatingLeavesView
 
-/// Subtle animated background decoration showing small leaves drifting
-/// diagonally downward and gently rotating, looping forever.
+/// Subtle animated background decoration showing small leaves drifting down
+/// along varied seeded paths, looping forever.
 ///
 /// The view is frameless (fills its container) and has `.allowsHitTesting(false)`
 /// so it does not interfere with any taps beneath it.
@@ -21,27 +21,30 @@ struct FloatingLeavesView: View {
 
     private struct LeafConfig: Sendable {
         let id: Int
-        /// Fractional X position within the view (0 = left, 1 = right)
-        let xFraction: CGFloat
+        let startXFraction: CGFloat
+        let endXFraction: CGFloat
+        let midpointBias: CGFloat
         /// How long it takes to drift the full height (seconds)
         let duration: Double
         /// Initial fractional progress so leaves don't all start at the same point
         let startOffset: CGFloat
         /// Scale factor relative to base size
         let scale: CGFloat
-        /// Horizontal sway amplitude in points
-        let sway: CGFloat
+        let swayAmplitude: CGFloat
+        let swayFrequency: CGFloat
+        let phase: CGFloat
         /// Full rotation range in degrees over one drift
         let rotationRange: Double
+        let opacity: Double
         let color: Color
     }
 
     private let leaves: [LeafConfig] = [
-        LeafConfig(id: 0, xFraction: 0.12, duration: 16.0, startOffset: 0.0,  scale: 1.0,  sway: 14, rotationRange: 50,  color: .nestLeafGreen),
-        LeafConfig(id: 1, xFraction: 0.82, duration: 20.0, startOffset: 0.35, scale: 0.8,  sway: 10, rotationRange: -60, color: .twig),
-        LeafConfig(id: 2, xFraction: 0.45, duration: 24.0, startOffset: 0.6,  scale: 0.65, sway: 18, rotationRange: 40,  color: .nestLeafGreen),
-        LeafConfig(id: 3, xFraction: 0.65, duration: 18.0, startOffset: 0.15, scale: 0.9,  sway: 12, rotationRange: -45, color: .twig),
-        LeafConfig(id: 4, xFraction: 0.28, duration: 22.0, startOffset: 0.8,  scale: 0.7,  sway: 16, rotationRange: 55,  color: .nestLeafGreen),
+        LeafConfig(id: 0, startXFraction: 0.10, endXFraction: 0.30, midpointBias: -0.08, duration: 17.0, startOffset: 0.00, scale: 1.0,  swayAmplitude: 10, swayFrequency: 1.4, phase: 0.2, rotationRange: 52,  opacity: 0.16, color: .nestLeafGreen),
+        LeafConfig(id: 1, startXFraction: 0.86, endXFraction: 0.70, midpointBias: 0.10,  duration: 21.0, startOffset: 0.35, scale: 0.8,  swayAmplitude: 8,  swayFrequency: 1.9, phase: 1.1, rotationRange: -64, opacity: 0.13, color: .twig),
+        LeafConfig(id: 2, startXFraction: 0.43, endXFraction: 0.55, midpointBias: 0.16,  duration: 25.0, startOffset: 0.60, scale: 0.65, swayAmplitude: 13, swayFrequency: 1.2, phase: 2.6, rotationRange: 43,  opacity: 0.14, color: .nestLeafGreen),
+        LeafConfig(id: 3, startXFraction: 0.68, endXFraction: 0.45, midpointBias: -0.14, duration: 19.0, startOffset: 0.15, scale: 0.9,  swayAmplitude: 9,  swayFrequency: 2.1, phase: 3.5, rotationRange: -48, opacity: 0.12, color: .twig),
+        LeafConfig(id: 4, startXFraction: 0.26, endXFraction: 0.18, midpointBias: 0.12,  duration: 23.0, startOffset: 0.80, scale: 0.7,  swayAmplitude: 12, swayFrequency: 1.6, phase: 4.4, rotationRange: 58,  opacity: 0.15, color: .nestLeafGreen),
     ]
 
     // MARK: Animation State
@@ -61,10 +64,10 @@ struct FloatingLeavesView: View {
                     LeafShape()
                         .fill(config.color)
                         .frame(width: leafW * config.scale, height: leafH * config.scale)
-                        .opacity(0.16)
+                        .opacity(config.opacity)
                         .rotationEffect(.degrees(config.rotationRange * offsets[config.id]))
                         .position(
-                            x: w * config.xFraction + config.sway * sin(offsets[config.id] * .pi * 2),
+                            x: xPosition(for: config, width: w, progress: offsets[config.id]),
                             y: lerp(from: -leafH, to: h + leafH, t: offsets[config.id])
                         )
                 }
@@ -105,6 +108,20 @@ struct FloatingLeavesView: View {
 
     private func lerp(from start: CGFloat, to end: CGFloat, t: CGFloat) -> CGFloat {
         start + (end - start) * t
+    }
+
+    private func xPosition(for config: LeafConfig, width: CGFloat, progress: CGFloat) -> CGFloat {
+        let start = width * config.startXFraction
+        let end = width * config.endXFraction
+        let middle = width * ((config.startXFraction + config.endXFraction) / 2 + config.midpointBias)
+        let curve = quadraticBezier(start: start, control: middle, end: end, t: progress)
+        let wobble = config.swayAmplitude * sin((progress * .pi * 2 * config.swayFrequency) + config.phase)
+        return curve + wobble
+    }
+
+    private func quadraticBezier(start: CGFloat, control: CGFloat, end: CGFloat, t: CGFloat) -> CGFloat {
+        let inverse = 1 - t
+        return inverse * inverse * start + 2 * inverse * t * control + t * t * end
     }
 }
 

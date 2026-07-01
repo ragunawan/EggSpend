@@ -146,6 +146,43 @@ final class SavingsGoalTests: XCTestCase {
         XCTAssertFalse(goal.isOverdue)
     }
 
+    func testMonthlySavingsNeededForFutureTargetDate() {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = calendar.date(from: DateComponents(year: 2026, month: 1, day: 15))!
+        let target = calendar.date(from: DateComponents(year: 2026, month: 4, day: 15))!
+        let goal = SavingsGoal(name: "Trip", targetAmount: 4_000, currentAmount: 1_000, targetDate: target)
+
+        XCTAssertEqual(goal.monthlySavingsNeeded(asOf: now, calendar: calendar) ?? 0, 1_000, accuracy: 0.001)
+    }
+
+    func testMonthlySavingsNeededUsesOneMonthForCurrentMonthTarget() {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = calendar.date(from: DateComponents(year: 2026, month: 1, day: 5))!
+        let target = calendar.date(from: DateComponents(year: 2026, month: 1, day: 25))!
+        let goal = SavingsGoal(name: "Short Goal", targetAmount: 500, currentAmount: 100, targetDate: target)
+
+        XCTAssertEqual(goal.monthlySavingsNeeded(asOf: now, calendar: calendar) ?? 0, 400, accuracy: 0.001)
+    }
+
+    func testMonthlySavingsNeededNilForPastTargetDate() {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = calendar.date(from: DateComponents(year: 2026, month: 2, day: 1))!
+        let target = calendar.date(from: DateComponents(year: 2026, month: 1, day: 31))!
+        let goal = SavingsGoal(name: "Past Goal", targetAmount: 500, targetDate: target)
+
+        XCTAssertNil(goal.monthlySavingsNeeded(asOf: now, calendar: calendar))
+    }
+
+    func testMonthlySavingsNeededZeroForCompletedAmount() {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = calendar.date(from: DateComponents(year: 2026, month: 1, day: 1))!
+        let target = calendar.date(from: DateComponents(year: 2026, month: 6, day: 1))!
+        let goal = SavingsGoal(name: "Done", targetAmount: 500, currentAmount: 500, targetDate: target)
+
+        XCTAssertEqual(goal.monthlySavingsNeeded(asOf: now, calendar: calendar) ?? -1, 0, accuracy: 0.001)
+        XCTAssertEqual(goal.monthlySavingsLabel, "Target reached")
+    }
+
     // MARK: - Status
 
     func testStatusDefaultsToActiveAndCanBeToggled() {

@@ -26,8 +26,8 @@ struct DashboardView: View {
             .reduce(0) { $0 + $1.amount }
     }
     private var recentTransactions: [Transaction] { Array(transactions.prefix(5)) }
-    private var topBudgets: [Budget] { Array(budgets.prefix(3)) }
-    private var topGoals: [SavingsGoal] { Array(activeGoals.prefix(3)) }
+    private var topBudgets: [Budget] { budgets.sorted { $0.name < $1.name } }
+    private var topGoals: [SavingsGoal] { activeGoals.sorted { $0.createdAt < $1.createdAt } }
     private var safeSpendResult: SafeSpendResult {
         SafeSpendCalculator.calculate(
             accounts: Array(accounts),
@@ -261,46 +261,33 @@ struct DashboardView: View {
 
     private var budgetPreviewSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            NavigationLink(destination: BudgetView()) {
-                HStack {
-                    Label("Budget Eggs", systemImage: "egg.fill")
-                        .font(.headline).foregroundStyle(Color.nestBrown)
-                    Spacer()
-                    Text("Manage").font(.subheadline).foregroundStyle(Color.yolk)
-                }
-            }
-            .buttonStyle(.plain)
+            Label("Budget Eggs", systemImage: "egg.fill")
+                .font(.headline)
+                .foregroundStyle(Color.nestBrown)
 
-            HStack(spacing: 16) {
-                ForEach(topBudgets) { budget in
-                    let prog = budget.progress(from: Array(transactions))
-                    VStack(spacing: 6) {
-                        EggProgressView(progress: prog, size: 56)
-                        Text(budget.name)
-                            .font(.caption2).lineLimit(1).foregroundStyle(Color.twig)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(topBudgets) { budget in
+                        NavigationLink(destination: BudgetDetailView(budget: budget)) {
+                            BudgetTileView(budget: budget, transactions: Array(transactions))
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .frame(maxWidth: .infinity)
                 }
+                .padding(.horizontal, 2)
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
         }
-        .padding()
-        .nestCard()
+        .padding(.vertical, 4)
     }
 
     // MARK: - Savings goals preview
 
     private var savingsGoalsPreviewSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            NavigationLink(destination: SavingsGoalsView()) {
-                HStack {
-                    Label("Savings Goals", systemImage: "leaf.fill")
-                        .font(.headline).foregroundStyle(Color.nestBrown)
-                    Spacer()
-                    Text("Manage").font(.subheadline).foregroundStyle(Color.yolk)
-                }
-            }
-            .buttonStyle(.plain)
+            Label("Savings Goals", systemImage: "leaf.fill")
+                .font(.headline)
+                .foregroundStyle(Color.nestBrown)
 
             if topGoals.isEmpty {
                 NavigationLink(destination: SavingsGoalsView()) {
@@ -310,21 +297,21 @@ struct DashboardView: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                HStack(spacing: 16) {
-                    ForEach(topGoals) { goal in
-                        VStack(spacing: 6) {
-                            EggProgressView(progress: goal.progress, size: 56)
-                            Text(goal.name)
-                                .font(.caption2).lineLimit(1).foregroundStyle(Color.twig)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(topGoals) { goal in
+                            NavigationLink(destination: SavingsGoalsView()) {
+                                SavingsGoalTileView(goal: goal)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .frame(maxWidth: .infinity)
                     }
+                    .padding(.horizontal, 2)
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
             }
         }
-        .padding()
-        .nestCard()
+        .padding(.vertical, 4)
     }
 
     // MARK: - Recent transactions
@@ -386,6 +373,94 @@ private struct NestMetricCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .nestCard()
+    }
+}
+
+private struct BudgetTileView: View {
+    let budget: Budget
+    let transactions: [Transaction]
+
+    private var spent: Double { budget.spent(from: transactions) }
+    private var progress: Double { budget.progress(from: transactions) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                EggProgressView(progress: progress, size: 52)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+
+            Text(budget.name)
+                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                .foregroundStyle(Color.nestBrown)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(Int(progress * 100))% used")
+                    .font(.caption2)
+                    .foregroundStyle(progress > 1 ? .red : Color.twig)
+                Text("\(spent.formatted(.currency(code: "USD"))) of \(budget.limitAmount.formatted(.currency(code: "USD")))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .frame(width: 148, height: 148, alignment: .topLeading)
+        .padding(12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(budget.statusColor(progress: progress).opacity(0.25), lineWidth: 1)
+        )
+    }
+}
+
+private struct SavingsGoalTileView: View {
+    let goal: SavingsGoal
+
+    private var goalColor: Color { Color(hex: goal.colorHex) ?? .yolk }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                EggProgressView(progress: goal.progress, size: 52)
+                Spacer()
+                Image(systemName: goal.icon)
+                    .font(.caption)
+                    .foregroundStyle(goalColor)
+            }
+
+            Text(goal.name)
+                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                .foregroundStyle(Color.nestBrown)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(goal.monthlySavingsLabel)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(goal.isGoalMet ? Color.nestLeafGreen : Color.twig)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                Text("\(goal.currentAmount.formatted(.currency(code: "USD"))) of \(goal.targetAmount.formatted(.currency(code: "USD")))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .frame(width: 156, height: 148, alignment: .topLeading)
+        .padding(12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(goal.statusColor.opacity(0.25), lineWidth: 1)
+        )
     }
 }
 
