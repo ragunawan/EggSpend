@@ -42,20 +42,20 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                LinearGradient.nestCanopy.ignoresSafeArea()
+                AnimatedCanopyBackground()
                 BirdAnimationView().frame(height: 100).frame(maxWidth: .infinity).padding(.top, 60)
 
                 ScrollView {
                     VStack(spacing: 20) {
                         nestHeaderSection
                         netWorthCard
-                        safeToSpendCard
-                        monthlySnapshotRow
-                        cashFlowForecastCard
-                        monthlyReviewCard
-                        savingsGoalsPreviewSection
-                        if !topBudgets.isEmpty { budgetPreviewSection }
-                        recentTransactionsSection
+                        safeToSpendCard.appearRise(delay: 0.05)
+                        monthlySnapshotRow.appearRise(delay: 0.1)
+                        cashFlowForecastCard.appearRise(delay: 0.15)
+                        monthlyReviewCard.appearRise(delay: 0.2)
+                        savingsGoalsPreviewSection.appearRise(delay: 0.25)
+                        if !topBudgets.isEmpty { budgetPreviewSection.appearRise(delay: 0.3) }
+                        recentTransactionsSection.appearRise(delay: 0.35)
                     }
                     .padding()
                     .padding(.bottom, 20)
@@ -342,11 +342,15 @@ struct DashboardView: View {
             .buttonStyle(.plain)
 
             if recentTransactions.isEmpty {
-                ContentUnavailableView(
-                    "Your nest is empty",
-                    systemImage: "bird",
-                    description: Text("Add your first transaction with the + button.")
-                )
+                ContentUnavailableView {
+                    Label {
+                        Text("Your nest is empty")
+                    } icon: {
+                        Image(systemName: "bird").symbolEffect(.pulse)
+                    }
+                } description: {
+                    Text("Add your first transaction with the + button.")
+                }
                 .frame(height: 140)
             } else {
                 VStack(spacing: 0) {

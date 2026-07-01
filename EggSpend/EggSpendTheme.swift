@@ -119,6 +119,30 @@ extension View {
     }
 }
 
+private struct AppearRiseModifier: ViewModifier {
+    let delay: Double
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 12)
+            .onAppear {
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.8).delay(delay)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+extension View {
+    /// Fades and rises content into place on first appearance. Stack with an
+    /// increasing `delay` across sibling sections for a cascading reveal.
+    func appearRise(delay: Double = 0) -> some View {
+        modifier(AppearRiseModifier(delay: delay))
+    }
+}
+
 extension Calendar {
     func isDateInCurrentMonth(_ date: Date) -> Bool {
         let now = Date.now

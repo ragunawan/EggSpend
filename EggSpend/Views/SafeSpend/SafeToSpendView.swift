@@ -25,7 +25,7 @@ struct SafeToSpendView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient.nestCanopy.ignoresSafeArea()
+            AnimatedCanopyBackground()
 
             List {
                 headlineSection

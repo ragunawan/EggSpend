@@ -18,7 +18,7 @@ struct NetWorthView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient.nestCanopy.ignoresSafeArea()
+                AnimatedCanopyBackground()
 
                 List {
                     summarySection
@@ -90,6 +90,7 @@ struct NetWorthView: View {
                 }
             }
             .padding(.vertical, 8)
+            .appearRise(delay: 0.05)
         }
     }
 
@@ -110,42 +111,49 @@ struct NetWorthView: View {
             }
             .frame(height: 180)
             .padding(.vertical, 8)
+            .appearRise(delay: 0.1)
         }
         .listRowBackground(Color.clear)
     }
 
     private var assetsSection: some View {
         Section("Assets") {
-            if assets.isEmpty {
-                Text("No assets added yet")
-                    .foregroundStyle(.secondary)
-            } else {
-                ForEach(assets) { account in
-                    Button { editingAccount = account } label: {
-                        AccountRowView(account: account)
+            Group {
+                if assets.isEmpty {
+                    Text("No assets added yet")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(assets) { account in
+                        Button { editingAccount = account } label: {
+                            AccountRowView(account: account)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                    .onDelete { indexSet in deleteAccounts(assets, at: indexSet) }
                 }
-                .onDelete { indexSet in deleteAccounts(assets, at: indexSet) }
             }
+            .appearRise(delay: 0.15)
         }
         .listRowBackground(Color.clear)
     }
 
     private var liabilitiesSection: some View {
         Section("Liabilities") {
-            if liabilities.isEmpty {
-                Text("No liabilities added yet")
-                    .foregroundStyle(.secondary)
-            } else {
-                ForEach(liabilities) { account in
-                    Button { editingAccount = account } label: {
-                        AccountRowView(account: account)
+            Group {
+                if liabilities.isEmpty {
+                    Text("No liabilities added yet")
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(liabilities) { account in
+                        Button { editingAccount = account } label: {
+                            AccountRowView(account: account)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                    .onDelete { indexSet in deleteAccounts(liabilities, at: indexSet) }
                 }
-                .onDelete { indexSet in deleteAccounts(liabilities, at: indexSet) }
             }
+            .appearRise(delay: 0.2)
         }
         .listRowBackground(Color.clear)
     }

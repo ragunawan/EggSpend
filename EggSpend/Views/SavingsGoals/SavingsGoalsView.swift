@@ -40,7 +40,7 @@ struct SavingsGoalsView: View {
                     }
                 }
             }
-            .background(LinearGradient.nestCanopy.ignoresSafeArea())
+            .background(AnimatedCanopyBackground())
             .navigationTitle("Savings Goals")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -183,7 +183,11 @@ struct SavingsGoalsView: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("No Savings Goals Yet", systemImage: "leaf")
+            Label {
+                Text("No Savings Goals Yet")
+            } icon: {
+                Image(systemName: "leaf").symbolEffect(.pulse)
+            }
         } description: {
             Text("Hatch a new nest egg.\nTap + to set your first savings goal.")
         } actions: {

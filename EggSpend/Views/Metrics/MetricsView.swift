@@ -103,7 +103,7 @@ struct MetricsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient.nestCanopy.ignoresSafeArea()
+                AnimatedCanopyBackground()
 
                 List {
                     periodPickerSection
@@ -143,6 +143,7 @@ struct MetricsView: View {
                 cashFlowChart
             }
             .padding(.vertical, 8)
+            .appearRise(delay: 0.05)
         } header: {
             Label("Timeline", systemImage: "chart.xyaxis.line")
                 .foregroundStyle(Color.twig)
@@ -380,37 +381,40 @@ struct MetricsView: View {
 
     private var incomeVsExpenseSection: some View {
         Section("Period Summary") {
-            Chart {
-                BarMark(x: .value("Type", "Income"),   y: .value("Amount", totalIncome))
-                    .foregroundStyle(Color.nestLeafGreen.gradient)
-                BarMark(x: .value("Type", "Expenses"), y: .value("Amount", totalExpenses))
-                    .foregroundStyle(Color.red.opacity(0.8).gradient)
-            }
-            .chartYAxis {
-                AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
-            }
-            .frame(height: 160)
-            .padding(.vertical, 8)
-
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Net").font(.caption).foregroundStyle(.secondary)
-                    Text(totalIncome - totalExpenses, format: .currency(code: "USD"))
-                        .font(.headline)
-                        .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : .red)
+            Group {
+                Chart {
+                    BarMark(x: .value("Type", "Income"),   y: .value("Amount", totalIncome))
+                        .foregroundStyle(Color.nestLeafGreen.gradient)
+                    BarMark(x: .value("Type", "Expenses"), y: .value("Amount", totalExpenses))
+                        .foregroundStyle(Color.red.opacity(0.8).gradient)
                 }
-                Spacer()
-                VStack(alignment: .trailing) {
-                    Text("Savings Rate").font(.caption).foregroundStyle(.secondary)
-                    if totalIncome > 0 {
-                        Text("\(Int((1 - totalExpenses / totalIncome) * 100))%")
-                            .font(.headline).foregroundStyle(Color.nestBrown)
-                    } else {
-                        Text("—").font(.headline).foregroundStyle(.secondary)
+                .chartYAxis {
+                    AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+                }
+                .frame(height: 160)
+                .padding(.vertical, 8)
+
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Net").font(.caption).foregroundStyle(.secondary)
+                        Text(totalIncome - totalExpenses, format: .currency(code: "USD"))
+                            .font(.headline)
+                            .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : .red)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text("Savings Rate").font(.caption).foregroundStyle(.secondary)
+                        if totalIncome > 0 {
+                            Text("\(Int((1 - totalExpenses / totalIncome) * 100))%")
+                                .font(.headline).foregroundStyle(Color.nestBrown)
+                        } else {
+                            Text("—").font(.headline).foregroundStyle(.secondary)
+                        }
                     }
                 }
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
+            .appearRise(delay: 0.1)
         }
         .listRowBackground(Color.clear)
     }
@@ -419,28 +423,31 @@ struct MetricsView: View {
 
     private var categoryBreakdownSection: some View {
         Section("Spending by Category") {
-            Chart(expensesByCategory.prefix(6), id: \.0) { name, amount, _ in
-                SectorMark(angle: .value("Amount", amount),
-                           innerRadius: .ratio(0.55),
-                           angularInset: 2)
-                    .foregroundStyle(by: .value("Category", name))
-                    .cornerRadius(4)
-            }
-            .frame(height: 200)
-            .padding(.vertical, 8)
+            Group {
+                Chart(expensesByCategory.prefix(6), id: \.0) { name, amount, _ in
+                    SectorMark(angle: .value("Amount", amount),
+                               innerRadius: .ratio(0.55),
+                               angularInset: 2)
+                        .foregroundStyle(by: .value("Category", name))
+                        .cornerRadius(4)
+                }
+                .frame(height: 200)
+                .padding(.vertical, 8)
 
-            ForEach(expensesByCategory.prefix(6), id: \.0) { name, amount, icon in
-                HStack {
-                    Image(systemName: icon).frame(width: 24).foregroundStyle(.secondary)
-                    Text(name)
-                    Spacer()
-                    Text(amount, format: .currency(code: "USD")).foregroundStyle(.secondary)
-                    if totalExpenses > 0 {
-                        Text("(\(Int(amount / totalExpenses * 100))%)")
-                            .font(.caption).foregroundStyle(.tertiary)
+                ForEach(expensesByCategory.prefix(6), id: \.0) { name, amount, icon in
+                    HStack {
+                        Image(systemName: icon).frame(width: 24).foregroundStyle(.secondary)
+                        Text(name)
+                        Spacer()
+                        Text(amount, format: .currency(code: "USD")).foregroundStyle(.secondary)
+                        if totalExpenses > 0 {
+                            Text("(\(Int(amount / totalExpenses * 100))%)")
+                                .font(.caption).foregroundStyle(.tertiary)
+                        }
                     }
                 }
             }
+            .appearRise(delay: 0.15)
         }
         .listRowBackground(Color.clear)
     }

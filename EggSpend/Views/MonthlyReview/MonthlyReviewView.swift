@@ -27,7 +27,7 @@ struct MonthlyReviewView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient.nestCanopy.ignoresSafeArea()
+            AnimatedCanopyBackground()
 
             List {
                 monthNavigationSection

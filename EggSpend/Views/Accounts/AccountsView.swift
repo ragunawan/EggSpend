@@ -33,11 +33,15 @@ struct AccountsView: View {
             }
             .overlay {
                 if accounts.isEmpty {
-                    ContentUnavailableView(
-                        "No Accounts",
-                        systemImage: "building.columns",
-                        description: Text("Add your first account to track net worth.")
-                    )
+                    ContentUnavailableView {
+                        Label {
+                            Text("No Accounts")
+                        } icon: {
+                            Image(systemName: "building.columns").symbolEffect(.pulse)
+                        }
+                    } description: {
+                        Text("Add your first account to track net worth.")
+                    }
                 }
             }
         }

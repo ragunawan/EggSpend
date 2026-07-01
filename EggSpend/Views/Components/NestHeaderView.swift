@@ -8,9 +8,20 @@ struct NestHeaderView: View {
 
     @State private var nestScale: CGFloat = 0.4
     @State private var nestOpacity: Double = 0
-    @State private var egg1Scale: CGFloat = 0
-    @State private var egg2Scale: CGFloat = 0
-    @State private var egg3Scale: CGFloat = 0
+    @State private var eggScales: [CGFloat] = [0, 0, 0]
+    @State private var eggOffsets: [CGFloat] = [0, 0, 0]
+    @State private var crackedEggIndex: Int? = nil
+    @State private var lastTapTime: Date = .distantPast
+
+    /// Fractional (x, y) position of each egg within the nest bowl.
+    private let eggPositions: [(x: CGFloat, y: CGFloat)] = [
+        (0.34, 0.52),
+        (0.50, 0.46),
+        (0.66, 0.53),
+    ]
+
+    /// Taps closer together than this feel deliberate/rapid rather than incidental.
+    private let fastTapThreshold: TimeInterval = 0.3
 
     var body: some View {
         Canvas { context, size in
@@ -19,6 +30,8 @@ struct NestHeaderView: View {
         .overlay(eggsOverlay)
         .scaleEffect(nestScale)
         .opacity(nestOpacity)
+        .contentShape(Rectangle())
+        .onTapGesture { handleTap() }
         .onAppear {
             // Nest scales in
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
@@ -26,15 +39,66 @@ struct NestHeaderView: View {
                 nestOpacity = 1.0
             }
             // Eggs bounce in with staggered delays
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.25)) {
-                egg1Scale = 1.0
+            let entranceDelays: [Double] = [0.25, 0.4, 0.55]
+            for index in eggScales.indices {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.55).delay(entranceDelays[index])) {
+                    eggScales[index] = 1.0
+                }
             }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.4)) {
-                egg2Scale = 1.0
+        }
+    }
+
+    // MARK: - Tap interaction
+
+    /// Every tap makes the eggs hop up and spring back into the nest. Tapping
+    /// again before the previous hop settles cracks a random egg, which
+    /// respawns on its own a few seconds later.
+    private func handleTap() {
+        let now = Date()
+        let isFastTap = now.timeIntervalSince(lastTapTime) < fastTapThreshold
+        lastTapTime = now
+
+        jumpAllEggs()
+
+        if isFastTap && crackedEggIndex == nil {
+            crackRandomEgg()
+        }
+    }
+
+    private func jumpAllEggs() {
+        for index in eggOffsets.indices {
+            let delay = Double(index) * 0.05
+            withAnimation(.spring(response: 0.22, dampingFraction: 0.5).delay(delay)) {
+                eggOffsets[index] = -20
             }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.55).delay(0.55)) {
-                egg3Scale = 1.0
+            Task {
+                try? await Task.sleep(for: .seconds(delay + 0.16))
+                await MainActor.run {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.45)) {
+                        eggOffsets[index] = 0
+                    }
+                }
             }
+        }
+    }
+
+    private func crackRandomEgg() {
+        let index = Int.random(in: eggPositions.indices)
+        crackedEggIndex = index
+        Task {
+            try? await Task.sleep(for: .seconds(5))
+            await MainActor.run {
+                respawnEgg(at: index)
+            }
+        }
+    }
+
+    private func respawnEgg(at index: Int) {
+        guard crackedEggIndex == index else { return }
+        crackedEggIndex = nil
+        eggScales[index] = 0
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) {
+            eggScales[index] = 1.0
         }
     }
 
@@ -160,26 +224,22 @@ struct NestHeaderView: View {
             let w = geo.size.width
             let h = geo.size.height
 
-            // Left egg
-            EggShape()
-                .fill(eggGradient)
+            ForEach(eggPositions.indices, id: \.self) { index in
+                let pos = eggPositions[index]
+                ZStack {
+                    EggShape()
+                        .fill(eggGradient)
+                    if crackedEggIndex == index {
+                        CrackShape()
+                            .stroke(Color.white.opacity(0.9), style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                            .blendMode(.overlay)
+                    }
+                }
                 .frame(width: w * 0.18, height: w * 0.13)
-                .scaleEffect(egg1Scale)
-                .position(x: w * 0.34, y: h * 0.52)
-
-            // Center egg (slightly raised)
-            EggShape()
-                .fill(eggGradient)
-                .frame(width: w * 0.18, height: w * 0.13)
-                .scaleEffect(egg2Scale)
-                .position(x: w * 0.50, y: h * 0.46)
-
-            // Right egg
-            EggShape()
-                .fill(eggGradient)
-                .frame(width: w * 0.18, height: w * 0.13)
-                .scaleEffect(egg3Scale)
-                .position(x: w * 0.66, y: h * 0.53)
+                .scaleEffect(eggScales[index])
+                .offset(y: eggOffsets[index])
+                .position(x: w * pos.x, y: h * pos.y)
+            }
         }
     }
 

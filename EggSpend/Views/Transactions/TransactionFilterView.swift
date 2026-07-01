@@ -34,7 +34,7 @@ struct TransactionFilterView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient.nestCanopy.ignoresSafeArea()
+                AnimatedCanopyBackground()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {

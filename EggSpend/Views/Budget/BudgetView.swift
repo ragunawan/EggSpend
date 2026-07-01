@@ -52,18 +52,18 @@ struct BudgetView: View {
                     ScrollView {
                         VStack(spacing: 20) {
                             summaryHeroCard
-                            periodPicker
-                            if !overBudget.isEmpty   { budgetGroup("Over Budget 🚨",   overBudget,   accent: .red) }
-                            if !warningBudgets.isEmpty { budgetGroup("Watch Out ⚠️", warningBudgets, accent: .yolk) }
-                            if !healthyBudgets.isEmpty { budgetGroup("On Track ✓",   healthyBudgets, accent: .nestLeafGreen) }
-                            inactiveBudgetsSection
+                            periodPicker.appearRise(delay: 0.05)
+                            if !overBudget.isEmpty   { budgetGroup("Over Budget 🚨",   overBudget,   accent: .red).appearRise(delay: 0.1) }
+                            if !warningBudgets.isEmpty { budgetGroup("Watch Out ⚠️", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
+                            if !healthyBudgets.isEmpty { budgetGroup("On Track ✓",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
+                            inactiveBudgetsSection.appearRise(delay: 0.25)
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 32)
                     }
                 }
             }
-            .background(LinearGradient.nestCanopy.ignoresSafeArea())
+            .background(AnimatedCanopyBackground())
             .navigationTitle("Budget Eggs")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -295,7 +295,11 @@ struct BudgetView: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("No Budgets Yet", systemImage: "bird")
+            Label {
+                Text("No Budgets Yet")
+            } icon: {
+                Image(systemName: "bird").symbolEffect(.pulse)
+            }
         } description: {
             Text("Build your nest egg wisely.\nTap + to set your first budget.")
         } actions: {

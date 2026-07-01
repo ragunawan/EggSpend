@@ -16,7 +16,7 @@ struct RecurringTransactionsView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient.nestCanopy.ignoresSafeArea()
+            AnimatedCanopyBackground()
 
             List {
                 if !dueSoon.isEmpty {
@@ -82,11 +82,15 @@ struct RecurringTransactionsView: View {
         }
         .overlay {
             if items.isEmpty {
-                ContentUnavailableView(
-                    "No Recurring Transactions",
-                    systemImage: "arrow.clockwise.circle",
-                    description: Text("Add bills, subscriptions, or regular income.")
-                )
+                ContentUnavailableView {
+                    Label {
+                        Text("No Recurring Transactions")
+                    } icon: {
+                        Image(systemName: "arrow.clockwise.circle").symbolEffect(.pulse)
+                    }
+                } description: {
+                    Text("Add bills, subscriptions, or regular income.")
+                }
             }
         }
         .sheet(isPresented: $showAdd) { AddRecurringTransactionView() }

@@ -36,22 +36,30 @@ struct TransactionsListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient.nestCanopy.ignoresSafeArea()
+                AnimatedCanopyBackground()
 
                 VStack(spacing: 0) {
                     activeFilterBanner
 
                     Group {
                         if transactions.isEmpty {
-                            ContentUnavailableView(
-                                "No Transactions",
-                                systemImage: "tray",
-                                description: Text("Tap + to record your first transaction.")
-                            )
+                            ContentUnavailableView {
+                                Label {
+                                    Text("No Transactions")
+                                } icon: {
+                                    Image(systemName: "tray").symbolEffect(.pulse)
+                                }
+                            } description: {
+                                Text("Tap + to record your first transaction.")
+                            }
                         } else if filtered.isEmpty {
                             if filter.isActive && searchText.isEmpty {
                                 ContentUnavailableView {
-                                    Label("No Matching Transactions", systemImage: "line.3.horizontal.decrease.circle")
+                                    Label {
+                                        Text("No Matching Transactions")
+                                    } icon: {
+                                        Image(systemName: "line.3.horizontal.decrease.circle").symbolEffect(.pulse)
+                                    }
                                 } description: {
                                     Text("Try adjusting or clearing your filters.")
                                 } actions: {

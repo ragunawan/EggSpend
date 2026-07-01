@@ -36,12 +36,16 @@ struct CategoryManagementView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient.nestCanopy.ignoresSafeArea()
+            AnimatedCanopyBackground()
 
             Group {
                 if categories.isEmpty {
                     ContentUnavailableView {
-                        Label("No categories yet", systemImage: "tag")
+                        Label {
+                            Text("No categories yet")
+                        } icon: {
+                            Image(systemName: "tag").symbolEffect(.pulse)
+                        }
                     } description: {
                         Text("Tap + to create your first category.")
                     }

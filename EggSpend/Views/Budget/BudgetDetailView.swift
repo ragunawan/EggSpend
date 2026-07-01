@@ -112,7 +112,7 @@ struct BudgetDetailView: View {
             .padding(.horizontal)
             .padding(.bottom, 32)
         }
-        .background(LinearGradient.nestCanopy.ignoresSafeArea())
+        .background(AnimatedCanopyBackground())
         .navigationTitle(budget.name)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
