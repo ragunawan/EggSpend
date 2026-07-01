@@ -55,12 +55,18 @@ struct BudgetView: View {
 
                         ScrollView {
                             VStack(spacing: 16) {
-                                if !overBudget.isEmpty   { budgetGroup("Over Budget 🚨",   overBudget,   accent: .red).appearRise(delay: 0.1) }
-                                if !warningBudgets.isEmpty { budgetGroup("Watch Out ⚠️", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
-                                if !healthyBudgets.isEmpty { budgetGroup("On Track ✓",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
-                                inactiveBudgetsSection.appearRise(delay: 0.25)
+                                if displayed.isEmpty && periodFilter != nil {
+                                    filteredEmptyState
+                                        .appearRise(delay: 0.1)
+                                } else {
+                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .red).appearRise(delay: 0.1) }
+                                    if !warningBudgets.isEmpty { budgetGroup("Watch Out", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
+                                    if !healthyBudgets.isEmpty { budgetGroup("On Track",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
+                                    inactiveBudgetsSection.appearRise(delay: 0.25)
+                                }
                             }
                             .padding(12)
+                            .frame(maxWidth: .infinity)
                         }
                         .frame(maxHeight: .infinity)
                         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -317,6 +323,30 @@ struct BudgetView: View {
             .buttonStyle(.borderedProminent).tint(Color.nestBrown)
         }
     }
+
+    private var filteredEmptyState: some View {
+        ContentUnavailableView {
+            Label {
+                Text(filteredEmptyTitle)
+            } icon: {
+                Image(systemName: "line.3.horizontal.decrease.circle")
+            }
+        } description: {
+            Text("There are no active budgets for the selected filter.")
+        } actions: {
+            Button("Show All Budgets") { periodFilter = nil }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.nestBrown)
+        }
+        .frame(maxWidth: .infinity, minHeight: 220)
+    }
+
+    private var filteredEmptyTitle: String {
+        if let periodFilter {
+            return "No \(periodFilter.rawValue) Budgets"
+        }
+        return "No Budgets"
+    }
 }
 
 // MARK: – Budget row card
@@ -331,56 +361,65 @@ struct BudgetRowView: View {
     private var statusColor: Color { budget.statusColor(progress: progress) }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 14) {
-                EggProgressView(progress: progress, size: 56)
+        HStack(spacing: 14) {
+            EggProgressView(progress: progress, size: 56)
+                .layoutPriority(1)
 
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 6) {
-                        if let cat = budget.category {
-                            Image(systemName: cat.icon).font(.caption).foregroundStyle(cat.color)
-                        }
-                        Text(budget.name)
-                            .font(.system(.body, design: .rounded, weight: .semibold))
-                            .lineLimit(1)
-                            .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    if let cat = budget.category {
+                        Image(systemName: cat.icon).font(.caption).foregroundStyle(cat.color)
                     }
-
-                    HStack(spacing: 4) {
-                        Text(spent, format: .currency(code: "USD"))
-                            .font(.system(.subheadline, design: .rounded, weight: .medium))
-                            .foregroundStyle(.primary)
-                        Text("of").font(.caption).foregroundStyle(.secondary)
-                        Text(budget.limitAmount, format: .currency(code: "USD"))
-                            .font(.system(.subheadline, design: .rounded, weight: .medium))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    HStack(spacing: 4) {
-                        Image(systemName: remaining >= 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                            .font(.caption2).foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
-                        Text(remaining >= 0
-                             ? "\(remaining, format: .currency(code: "USD")) left"
-                             : "\(abs(remaining), format: .currency(code: "USD")) over")
-                            .font(.caption)
-                            .foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
-                    }
+                    Text(budget.name)
+                        .font(.system(.body, design: .rounded, weight: .semibold))
+                        .lineLimit(2)
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Spacer(minLength: 0)
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Image(systemName: budget.period.icon).font(.caption).foregroundStyle(.secondary)
-                    Text(budget.period.rawValue).font(.caption2).foregroundStyle(.secondary)
-                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                HStack(spacing: 4) {
+                    Text(spent, format: .currency(code: "USD"))
+                        .font(.system(.subheadline, design: .rounded, weight: .medium))
+                        .foregroundStyle(.primary)
+                    Text("of").font(.caption).foregroundStyle(.secondary)
+                    Text(budget.limitAmount, format: .currency(code: "USD"))
+                        .font(.system(.subheadline, design: .rounded, weight: .medium))
+                        .foregroundStyle(.secondary)
                 }
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+
+                HStack(spacing: 4) {
+                    Image(systemName: remaining >= 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                        .font(.caption2).foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
+                    Text(remaining >= 0
+                         ? "\(remaining, format: .currency(code: "USD")) left"
+                         : "\(abs(remaining), format: .currency(code: "USD")) over")
+                        .font(.caption)
+                        .foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
+                }
+
+                AnimatedProgressBar(progress: progress, color: statusColor, height: 3)
+                    .padding(.top, 2)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .layoutPriority(2)
 
-            // Colour progress bar at bottom of card
-            AnimatedProgressBar(progress: progress, color: statusColor, height: 3)
+            Spacer(minLength: 0)
+
+            VStack(alignment: .trailing, spacing: 4) {
+                Image(systemName: budget.period.icon).font(.caption).foregroundStyle(.secondary)
+                Text(budget.period.compactLabel)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+            }
+            .frame(width: 48, alignment: .trailing)
+            .fixedSize(horizontal: true, vertical: false)
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -432,6 +471,16 @@ private struct FilterChip: View {
         }
         .buttonStyle(.plain)
         .animation(.spring(response: 0.3), value: selected)
+    }
+}
+
+private extension BudgetPeriod {
+    var compactLabel: String {
+        switch self {
+        case .weekly: return "Week"
+        case .monthly: return "Month"
+        case .yearly: return "Year"
+        }
     }
 }
 

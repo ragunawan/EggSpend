@@ -42,6 +42,7 @@ final class Account {
     var annualPercentageRate: Double?
     var minimumPayment: Double?
     var plannedExtraPayment: Double?
+    var includeInNetWorth: Bool = true
 
     var type: AccountType {
         get { AccountType(rawValue: typeRaw) ?? .other }
@@ -50,6 +51,7 @@ final class Account {
 
     var isAsset: Bool { type.isAsset }
     var isLiability: Bool { type == .credit || type == .loan }
+    var countsTowardNetWorth: Bool { isAsset || includeInNetWorth }
 
     @Relationship(deleteRule: .nullify, inverse: \Transaction.account)
     var transactions: [Transaction]? = []

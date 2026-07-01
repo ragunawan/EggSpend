@@ -36,7 +36,7 @@ final class NetWorthCalculationTests: XCTestCase {
             ("Student Loan", .loan, -15000)
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let liabilities = accounts.filter { !$0.isAsset }.reduce(0.0) { $0 + abs($1.balance) }
+        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
         XCTAssertEqual(liabilities, 17000, accuracy: 0.001)
     }
 
@@ -47,7 +47,7 @@ final class NetWorthCalculationTests: XCTestCase {
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
         let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        let liabilities = accounts.filter { !$0.isAsset }.reduce(0.0) { $0 + abs($1.balance) }
+        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
         XCTAssertEqual(assets - liabilities, 40000, accuracy: 0.001)
     }
 
@@ -58,8 +58,47 @@ final class NetWorthCalculationTests: XCTestCase {
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
         let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        let liabilities = accounts.filter { !$0.isAsset }.reduce(0.0) { $0 + abs($1.balance) }
+        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
         XCTAssertEqual(assets - liabilities, -7000, accuracy: 0.001)
+    }
+
+    func testExcludedLiabilityDoesNotReduceNetWorth() throws {
+        let savings = Account(name: "Savings", type: .savings, balance: 20000)
+        let mortgage = Account(name: "Mortgage", type: .loan, balance: -300000)
+        mortgage.includeInNetWorth = false
+        context.insert(savings)
+        context.insert(mortgage)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
+        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
+
+        XCTAssertEqual(assets - liabilities, 20000, accuracy: 0.001)
+    }
+
+    func testIncludedAndExcludedLiabilitiesCalculateTogether() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 5000)
+        let creditCard = Account(name: "Credit Card", type: .credit, balance: -1200)
+        let loan = Account(name: "Loan", type: .loan, balance: -10000)
+        loan.includeInNetWorth = false
+        context.insert(checking)
+        context.insert(creditCard)
+        context.insert(loan)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
+        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
+
+        XCTAssertEqual(assets - liabilities, 3800, accuracy: 0.001)
+    }
+
+    func testLiabilitiesIncludeInNetWorthByDefault() {
+        let creditCard = Account(name: "Credit Card", type: .credit, balance: -500)
+
+        XCTAssertTrue(creditCard.includeInNetWorth)
+        XCTAssertTrue(creditCard.countsTowardNetWorth)
     }
 
     func testAccountTypeClassification() {
@@ -92,7 +131,10 @@ final class NetWorthCalculationTests: XCTestCase {
 
     func testEmptyAccountsNetWorth() throws {
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let netWorth = accounts.reduce(0.0) { $0 + ($1.isAsset ? $1.balance : -$1.balance) }
+        let netWorth = accounts.reduce(0.0) { total, account in
+            guard account.countsTowardNetWorth else { return total }
+            return total + (account.isAsset ? account.balance : -abs(account.balance))
+        }
         XCTAssertEqual(netWorth, 0)
     }
 

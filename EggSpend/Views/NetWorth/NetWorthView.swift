@@ -10,9 +10,10 @@ struct NetWorthView: View {
 
     private var assets: [Account] { accounts.filter(\.isAsset) }
     private var liabilities: [Account] { accounts.filter { !$0.isAsset } }
+    private var includedLiabilities: [Account] { liabilities.filter(\.includeInNetWorth) }
 
     private var totalAssets: Double { assets.reduce(0) { $0 + $1.balance } }
-    private var totalLiabilities: Double { liabilities.reduce(0) { $0 + abs($1.balance) } }
+    private var totalLiabilities: Double { includedLiabilities.reduce(0) { $0 + abs($1.balance) } }
     private var netWorth: Double { totalAssets - totalLiabilities }
 
     var body: some View {
@@ -145,8 +146,21 @@ struct NetWorthView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(liabilities) { account in
-                        NavigationLink(destination: DebtPayoffPlannerView(account: account)) {
-                            AccountRowView(account: account)
+                        HStack(spacing: 8) {
+                            NavigationLink(destination: DebtPayoffPlannerView(account: account)) {
+                                AccountRowView(account: account)
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                editingAccount = account
+                            } label: {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(Color.yolk)
+                                    .accessibilityLabel("Edit \(account.name)")
+                            }
+                            .buttonStyle(.plain)
                         }
                         .swipeActions(edge: .leading) {
                             Button("Edit", systemImage: "pencil") {
@@ -194,6 +208,11 @@ private struct AccountRowView: View {
                     Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
                         .font(.caption2)
                         .foregroundStyle(.orange)
+                }
+                if account.isLiability && !account.includeInNetWorth {
+                    Text("Excluded from net worth")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
             }
             Spacer()

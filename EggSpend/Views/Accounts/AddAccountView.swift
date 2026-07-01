@@ -16,6 +16,7 @@ struct AddAccountView: View {
     @State private var aprText = ""
     @State private var minimumPaymentText = ""
     @State private var extraPaymentText = ""
+    @State private var includeInNetWorth = true
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingAccount != nil }
@@ -38,6 +39,7 @@ struct AddAccountView: View {
                             aprText = ""
                             minimumPaymentText = ""
                             extraPaymentText = ""
+                            includeInNetWorth = true
                         }
                     }
                     HStack {
@@ -54,6 +56,7 @@ struct AddAccountView: View {
                         if hasDueDate {
                             DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
                         }
+                        Toggle("Include in Net Worth", isOn: $includeInNetWorth)
                     }
                 }
 
@@ -115,6 +118,7 @@ struct AddAccountView: View {
             account.annualPercentageRate = selectedType.isAsset ? nil : Double(aprText)
             account.minimumPayment = selectedType.isAsset ? nil : Double(minimumPaymentText)
             account.plannedExtraPayment = selectedType.isAsset ? nil : Double(extraPaymentText)
+            account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
         } else {
             let account = Account(
                 name: name.trimmingCharacters(in: .whitespaces),
@@ -126,6 +130,7 @@ struct AddAccountView: View {
             account.annualPercentageRate = selectedType.isAsset ? nil : Double(aprText)
             account.minimumPayment = selectedType.isAsset ? nil : Double(minimumPaymentText)
             account.plannedExtraPayment = selectedType.isAsset ? nil : Double(extraPaymentText)
+            account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
             modelContext.insert(account)
         }
         dismiss()
@@ -142,6 +147,7 @@ struct AddAccountView: View {
         aprText = account.annualPercentageRate.map { String(format: "%.2f", $0) } ?? ""
         minimumPaymentText = account.minimumPayment.map { String(format: "%.2f", $0) } ?? ""
         extraPaymentText = account.plannedExtraPayment.map { String(format: "%.2f", $0) } ?? ""
+        includeInNetWorth = account.includeInNetWorth
     }
 
     private func currencyField(_ label: String, text: Binding<String>) -> some View {

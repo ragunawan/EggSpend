@@ -132,39 +132,15 @@ struct TransactionsListView: View {
                                 ContentUnavailableView.search(text: searchText)
                             }
                         } else {
-                            List {
-                                ForEach(grouped, id: \.0) { section, items in
-                                    Section {
-                                        ForEach(items) { row in
-                                            rowView(for: row)
-                                                .listRowBackground(Color.clear)
-                                                .deleteDisabled(row.isUpcoming)
-                                        }
-                                        .onDelete { indexSet in
-                                            deleteRows(items, at: indexSet)
-                                        }
-                                    } header: {
-                                        Text(section)
-                                            .font(.headline)
-                                            .foregroundStyle(Color.twig)
-                                            .textCase(nil)
-                                    }
-                                }
-                            }
-                            .listStyle(.insetGrouped)
-                            .scrollContentBackground(.hidden)
-                            .background(Color.clear)
-                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                            .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
-                            .padding(.horizontal, 12)
-                            .padding(.top, 8)
+                            transactionList
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .navigationTitle("Transactions")
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbarBackground(.regularMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .searchable(text: $searchText, prompt: "Search transactions")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -203,6 +179,42 @@ struct TransactionsListView: View {
                 processRecurringTransactions(Array(recurring), context: modelContext)
             }
         }
+    }
+
+    private var transactionList: some View {
+        List {
+            ForEach(grouped, id: \.0) { section, items in
+                Section {
+                    ForEach(items) { row in
+                        rowView(for: row)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.visible)
+                            .deleteDisabled(row.isUpcoming)
+                    }
+                    .onDelete { indexSet in
+                        deleteRows(items, at: indexSet)
+                    }
+                } header: {
+                    Text(section)
+                        .font(.headline)
+                        .foregroundStyle(Color.twig)
+                        .textCase(nil)
+                }
+                .listSectionSeparator(.visible)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .background {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.regularMaterial)
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+        }
+        .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
     }
 
     @ViewBuilder
