@@ -1,0 +1,849 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0200000000000000000001 /* EggSpendApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000001 /* EggSpendApp.swift */; };
+		AA0200000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000002 /* ContentView.swift */; };
+		AA0200000000000000000003 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000003 /* Transaction.swift */; };
+		AA0200000000000000000004 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000004 /* TransactionCategory.swift */; };
+		AA0200000000000000000005 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000005 /* Account.swift */; };
+		AA0200000000000000000006 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000006 /* DashboardView.swift */; };
+		AA0200000000000000000007 /* TransactionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000007 /* TransactionsListView.swift */; };
+		AA0200000000000000000008 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000008 /* AddTransactionView.swift */; };
+		AA0200000000000000000009 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000009 /* TransactionDetailView.swift */; };
+		AA020000000000000000000A /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000A /* NetWorthView.swift */; };
+		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
+		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
+		AA020000000000000000000D /* AddAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000D /* AddAccountView.swift */; };
+		AA020000000000000000000E /* CategoryBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000E /* CategoryBadgeView.swift */; };
+		AA020000000000000000000F /* AmountLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000F /* AmountLabel.swift */; };
+		AA0200000000000000000010 /* TransactionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000010 /* TransactionRowView.swift */; };
+		AA0200000000000000000011 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000011 /* PersistenceController.swift */; };
+		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
+		AA0200000000000000000013 /* EggSpendTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000013 /* EggSpendTheme.swift */; };
+		AA0200000000000000000014 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000014 /* Budget.swift */; };
+		AA0200000000000000000015 /* RecurringTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000015 /* RecurringTransaction.swift */; };
+		AA0200000000000000000016 /* NestHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000016 /* NestHeaderView.swift */; };
+		AA0200000000000000000017 /* EggProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000017 /* EggProgressView.swift */; };
+		AA0200000000000000000018 /* BirdAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000018 /* BirdAnimationView.swift */; };
+		AA0200000000000000000019 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000019 /* BudgetView.swift */; };
+		AA020000000000000000001A /* AddBudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001A /* AddBudgetView.swift */; };
+		AA020000000000000000001B /* BudgetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000040 /* BudgetDetailView.swift */; };
+		AA020000000000000000001C /* RecurringTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001B /* RecurringTransactionsView.swift */; };
+		AA020000000000000000001D /* AddRecurringTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001C /* AddRecurringTransactionView.swift */; };
+		AA020000000000000000001F /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001E /* CSVParser.swift */; };
+		AA0200000000000000000020 /* CSVImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001F /* CSVImportView.swift */; };
+		AA0200000000000000000021 /* CategoryManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000036 /* CategoryManagementView.swift */; };
+		AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000037 /* AddEditCategoryView.swift */; };
+		AA0200000000000000000023 /* ForecastEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000041 /* ForecastEngine.swift */; };
+		AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000042 /* CashFlowForecastView.swift */; };
+		AA0200000000000000000027 /* TransactionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000030 /* TransactionModelTests.swift */; };
+		AA0200000000000000000028 /* MetricsCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000031 /* MetricsCalculationTests.swift */; };
+		AA0200000000000000000029 /* NetWorthCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000032 /* NetWorthCalculationTests.swift */; };
+		AA020000000000000000002A /* CategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000033 /* CategoryTests.swift */; };
+		AA020000000000000000002B /* BudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000034 /* BudgetTests.swift */; };
+		AA020000000000000000002C /* RecurringTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000035 /* RecurringTransactionTests.swift */; };
+		AA020000000000000000002D /* CategoryManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000038 /* CategoryManagementTests.swift */; };
+		AA020000000000000000002E /* CashFlowForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000043 /* CashFlowForecastTests.swift */; };
+		AA020000000000000000002F /* AccountBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000044 /* AccountBalanceService.swift */; };
+		AA0200000000000000000030 /* TransactionAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000045 /* TransactionAccountTests.swift */; };
+		AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000046 /* MonthlyReviewCalculator.swift */; };
+		AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000047 /* MonthlyReviewView.swift */; };
+		AA0200000000000000000033 /* MonthlyReviewCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000048 /* MonthlyReviewCalculatorTests.swift */; };
+		AA0200000000000000000034 /* TransactionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000049 /* TransactionFilter.swift */; };
+		AA0200000000000000000035 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004A /* TransactionFilterView.swift */; };
+		AA0200000000000000000036 /* TransactionFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004B /* TransactionFilterTests.swift */; };
+		AA0200000000000000000037 /* SavingsGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004C /* SavingsGoal.swift */; };
+		AA0200000000000000000038 /* SavingsGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004D /* SavingsGoalsView.swift */; };
+		AA0200000000000000000039 /* AddSavingsGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004E /* AddSavingsGoalView.swift */; };
+		AA020000000000000000003A /* SavingsGoalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004F /* SavingsGoalTests.swift */; };
+		AA020000000000000000003B /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000050 /* CSVParserTests.swift */; };
+		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
+		AA020000000000000000003D /* SyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000052 /* SyncStatus.swift */; };
+		AA020000000000000000003E /* CloudKitSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000053 /* CloudKitSchemaTests.swift */; };
+		AA020000000000000000003F /* SafeSpendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000054 /* SafeSpendCalculator.swift */; };
+		AA0200000000000000000040 /* SafeToSpendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000055 /* SafeToSpendView.swift */; };
+		AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA0900000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0400000000000000000001;
+			remoteInfo = EggSpend;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AA0100000000000000000001 /* EggSpendApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendApp.swift; sourceTree = "<group>"; };
+		AA0100000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000003 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+		AA0100000000000000000004 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
+		AA0100000000000000000005 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
+		AA0100000000000000000006 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000007 /* TransactionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000008 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000009 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
+		AA010000000000000000000A /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
+		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
+		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
+		AA010000000000000000000D /* AddAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAccountView.swift; sourceTree = "<group>"; };
+		AA010000000000000000000E /* CategoryBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBadgeView.swift; sourceTree = "<group>"; };
+		AA010000000000000000000F /* AmountLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmountLabel.swift; sourceTree = "<group>"; };
+		AA0100000000000000000010 /* TransactionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRowView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000011 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA0100000000000000000013 /* EggSpendTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendTheme.swift; sourceTree = "<group>"; };
+		AA0100000000000000000014 /* Budget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Budget.swift; sourceTree = "<group>"; };
+		AA0100000000000000000015 /* RecurringTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransaction.swift; sourceTree = "<group>"; };
+		AA0100000000000000000016 /* NestHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestHeaderView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000017 /* EggProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggProgressView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000018 /* BirdAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BirdAnimationView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000019 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
+		AA010000000000000000001A /* AddBudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBudgetView.swift; sourceTree = "<group>"; };
+		AA010000000000000000001B /* RecurringTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransactionsView.swift; sourceTree = "<group>"; };
+		AA010000000000000000001C /* AddRecurringTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecurringTransactionView.swift; sourceTree = "<group>"; };
+		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
+		AA010000000000000000001E /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
+		AA010000000000000000001F /* CSVImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVImportView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000020 /* EggSpend.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EggSpend.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0100000000000000000021 /* EggSpendTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EggSpendTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0100000000000000000030 /* TransactionModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModelTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000031 /* MetricsCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsCalculationTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000032 /* NetWorthCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculationTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000033 /* CategoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000034 /* BudgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000035 /* RecurringTransactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransactionTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000036 /* CategoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagementView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000037 /* AddEditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditCategoryView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000038 /* CategoryManagementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagementTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000040 /* BudgetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetailView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000041 /* ForecastEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastEngine.swift; sourceTree = "<group>"; };
+		AA0100000000000000000042 /* CashFlowForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowForecastView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000043 /* CashFlowForecastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowForecastTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000044 /* AccountBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceService.swift; sourceTree = "<group>"; };
+		AA0100000000000000000045 /* TransactionAccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAccountTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000046 /* MonthlyReviewCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewCalculator.swift; sourceTree = "<group>"; };
+		AA0100000000000000000047 /* MonthlyReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000048 /* MonthlyReviewCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewCalculatorTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000049 /* TransactionFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilter.swift; sourceTree = "<group>"; };
+		AA010000000000000000004A /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
+		AA010000000000000000004B /* TransactionFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000004C /* SavingsGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoal.swift; sourceTree = "<group>"; };
+		AA010000000000000000004D /* SavingsGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalsView.swift; sourceTree = "<group>"; };
+		AA010000000000000000004E /* AddSavingsGoalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSavingsGoalView.swift; sourceTree = "<group>"; };
+		AA010000000000000000004F /* SavingsGoalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000050 /* CSVParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParserTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AA0100000000000000000052 /* SyncStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatus.swift; sourceTree = "<group>"; };
+		AA0100000000000000000053 /* CloudKitSchemaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000054 /* SafeSpendCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeSpendCalculator.swift; sourceTree = "<group>"; };
+		AA0100000000000000000055 /* SafeToSpendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeToSpendView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeSpendCalculatorTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA0700000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0700000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA0300000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				AA0300000000000000000003 /* EggSpend */,
+				AA030000000000000000000D /* EggSpendTests */,
+				AA0300000000000000000002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000020 /* EggSpend.app */,
+				AA0100000000000000000021 /* EggSpendTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000003 /* EggSpend */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000001 /* EggSpendApp.swift */,
+				AA0100000000000000000002 /* ContentView.swift */,
+				AA0100000000000000000013 /* EggSpendTheme.swift */,
+				AA010000000000000000001D /* EggSpend.entitlements */,
+				AA0100000000000000000051 /* PrivacyInfo.xcprivacy */,
+				AA0300000000000000000004 /* Models */,
+				AA0300000000000000000005 /* Views */,
+				AA0300000000000000000010 /* Utilities */,
+				AA030000000000000000000C /* Persistence */,
+				AA0100000000000000000012 /* Assets.xcassets */,
+			);
+			path = EggSpend;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000003 /* Transaction.swift */,
+				AA0100000000000000000004 /* TransactionCategory.swift */,
+				AA0100000000000000000005 /* Account.swift */,
+				AA0100000000000000000014 /* Budget.swift */,
+				AA0100000000000000000015 /* RecurringTransaction.swift */,
+				AA010000000000000000004C /* SavingsGoal.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000005 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA0300000000000000000006 /* Dashboard */,
+				AA0300000000000000000007 /* Transactions */,
+				AA030000000000000000000E /* Budget */,
+				AA030000000000000000000F /* Recurring */,
+				AA0300000000000000000011 /* Import */,
+				AA0300000000000000000008 /* NetWorth */,
+				AA0300000000000000000009 /* Metrics */,
+				AA030000000000000000000A /* Accounts */,
+				AA030000000000000000000B /* Components */,
+				AA0300000000000000000012 /* Categories */,
+				AA0300000000000000000013 /* Forecast */,
+				AA0300000000000000000014 /* MonthlyReview */,
+				AA0300000000000000000015 /* SavingsGoals */,
+				AA0300000000000000000016 /* SafeSpend */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000006 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000006 /* DashboardView.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000007 /* Transactions */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000007 /* TransactionsListView.swift */,
+				AA0100000000000000000008 /* AddTransactionView.swift */,
+				AA0100000000000000000009 /* TransactionDetailView.swift */,
+				AA010000000000000000004A /* TransactionFilterView.swift */,
+			);
+			path = Transactions;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000008 /* NetWorth */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000000A /* NetWorthView.swift */,
+			);
+			path = NetWorth;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000009 /* Metrics */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000000B /* MetricsView.swift */,
+			);
+			path = Metrics;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000000A /* Accounts */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000000C /* AccountsView.swift */,
+				AA010000000000000000000D /* AddAccountView.swift */,
+			);
+			path = Accounts;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000000B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000016 /* NestHeaderView.swift */,
+				AA0100000000000000000017 /* EggProgressView.swift */,
+				AA0100000000000000000018 /* BirdAnimationView.swift */,
+				AA010000000000000000000E /* CategoryBadgeView.swift */,
+				AA010000000000000000000F /* AmountLabel.swift */,
+				AA0100000000000000000010 /* TransactionRowView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000000C /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000011 /* PersistenceController.swift */,
+				AA0100000000000000000052 /* SyncStatus.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000000D /* EggSpendTests */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000030 /* TransactionModelTests.swift */,
+				AA0100000000000000000031 /* MetricsCalculationTests.swift */,
+				AA0100000000000000000032 /* NetWorthCalculationTests.swift */,
+				AA0100000000000000000033 /* CategoryTests.swift */,
+				AA0100000000000000000034 /* BudgetTests.swift */,
+				AA0100000000000000000035 /* RecurringTransactionTests.swift */,
+				AA0100000000000000000038 /* CategoryManagementTests.swift */,
+				AA0100000000000000000043 /* CashFlowForecastTests.swift */,
+				AA0100000000000000000045 /* TransactionAccountTests.swift */,
+				AA0100000000000000000048 /* MonthlyReviewCalculatorTests.swift */,
+				AA010000000000000000004B /* TransactionFilterTests.swift */,
+				AA010000000000000000004F /* SavingsGoalTests.swift */,
+				AA0100000000000000000050 /* CSVParserTests.swift */,
+				AA0100000000000000000053 /* CloudKitSchemaTests.swift */,
+				AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */,
+			);
+			path = EggSpendTests;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000000E /* Budget */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000019 /* BudgetView.swift */,
+				AA010000000000000000001A /* AddBudgetView.swift */,
+				AA0100000000000000000040 /* BudgetDetailView.swift */,
+			);
+			path = Budget;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000000F /* Recurring */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000001B /* RecurringTransactionsView.swift */,
+				AA010000000000000000001C /* AddRecurringTransactionView.swift */,
+			);
+			path = Recurring;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000010 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000001E /* CSVParser.swift */,
+				AA0100000000000000000044 /* AccountBalanceService.swift */,
+				AA0100000000000000000046 /* MonthlyReviewCalculator.swift */,
+				AA0100000000000000000049 /* TransactionFilter.swift */,
+				AA0100000000000000000054 /* SafeSpendCalculator.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000011 /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000001F /* CSVImportView.swift */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000012 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000036 /* CategoryManagementView.swift */,
+				AA0100000000000000000037 /* AddEditCategoryView.swift */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000013 /* Forecast */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000041 /* ForecastEngine.swift */,
+				AA0100000000000000000042 /* CashFlowForecastView.swift */,
+			);
+			path = Forecast;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000014 /* MonthlyReview */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000047 /* MonthlyReviewView.swift */,
+			);
+			path = MonthlyReview;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000015 /* SavingsGoals */ = {
+			isa = PBXGroup;
+			children = (
+				AA010000000000000000004D /* SavingsGoalsView.swift */,
+				AA010000000000000000004E /* AddSavingsGoalView.swift */,
+			);
+			path = SavingsGoals;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000016 /* SafeSpend */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000055 /* SafeToSpendView.swift */,
+			);
+			path = SafeSpend;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0400000000000000000001 /* EggSpend */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0500000000000000000002 /* Build configuration list for PBXNativeTarget "EggSpend" */;
+			buildPhases = (
+				AA0700000000000000000001 /* Sources */,
+				AA0700000000000000000003 /* Frameworks */,
+				AA0700000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EggSpend;
+			productName = EggSpend;
+			productReference = AA0100000000000000000020 /* EggSpend.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA0400000000000000000002 /* EggSpendTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0500000000000000000003 /* Build configuration list for PBXNativeTarget "EggSpendTests" */;
+			buildPhases = (
+				AA0700000000000000000004 /* Sources */,
+				AA0700000000000000000005 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0900000000000000000001 /* PBXTargetDependency */,
+			);
+			name = EggSpendTests;
+			productName = EggSpendTests;
+			productReference = AA0100000000000000000021 /* EggSpendTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					AA0400000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+						DevelopmentTeam = 5T5444U7W2;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
+					};
+					AA0400000000000000000002 = {
+						CreatedOnToolsVersion = 16.0;
+						DevelopmentTeam = 5T5444U7W2;
+						ProvisioningStyle = Automatic;
+						TestTargetID = AA0400000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = AA0500000000000000000001 /* Build configuration list for PBXProject "EggSpend" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA0300000000000000000001;
+			productRefGroup = AA0300000000000000000002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0400000000000000000001 /* EggSpend */,
+				AA0400000000000000000002 /* EggSpendTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0700000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0200000000000000000012 /* Assets.xcassets in Resources */,
+				AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0700000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0200000000000000000001 /* EggSpendApp.swift in Sources */,
+				AA0200000000000000000002 /* ContentView.swift in Sources */,
+				AA0200000000000000000013 /* EggSpendTheme.swift in Sources */,
+				AA0200000000000000000003 /* Transaction.swift in Sources */,
+				AA0200000000000000000004 /* TransactionCategory.swift in Sources */,
+				AA0200000000000000000005 /* Account.swift in Sources */,
+				AA0200000000000000000014 /* Budget.swift in Sources */,
+				AA0200000000000000000015 /* RecurringTransaction.swift in Sources */,
+				AA0200000000000000000037 /* SavingsGoal.swift in Sources */,
+				AA0200000000000000000006 /* DashboardView.swift in Sources */,
+				AA0200000000000000000007 /* TransactionsListView.swift in Sources */,
+				AA0200000000000000000008 /* AddTransactionView.swift in Sources */,
+				AA0200000000000000000009 /* TransactionDetailView.swift in Sources */,
+				AA020000000000000000000A /* NetWorthView.swift in Sources */,
+				AA020000000000000000000B /* MetricsView.swift in Sources */,
+				AA020000000000000000000C /* AccountsView.swift in Sources */,
+				AA020000000000000000000D /* AddAccountView.swift in Sources */,
+				AA0200000000000000000019 /* BudgetView.swift in Sources */,
+				AA020000000000000000001A /* AddBudgetView.swift in Sources */,
+				AA020000000000000000001B /* BudgetDetailView.swift in Sources */,
+				AA020000000000000000001C /* RecurringTransactionsView.swift in Sources */,
+				AA020000000000000000001D /* AddRecurringTransactionView.swift in Sources */,
+				AA0200000000000000000016 /* NestHeaderView.swift in Sources */,
+				AA0200000000000000000017 /* EggProgressView.swift in Sources */,
+				AA0200000000000000000018 /* BirdAnimationView.swift in Sources */,
+				AA020000000000000000000E /* CategoryBadgeView.swift in Sources */,
+				AA020000000000000000000F /* AmountLabel.swift in Sources */,
+				AA0200000000000000000010 /* TransactionRowView.swift in Sources */,
+				AA0200000000000000000011 /* PersistenceController.swift in Sources */,
+				AA020000000000000000003D /* SyncStatus.swift in Sources */,
+				AA020000000000000000001F /* CSVParser.swift in Sources */,
+				AA020000000000000000002F /* AccountBalanceService.swift in Sources */,
+				AA0200000000000000000020 /* CSVImportView.swift in Sources */,
+				AA0200000000000000000021 /* CategoryManagementView.swift in Sources */,
+				AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */,
+				AA0200000000000000000023 /* ForecastEngine.swift in Sources */,
+				AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */,
+				AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */,
+				AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */,
+				AA0200000000000000000034 /* TransactionFilter.swift in Sources */,
+				AA0200000000000000000035 /* TransactionFilterView.swift in Sources */,
+				AA0200000000000000000038 /* SavingsGoalsView.swift in Sources */,
+				AA0200000000000000000039 /* AddSavingsGoalView.swift in Sources */,
+				AA020000000000000000003F /* SafeSpendCalculator.swift in Sources */,
+				AA0200000000000000000040 /* SafeToSpendView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0700000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0200000000000000000027 /* TransactionModelTests.swift in Sources */,
+				AA0200000000000000000028 /* MetricsCalculationTests.swift in Sources */,
+				AA0200000000000000000029 /* NetWorthCalculationTests.swift in Sources */,
+				AA020000000000000000002A /* CategoryTests.swift in Sources */,
+				AA020000000000000000002B /* BudgetTests.swift in Sources */,
+				AA020000000000000000002C /* RecurringTransactionTests.swift in Sources */,
+				AA020000000000000000002D /* CategoryManagementTests.swift in Sources */,
+				AA020000000000000000002E /* CashFlowForecastTests.swift in Sources */,
+				AA0200000000000000000030 /* TransactionAccountTests.swift in Sources */,
+				AA0200000000000000000033 /* MonthlyReviewCalculatorTests.swift in Sources */,
+				AA0200000000000000000036 /* TransactionFilterTests.swift in Sources */,
+				AA020000000000000000003A /* SavingsGoalTests.swift in Sources */,
+				AA020000000000000000003B /* CSVParserTests.swift in Sources */,
+				AA020000000000000000003E /* CloudKitSchemaTests.swift in Sources */,
+				AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0900000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0400000000000000000001 /* EggSpend */;
+			targetProxy = AA0900000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		AA0600000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_NS_ASSERTIONS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA0600000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		AA0600000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSTCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSTCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EggSpend/EggSpend.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5T5444U7W2;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = EggSpend;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpend;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA0600000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSTCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSTCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = EggSpend/EggSpend.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5T5444U7W2;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = EggSpend;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpend;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AA0600000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5T5444U7W2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpendTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EggSpend.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EggSpend";
+			};
+			name = Debug;
+		};
+		AA0600000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5T5444U7W2;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpendTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EggSpend.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EggSpend";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0500000000000000000001 /* Build configuration list for PBXProject "EggSpend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0600000000000000000001 /* Debug */,
+				AA0600000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0500000000000000000002 /* Build configuration list for PBXNativeTarget "EggSpend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0600000000000000000003 /* Debug */,
+				AA0600000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0500000000000000000003 /* Build configuration list for PBXNativeTarget "EggSpendTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0600000000000000000005 /* Debug */,
+				AA0600000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA0000000000000000000001 /* Project object */;
+}

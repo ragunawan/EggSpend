@@ -1,0 +1,452 @@
+import SwiftUI
+import SwiftData
+import Charts
+
+struct MetricsView: View {
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query private var accounts: [Account]
+
+    @State private var selectedPeriod: Period = .month
+    @State private var selectedNetWorthDate: Date? = nil
+    @State private var selectedCashFlowDate: Date? = nil
+
+    // MARK: - Period
+
+    enum Period: String, CaseIterable {
+        case week = "Week"
+        case month = "Month"
+        case year = "Year"
+
+        var bucketUnit: Calendar.Component {
+            switch self {
+            case .week:  return .day
+            case .month: return .weekOfYear
+            case .year:  return .month
+            }
+        }
+        var dateStart: Date {
+            let cal = Calendar.current
+            let now = Date.now
+            switch self {
+            case .week:  return cal.date(byAdding: .day,   value: -7,  to: now) ?? now
+            case .month: return cal.date(byAdding: .month, value: -1,  to: now) ?? now
+            case .year:  return cal.date(byAdding: .year,  value: -1,  to: now) ?? now
+            }
+        }
+    }
+
+    // MARK: - Derived data
+
+    private var filtered: [Transaction] {
+        transactions.filter { $0.date >= selectedPeriod.dateStart }
+    }
+
+    private var totalIncome:   Double { filtered.filter { $0.type == .income  }.reduce(0) { $0 + $1.amount } }
+    private var totalExpenses: Double { filtered.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount } }
+
+    private var expensesByCategory: [(String, Double, String)] {
+        var dict: [String: (Double, String)] = [:]
+        for tx in filtered where tx.type == .expense {
+            let key  = tx.category?.name ?? "Uncategorized"
+            let icon = tx.category?.icon ?? "questionmark.circle"
+            dict[key] = ((dict[key]?.0 ?? 0) + tx.amount, icon)
+        }
+        return dict.map { ($0.key, $0.value.0, $0.value.1) }.sorted { $0.1 > $1.1 }
+    }
+
+    // Net worth timeline: reconstruct historical net worth from current account balances
+    // by reversing every transaction that happened after each bucket boundary.
+    private var netWorthTimeline: [(date: Date, worth: Double)] {
+        let currentNetWorth = accounts.reduce(0.0) {
+            $0 + ($1.isAsset ? $1.balance : -$1.balance)
+        }
+        let cal   = Calendar.current
+        let now   = Date.now
+        let start = selectedPeriod.dateStart
+        let unit  = selectedPeriod.bucketUnit
+
+        // Build evenly-spaced bucket dates from start → now
+        var buckets: [Date] = []
+        var cursor = start
+        while cursor <= now {
+            buckets.append(cursor)
+            cursor = cal.date(byAdding: unit, value: 1, to: cursor) ?? now.addingTimeInterval(1)
+        }
+        if buckets.last.map({ $0 < now }) ?? true { buckets.append(now) }
+
+        // For each bucket: net worth = current − Σ(signed amounts of transactions AFTER bucket)
+        return buckets.map { bucket in
+            let delta = transactions
+                .filter { $0.date > bucket }
+                .reduce(0.0) { $0 + ($1.type == .income ? $1.amount : -$1.amount) }
+            return (bucket, currentNetWorth - delta)
+        }
+    }
+
+    // Cash flow: income and expenses bucketed over the selected period
+    private var cashFlowData: [(date: Date, income: Double, expenses: Double)] {
+        let cal  = Calendar.current
+        let unit = selectedPeriod.bucketUnit
+        var dict: [Date: (Double, Double)] = [:]
+        for tx in filtered {
+            let key = cal.dateInterval(of: unit, for: tx.date)?.start ?? tx.date
+            var pair = dict[key] ?? (0, 0)
+            if tx.type == .income  { pair.0 += tx.amount }
+            else                   { pair.1 += tx.amount }
+            dict[key] = pair
+        }
+        return dict.map { ($0.key, $0.value.0, $0.value.1) }.sorted { $0.0 < $1.0 }
+    }
+
+    // MARK: - Body
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                LinearGradient.nestCanopy.ignoresSafeArea()
+
+                List {
+                    periodPickerSection
+                    timelineSection
+                    incomeVsExpenseSection
+                    if !expensesByCategory.isEmpty { categoryBreakdownSection }
+                }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+            }
+            .navigationTitle("Metrics")
+            .toolbarBackground(.hidden, for: .navigationBar)
+        }
+    }
+
+    // MARK: - Period picker
+
+    private var periodPickerSection: some View {
+        Section {
+            Picker("Period", selection: $selectedPeriod) {
+                ForEach(Period.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .tint(Color.yolk)
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    // MARK: - Timeline section (new)
+
+    private var timelineSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 20) {
+                netWorthChart
+                Divider()
+                cashFlowChart
+            }
+            .padding(.vertical, 8)
+        } header: {
+            Label("Timeline", systemImage: "chart.xyaxis.line")
+                .foregroundStyle(Color.twig)
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    // Net worth area + line chart with tap-to-inspect
+    private var netWorthChart: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Nest Egg Over Time")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(Color.nestBrown)
+
+            let data = netWorthTimeline
+            let minWorth = data.map(\.worth).min() ?? 0
+            let maxWorth = data.map(\.worth).max() ?? 1
+            let yPad    = (maxWorth - minWorth) * 0.1
+
+            Chart {
+                // Gradient area fill
+                ForEach(data, id: \.date) { point in
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        yStart: .value("Base", minWorth - yPad),
+                        yEnd:   .value("Worth", point.worth)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color.eggBlue.opacity(0.35), Color.eggBlue.opacity(0.0)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .interpolationMethod(.catmullRom)
+                }
+                // Line on top
+                ForEach(data, id: \.date) { point in
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value("Worth", point.worth)
+                    )
+                    .foregroundStyle(Color.eggBlue)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5))
+                    .interpolationMethod(.catmullRom)
+                    .symbol(Circle().strokeBorder(lineWidth: 1.5))
+                    .symbolSize(20)
+                }
+                // Interactive selection rule
+                if let sel = selectedNetWorthDate,
+                   let closest = data.min(by: {
+                       abs($0.date.timeIntervalSince(sel)) < abs($1.date.timeIntervalSince(sel))
+                   }) {
+                    RuleMark(x: .value("Selected", closest.date))
+                        .foregroundStyle(Color.nestBrown.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
+                        .annotation(position: .top,
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                            netWorthCallout(date: closest.date, worth: closest.worth)
+                        }
+                    PointMark(
+                        x: .value("Selected", closest.date),
+                        y: .value("Worth", closest.worth)
+                    )
+                    .foregroundStyle(Color.eggBlue)
+                    .symbolSize(64)
+                }
+            }
+            .chartXSelection(value: $selectedNetWorthDate)
+            .chartYAxis {
+                AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic) { value in
+                    AxisGridLine()
+                    AxisValueLabel(format: xAxisFormat, centered: true)
+                }
+            }
+            .frame(height: 200)
+
+            // Summary row
+            if let first = data.first, let last = data.last {
+                let change = last.worth - first.worth
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Current").font(.caption).foregroundStyle(.secondary)
+                        Text(last.worth, format: .currency(code: "USD"))
+                            .font(.system(.callout, design: .rounded, weight: .semibold))
+                            .foregroundStyle(Color.nestBrown)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("Change").font(.caption).foregroundStyle(.secondary)
+                        HStack(spacing: 3) {
+                            Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
+                                .font(.caption2)
+                            Text(abs(change), format: .currency(code: "USD"))
+                                .font(.system(.callout, design: .rounded, weight: .semibold))
+                        }
+                        .foregroundStyle(change >= 0 ? Color.nestLeafGreen : .red)
+                    }
+                }
+                .padding(.top, 4)
+            }
+        }
+    }
+
+    private func netWorthCallout(date: Date, worth: Double) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(date, format: calloutDateFormat)
+                .font(.caption2).foregroundStyle(.secondary)
+            Text(worth, format: .currency(code: "USD"))
+                .font(.caption).fontWeight(.semibold).foregroundStyle(Color.nestBrown)
+        }
+        .padding(.horizontal, 8).padding(.vertical, 5)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+    }
+
+    // Cash flow bar chart (income positive, expenses negative from zero line)
+    private var cashFlowChart: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Income & Expenses")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(Color.nestBrown)
+
+            let data = cashFlowData
+
+            Chart {
+                ForEach(data, id: \.date) { point in
+                    BarMark(
+                        x: .value("Period", point.date, unit: selectedPeriod.bucketUnit),
+                        y: .value("Income", point.income)
+                    )
+                    .foregroundStyle(Color.nestLeafGreen.gradient)
+                    .position(by: .value("Series", "Income"))
+                    .cornerRadius(4)
+
+                    BarMark(
+                        x: .value("Period", point.date, unit: selectedPeriod.bucketUnit),
+                        y: .value("Expenses", -point.expenses)
+                    )
+                    .foregroundStyle(Color.red.opacity(0.8).gradient)
+                    .position(by: .value("Series", "Expenses"))
+                    .cornerRadius(4)
+                }
+
+                // Zero rule line
+                RuleMark(y: .value("Zero", 0))
+                    .foregroundStyle(Color.twig.opacity(0.4))
+                    .lineStyle(StrokeStyle(lineWidth: 1))
+
+                // Selection rule
+                if let sel = selectedCashFlowDate,
+                   let closest = data.min(by: {
+                       abs($0.date.timeIntervalSince(sel)) < abs($1.date.timeIntervalSince(sel))
+                   }) {
+                    RuleMark(x: .value("Selected", closest.date))
+                        .foregroundStyle(Color.nestBrown.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
+                        .annotation(position: .top,
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                            cashFlowCallout(date: closest.date,
+                                            income: closest.income,
+                                            expenses: closest.expenses)
+                        }
+                }
+            }
+            .chartXSelection(value: $selectedCashFlowDate)
+            .chartYAxis {
+                AxisMarks { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let v = value.as(Double.self) {
+                            Text(abs(v), format: .currency(code: "USD").precision(.fractionLength(0)))
+                                .font(.caption2)
+                                .foregroundStyle(v >= 0 ? Color.nestLeafGreen : .red)
+                        }
+                    }
+                }
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic) { value in
+                    AxisGridLine()
+                    AxisValueLabel(format: xAxisFormat, centered: true)
+                }
+            }
+            .chartLegend(position: .topTrailing, spacing: 8) {
+                HStack(spacing: 12) {
+                    Label("Income",   systemImage: "square.fill").foregroundStyle(Color.nestLeafGreen)
+                    Label("Expenses", systemImage: "square.fill").foregroundStyle(.red)
+                }
+                .font(.caption)
+            }
+            .frame(height: 180)
+        }
+    }
+
+    private func cashFlowCallout(date: Date, income: Double, expenses: Double) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(date, format: calloutDateFormat)
+                .font(.caption2).foregroundStyle(.secondary)
+            HStack(spacing: 8) {
+                Label(income.formatted(.currency(code: "USD").precision(.fractionLength(0))),
+                      systemImage: "arrow.down.circle.fill")
+                    .font(.caption).foregroundStyle(Color.nestLeafGreen)
+                Label(expenses.formatted(.currency(code: "USD").precision(.fractionLength(0))),
+                      systemImage: "arrow.up.circle.fill")
+                    .font(.caption).foregroundStyle(.red)
+            }
+        }
+        .padding(.horizontal, 8).padding(.vertical, 5)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+    }
+
+    // MARK: - Axis format helpers
+
+    private var xAxisFormat: Date.FormatStyle {
+        switch selectedPeriod {
+        case .week:  return .dateTime.weekday(.abbreviated)
+        case .month: return .dateTime.month(.abbreviated).day()
+        case .year:  return .dateTime.month(.abbreviated)
+        }
+    }
+
+    private var calloutDateFormat: Date.FormatStyle {
+        switch selectedPeriod {
+        case .week:  return .dateTime.weekday(.wide).month(.abbreviated).day()
+        case .month: return .dateTime.month(.wide).day()
+        case .year:  return .dateTime.month(.wide).year()
+        }
+    }
+
+    // MARK: - Income vs Expenses summary
+
+    private var incomeVsExpenseSection: some View {
+        Section("Period Summary") {
+            Chart {
+                BarMark(x: .value("Type", "Income"),   y: .value("Amount", totalIncome))
+                    .foregroundStyle(Color.nestLeafGreen.gradient)
+                BarMark(x: .value("Type", "Expenses"), y: .value("Amount", totalExpenses))
+                    .foregroundStyle(Color.red.opacity(0.8).gradient)
+            }
+            .chartYAxis {
+                AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+            }
+            .frame(height: 160)
+            .padding(.vertical, 8)
+
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Net").font(.caption).foregroundStyle(.secondary)
+                    Text(totalIncome - totalExpenses, format: .currency(code: "USD"))
+                        .font(.headline)
+                        .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : .red)
+                }
+                Spacer()
+                VStack(alignment: .trailing) {
+                    Text("Savings Rate").font(.caption).foregroundStyle(.secondary)
+                    if totalIncome > 0 {
+                        Text("\(Int((1 - totalExpenses / totalIncome) * 100))%")
+                            .font(.headline).foregroundStyle(Color.nestBrown)
+                    } else {
+                        Text("—").font(.headline).foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    // MARK: - Category breakdown
+
+    private var categoryBreakdownSection: some View {
+        Section("Spending by Category") {
+            Chart(expensesByCategory.prefix(6), id: \.0) { name, amount, _ in
+                SectorMark(angle: .value("Amount", amount),
+                           innerRadius: .ratio(0.55),
+                           angularInset: 2)
+                    .foregroundStyle(by: .value("Category", name))
+                    .cornerRadius(4)
+            }
+            .frame(height: 200)
+            .padding(.vertical, 8)
+
+            ForEach(expensesByCategory.prefix(6), id: \.0) { name, amount, icon in
+                HStack {
+                    Image(systemName: icon).frame(width: 24).foregroundStyle(.secondary)
+                    Text(name)
+                    Spacer()
+                    Text(amount, format: .currency(code: "USD")).foregroundStyle(.secondary)
+                    if totalExpenses > 0 {
+                        Text("(\(Int(amount / totalExpenses * 100))%)")
+                            .font(.caption).foregroundStyle(.tertiary)
+                    }
+                }
+            }
+        }
+        .listRowBackground(Color.clear)
+    }
+}
+
+#Preview {
+    MetricsView()
+        .modelContainer(PersistenceController.previewContainer())
+}

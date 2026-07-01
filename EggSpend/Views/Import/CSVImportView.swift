@@ -1,0 +1,505 @@
+import SwiftUI
+import SwiftData
+import UniformTypeIdentifiers
+
+// MARK: – Import type
+
+enum CSVImportType {
+    case transactions
+    case accounts
+
+    var title: String {
+        switch self {
+        case .transactions: return "Import Transactions"
+        case .accounts:     return "Import Accounts"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .transactions: return "list.bullet.rectangle.fill"
+        case .accounts:     return "building.columns.fill"
+        }
+    }
+}
+
+// MARK: – Main view
+
+struct CSVImportView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query private var categories: [TransactionCategory]
+
+    let importType: CSVImportType
+
+    // File picking
+    @State private var showFilePicker = false
+    @State private var fileName = ""
+
+    // Parsed state
+    @State private var headers:  [String] = []
+    @State private var rawRows:  [[String]] = []
+    @State private var mapping:  ColumnMapping = ColumnMapping()
+
+    // Results
+    @State private var txResults:   [ParsedTransactionResult] = []
+    @State private var acctResults: [ParsedAccountResult]     = []
+
+    // UI state
+    @State private var step: Step = .pick
+    @State private var errorMessage: String? = nil
+    @State private var importComplete = false
+    @State private var importedCount  = 0
+    @State private var skippedCount   = 0
+
+    enum Step { case pick, map, preview, done }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                switch step {
+                case .pick:    pickStep
+                case .map:     mapStep
+                case .preview: previewStep
+                case .done:    doneStep
+                }
+            }
+            .navigationTitle(importType.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(step == .done)
+                }
+            }
+            .alert("Error", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK") { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+        }
+        .fileImporter(
+            isPresented: $showFilePicker,
+            allowedContentTypes: [.commaSeparatedText, .plainText, .text],
+            allowsMultipleSelection: false
+        ) { result in
+            handleFilePicked(result)
+        }
+    }
+
+    // MARK: - Step 1: Pick file
+
+    private var pickStep: some View {
+        VStack(spacing: 32) {
+            Spacer()
+
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.yolk.opacity(0.12))
+                    .frame(width: 100, height: 100)
+                Image(systemName: "doc.badge.plus")
+                    .font(.system(size: 44))
+                    .foregroundStyle(Color.yolk)
+            }
+
+            VStack(spacing: 8) {
+                Text("Choose a CSV File")
+                    .font(.title2).fontWeight(.semibold).foregroundStyle(Color.nestBrown)
+                Text(importType == .transactions
+                     ? "Supports exports from Chase, Bank of America, Mint, Apple Card, and any standard CSV."
+                     : "CSV should have columns for account name, type, and balance.")
+                    .font(.callout).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+
+            // Format hint
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Expected columns")
+                    .font(.caption).fontWeight(.semibold).foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                if importType == .transactions {
+                    HintRow(cols: ["Date", "Description", "Amount"])
+                    HintRow(cols: ["Category (opt.)", "Notes (opt.)", "Type (opt.)"])
+                } else {
+                    HintRow(cols: ["Name", "Type", "Balance"])
+                    HintRow(cols: ["Notes (opt.)"])
+                }
+            }
+            .padding()
+            .background(Color.nestCream, in: RoundedRectangle(cornerRadius: 14))
+            .padding(.horizontal, 32)
+
+            Button {
+                showFilePicker = true
+            } label: {
+                Label("Choose File", systemImage: "folder.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.yolk, in: RoundedRectangle(cornerRadius: 14))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 32)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Step 2: Map columns
+
+    private var mapStep: some View {
+        List {
+            Section {
+                Label(fileName, systemImage: "doc.text.fill")
+                    .foregroundStyle(Color.nestBrown)
+                Text("\(rawRows.count) data rows · \(headers.count) columns detected")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
+            if importType == .transactions {
+                Section {
+                    columnPicker("Date *",        selection: $mapping.dateColumn)
+                    columnPicker("Title / Desc *", selection: $mapping.titleColumn)
+                    columnPicker("Amount *",       selection: $mapping.amountColumn)
+                } header: { Text("Required") }
+
+                Section {
+                    columnPicker("Transaction Type", selection: $mapping.typeColumn)
+                    columnPicker("Category",         selection: $mapping.categoryColumn)
+                    columnPicker("Notes",            selection: $mapping.notesColumn)
+                } header: { Text("Optional") }
+
+                Section {
+                    Toggle("Negative amount = Expense", isOn: $mapping.negativeIsExpense)
+                } header: { Text("Amount Interpretation") }
+                  footer: { Text("When no Type column is mapped, sign of amount determines income vs. expense.") }
+
+            } else {
+                Section {
+                    columnPicker("Account Name *", selection: $mapping.nameColumn)
+                    columnPicker("Balance *",      selection: $mapping.balanceColumn)
+                } header: { Text("Required") }
+
+                Section {
+                    columnPicker("Account Type", selection: $mapping.acctTypeColumn)
+                    columnPicker("Notes",        selection: $mapping.acctNotesColumn)
+                } header: { Text("Optional") }
+            }
+
+            Section {
+                Button("Preview →") { buildPreview() }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundStyle(Color.yolk)
+                    .fontWeight(.semibold)
+                    .disabled(!canProceedFromMap)
+            }
+        }
+        .listStyle(.insetGrouped)
+    }
+
+    private var canProceedFromMap: Bool {
+        if importType == .transactions {
+            return mapping.dateColumn != nil && mapping.titleColumn != nil && mapping.amountColumn != nil
+        } else {
+            return mapping.nameColumn != nil && mapping.balanceColumn != nil
+        }
+    }
+
+    @ViewBuilder
+    private func columnPicker(_ label: String, selection: Binding<String?>) -> some View {
+        Picker(label, selection: selection) {
+            Text("— None —").tag(Optional<String>.none)
+            ForEach(headers, id: \.self) { h in
+                Text(h).tag(Optional(h))
+            }
+        }
+    }
+
+    // MARK: - Step 3: Preview
+
+    private var previewStep: some View {
+        VStack(spacing: 0) {
+            // Summary bar
+            summaryBar
+
+            List {
+                Section {
+                    if importType == .transactions {
+                        ForEach(txResults.prefix(50)) { result in
+                            TransactionPreviewRow(result: result)
+                        }
+                        if txResults.count > 50 {
+                            Text("… and \(txResults.count - 50) more rows")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    } else {
+                        ForEach(acctResults.prefix(50)) { result in
+                            AccountPreviewRow(result: result)
+                        }
+                        if acctResults.count > 50 {
+                            Text("… and \(acctResults.count - 50) more rows")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Preview (first 50 rows)")
+                }
+            }
+            .listStyle(.insetGrouped)
+
+            // Import button
+            Button(action: performImport) {
+                let validCount = importType == .transactions
+                    ? txResults.filter(\.isValid).count
+                    : acctResults.filter(\.isValid).count
+                Label("Import \(validCount) \(importType == .transactions ? "Transactions" : "Accounts")",
+                      systemImage: "square.and.arrow.down.fill")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.nestBrown, in: RoundedRectangle(cornerRadius: 14))
+                    .foregroundStyle(.white)
+            }
+            .padding()
+        }
+    }
+
+    private var summaryBar: some View {
+        let (valid, invalid) = importType == .transactions
+            ? (txResults.filter(\.isValid).count, txResults.filter { !$0.isValid }.count)
+            : (acctResults.filter(\.isValid).count, acctResults.filter { !$0.isValid }.count)
+
+        return HStack {
+            Label("\(valid) ready", systemImage: "checkmark.circle.fill")
+                .foregroundStyle(Color.nestLeafGreen)
+            Spacer()
+            if invalid > 0 {
+                Label("\(invalid) skipped", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+            }
+        }
+        .font(.subheadline).fontWeight(.medium)
+        .padding(.horizontal).padding(.vertical, 10)
+        .background(Color(uiColor: .secondarySystemBackground))
+    }
+
+    // MARK: - Step 4: Done
+
+    private var doneStep: some View {
+        VStack(spacing: 28) {
+            Spacer()
+            ZStack {
+                Circle().fill(Color.nestLeafGreen.opacity(0.15)).frame(width: 100, height: 100)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 52)).foregroundStyle(Color.nestLeafGreen)
+            }
+            VStack(spacing: 8) {
+                Text("Import Complete")
+                    .font(.title2).fontWeight(.bold).foregroundStyle(Color.nestBrown)
+                Text("\(importedCount) \(importType == .transactions ? "transactions" : "accounts") added")
+                    .foregroundStyle(.secondary)
+                if skippedCount > 0 {
+                    Text("\(skippedCount) rows skipped (invalid data)")
+                        .font(.caption).foregroundStyle(.orange)
+                }
+            }
+            Button("Done") { dismiss() }
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.nestBrown, in: RoundedRectangle(cornerRadius: 14))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 32)
+            Spacer()
+        }
+    }
+
+    // MARK: - Logic
+
+    private func handleFilePicked(_ result: Result<[URL], Error>) {
+        switch result {
+        case .failure(let err):
+            errorMessage = err.localizedDescription
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            fileName = url.lastPathComponent
+            let gotAccess = url.startAccessingSecurityScopedResource()
+            defer { if gotAccess { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let data = try Data(contentsOf: url)
+                let text = String(data: data, encoding: .utf8)
+                    ?? String(data: data, encoding: .isoLatin1)
+                    ?? ""
+                let (h, r) = CSVParser.parse(text)
+                guard !h.isEmpty else {
+                    errorMessage = "Could not read CSV headers. Make sure the file has a header row."
+                    return
+                }
+                headers = h
+                rawRows = r
+                mapping = importType == .transactions
+                    ? .autoDetectTransaction(headers: h)
+                    : .autoDetectAccount(headers: h)
+                step = .map
+            } catch {
+                errorMessage = "Could not read file: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func buildPreview() {
+        if importType == .transactions {
+            txResults = CSVParser.parseTransactionRows(rows: rawRows, headers: headers, mapping: mapping)
+        } else {
+            acctResults = CSVParser.parseAccountRows(rows: rawRows, headers: headers, mapping: mapping)
+        }
+        step = .preview
+    }
+
+    private func performImport() {
+        importedCount = 0
+        skippedCount  = 0
+
+        if importType == .transactions {
+            // Build category lookup (case-insensitive)
+            let catMap = Dictionary(
+                categories.map { ($0.name.lowercased(), $0) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            for result in txResults {
+                guard result.isValid, let date = result.date, let amount = result.amount else {
+                    skippedCount += 1
+                    continue
+                }
+                let category = result.categoryName.flatMap { catMap[$0.lowercased()] }
+                let tx = Transaction(
+                    title:    result.title,
+                    amount:   amount,
+                    date:     date,
+                    type:     result.type,
+                    category: category,
+                    notes:    result.notes
+                )
+                modelContext.insert(tx)
+                importedCount += 1
+            }
+        } else {
+            for result in acctResults {
+                guard result.isValid, let balance = result.balance else {
+                    skippedCount += 1
+                    continue
+                }
+                let account = Account(name: result.name, type: result.type,
+                                      balance: balance, notes: result.notes)
+                modelContext.insert(account)
+                importedCount += 1
+            }
+        }
+
+        try? modelContext.save()
+        step = .done
+    }
+}
+
+// MARK: – Preview rows
+
+private struct TransactionPreviewRow: View {
+    let result: ParsedTransactionResult
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: result.isValid
+                  ? (result.type == .income ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                  : "exclamationmark.triangle.fill")
+                .foregroundStyle(result.isValid
+                                 ? (result.type == .income ? Color.nestLeafGreen : .red)
+                                 : .orange)
+                .frame(width: 22)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(result.title).font(.body).lineLimit(1)
+                if let err = result.validationError {
+                    Text(err).font(.caption).foregroundStyle(.orange)
+                } else {
+                    HStack(spacing: 6) {
+                        if let date = result.date {
+                            Text(date, style: .date).font(.caption).foregroundStyle(.secondary)
+                        }
+                        if let cat = result.categoryName {
+                            Text(cat).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            if let amount = result.amount {
+                AmountLabel(amount: amount, type: result.type, font: .callout)
+            } else {
+                Text("—").foregroundStyle(.secondary)
+            }
+        }
+        .opacity(result.isValid ? 1 : 0.5)
+    }
+}
+
+private struct AccountPreviewRow: View {
+    let result: ParsedAccountResult
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: result.isValid ? result.type.icon : "exclamationmark.triangle.fill")
+                .foregroundStyle(result.isValid
+                                 ? (result.type.isAsset ? Color.nestLeafGreen : .red)
+                                 : .orange)
+                .frame(width: 22)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(result.name).font(.body).lineLimit(1)
+                if let err = result.validationError {
+                    Text(err).font(.caption).foregroundStyle(.orange)
+                } else {
+                    Text(result.type.rawValue).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            if let balance = result.balance {
+                Text(abs(balance), format: .currency(code: "USD"))
+                    .font(.system(.callout, design: .rounded, weight: .medium))
+                    .foregroundStyle(result.type.isAsset ? Color.nestLeafGreen : .red)
+            } else {
+                Text("—").foregroundStyle(.secondary)
+            }
+        }
+        .opacity(result.isValid ? 1 : 0.5)
+    }
+}
+
+// MARK: – Column hint chip row
+
+private struct HintRow: View {
+    let cols: [String]
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(cols, id: \.self) { col in
+                Text(col)
+                    .font(.caption2)
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .background(Color.twig.opacity(0.15), in: Capsule())
+                    .foregroundStyle(Color.twig)
+            }
+        }
+    }
+}
+
+#Preview {
+    CSVImportView(importType: .transactions)
+        .modelContainer(PersistenceController.previewContainer())
+}
