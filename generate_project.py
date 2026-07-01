@@ -640,7 +640,7 @@ def pbxproj():
         a(f"\t\t\t\tDEVELOPMENT_TEAM = 5T5444U7W2;")
         if debug:
             a(f"\t\t\t\tENABLE_TESTABILITY = YES;")
-        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 1;")
+        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 2;")
         a(f"\t\t\t\tENABLE_PREVIEWS = YES;")
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = EggSpend;")
@@ -672,7 +672,7 @@ def pbxproj():
         a(f"\t\t\t\tBUNDLE_LOADER = \"$(TEST_HOST)\";")
         a(f"\t\t\t\tCODE_SIGN_STYLE = Automatic;")
         a(f"\t\t\t\tDEVELOPMENT_TEAM = 5T5444U7W2;")
-        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 1;")
+        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 2;")
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
         a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 17.0;")
         a(f"\t\t\t\tMARKETING_VERSION = 1.0;")
