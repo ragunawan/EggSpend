@@ -174,4 +174,27 @@ final class TransactionAccountTests: XCTestCase {
         AccountBalanceService.apply(tx, to: nil)
         AccountBalanceService.reverse(tx, from: nil)
     }
+
+    // MARK: - Bill due date
+
+    func testCreditAccountCanStoreAndFetchDueDate() throws {
+        let account = Account(name: "Visa", type: .credit, balance: -500)
+        let due = Date(timeIntervalSince1970: 1_800_000_000)
+        account.dueDate = due
+        context.insert(account)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(fetched.first?.dueDate, due)
+    }
+
+    func testCheckingAccountDueDateDefaultsNil() throws {
+        let account = Account(name: "Checking", type: .checking, balance: 1000)
+        XCTAssertNil(account.dueDate)
+    }
+
+    func testLoanAccountDueDateDefaultsNilUntilSet() throws {
+        let account = Account(name: "Loan", type: .loan, balance: -10000)
+        XCTAssertNil(account.dueDate)
+    }
 }

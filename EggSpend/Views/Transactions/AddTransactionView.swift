@@ -169,12 +169,29 @@ struct AddTransactionView: View {
                 Text("No accounts added yet")
                     .foregroundStyle(.secondary)
             } else {
-                Picker("Account", selection: $selectedAccount) {
-                    Text("None").tag(Optional<Account>.none)
-                    ForEach(accounts) { account in
-                        Label(account.name, systemImage: account.type.icon)
-                            .tag(Optional(account))
+                HStack {
+                    Text("Account")
+                    Spacer()
+                    Menu {
+                        Button("None") { selectedAccount = nil }
+                        ForEach(accounts) { account in
+                            Button {
+                                selectedAccount = account
+                            } label: {
+                                Label(account.name, systemImage: account.type.icon)
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(selectedAccount?.name ?? "None")
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption2)
+                        }
+                        .foregroundStyle(.secondary)
                     }
+                    .frame(maxWidth: 180, alignment: .trailing)
                 }
             }
         }

@@ -185,6 +185,11 @@ private struct AccountRowView: View {
                 Text(account.type.rawValue)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let dueDate = account.dueDate {
+                    Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                }
             }
             Spacer()
             Text(abs(account.balance), format: .currency(code: "USD"))

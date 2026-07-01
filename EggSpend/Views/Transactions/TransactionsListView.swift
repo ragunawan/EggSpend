@@ -126,6 +126,11 @@ struct TransactionsListView: View {
                             .listStyle(.insetGrouped)
                             .scrollContentBackground(.hidden)
                             .background(Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
+                            .padding(.horizontal, 12)
+                            .padding(.top, 8)
                         }
                     }
                 }

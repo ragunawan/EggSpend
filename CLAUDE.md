@@ -81,78 +81,7 @@ Domain logic lives outside views in three locations:
 
 ## Todo
 
-### 1. Optional bill due date for credit card accounts and loans
-
-Goal: `Account` records whose type is `.credit` or `.loan` can store an optional due date, while checking, savings, investment, and other accounts do not show that field.
-
-Implementation plan:
-- Update `EggSpend/Models/Account.swift` with a CloudKit-compatible optional `Date?` property, e.g. `var billDueDate: Date?`.
-- Update the `Account` initializer to accept `billDueDate: Date? = nil` and assign it.
-- In `EggSpend/Views/Accounts/AddAccountView.swift`, add state for `hasBillDueDate` and `billDueDate`.
-- Show a bill due date section only when `selectedType` is `.credit` or `.loan`. Use a `Toggle` for enabling the optional value and a `DatePicker` with `.date` components when enabled.
-- When `selectedType` changes away from `.credit` or `.loan`, clear the optional due date state so non-bill accounts do not persist stale bill dates.
-- In `save()`, write `account.billDueDate = hasBillDueDate ? billDueDate : nil` for credit/loan accounts and always write `nil` for all other types.
-- In `populateIfEditing()`, restore the existing optional due date and toggle state for credit/loan accounts.
-- Consider displaying the due date in account row/detail UI if there is already a concise place for account metadata, such as account rows in `AccountsView` or `NetWorthView`.
-- Add or update account model tests to verify credit/loan accounts can persist a due date and non-bill account saves clear it.
-
-Verification:
-- Build the app with `xcodebuild build -project EggSpend.xcodeproj -scheme EggSpend -destination 'platform=iOS Simulator,name=iPhone 17'`.
-- Run relevant account/model tests, or the full test suite if the schema change touches CloudKit tests.
-
-### 2. Shorten the account field in the edit transaction view
-
-Goal: In `AddTransactionView` while editing a transaction, the account selector should not consume most of the screen width.
-
-Implementation plan:
-- Inspect `EggSpend/Views/Transactions/AddTransactionView.swift`, especially `accountSection`.
-- Replace the full-width default `Picker("Account", selection:)` presentation with a more compact control. Good options:
-  - Apply `.pickerStyle(.menu)` so the row shows a compact menu value instead of expanding visually.
-  - Or build an `HStack` with `Text("Account")`, `Spacer()`, and a trailing menu picker constrained with `.frame(maxWidth: 220, alignment: .trailing)` and `.lineLimit(1)`.
-- Keep the current `Optional<Account>.none` tag and account tags so SwiftData model selection still works.
-- Use the same compact selector for both add and edit modes unless there is a strong reason to special-case editing.
-- Confirm long account names truncate instead of pushing other content off screen.
-
-Verification:
-- Preview or run `AddTransactionView` with preview data and edit a transaction with a long account name.
-- Confirm saving still reverses/applies account balance correctly through the existing `AccountBalanceService` calls.
-
-### 3. Make transactions one scrollable field on the transaction page
-
-Goal: `TransactionsListView` should present the transaction rows inside a single bounded scrollable area instead of letting the list dominate the whole screen.
-
-Implementation plan:
-- Work in `EggSpend/Views/Transactions/TransactionsListView.swift`.
-- Keep the existing search, filter banner, empty states, grouping by date, navigation links, and swipe-to-delete behavior.
-- Wrap the populated transaction list in one visually bounded scroll container/card, using existing theme primitives such as `.nestCard()` and semantic colors.
-- Prefer retaining `List` if swipe actions and deletion are important, but constrain it inside a single container with a stable `frame`/layout so it reads as one scrollable field.
-- If converting to `ScrollView` + `LazyVStack`, reimplement row actions carefully because SwiftUI `swipeActions` are `List`-oriented. Do not drop delete/edit affordances without replacing them.
-- Ensure the filter banner remains outside or above the scrollable transaction field so the list itself is the only scrolling transaction area.
-- Check that date section headers still separate grouped transactions clearly.
-
-Verification:
-- Test with empty, filtered-empty, and many-transaction preview data.
-- Confirm search and filters still update the one scrollable field.
-- Confirm delete still reverses account balance via `deleteTransactions(_:at:)`.
-
-### 4. Make budgets one scrollable field on the budget page
-
-Goal: `BudgetView` should present all budget rows inside one scrollable field while keeping the summary and period filter readable.
-
-Implementation plan:
-- Work in `EggSpend/Views/Budget/BudgetView.swift`.
-- Keep `summaryHeroCard` and `periodPicker` near the top of the page.
-- Move the budget groups (`overBudget`, `warningBudgets`, `healthyBudgets`, and inactive budgets) into a single bounded scrollable container/card below the summary/filter.
-- Preserve existing grouping headings, navigation to `BudgetDetailView`, edit/delete/pause/resume actions, and inactive budget expansion.
-- If the current `ScrollView` remains the outer page scroll, avoid nested unbounded scroll views. Use a fixed or geometry-based height for the budgets field, or make the top-level layout a `VStack` with only the budgets field scrolling.
-- Keep the existing `BudgetRowView` styling and avoid adding nested card-on-card visuals.
-
-Verification:
-- Test no budgets, only active budgets, mixed status budgets, and inactive budgets expanded.
-- Confirm period filtering updates the single scrollable budget field.
-- Confirm swipe/context menu actions still work.
-
-### 5. Move happened recurring events into the main transaction list
+### 1. Move happened recurring events into the main transaction list
 
 Goal: When a recurring transaction's `nextDueDate` has happened, create the corresponding single `Transaction` in the main transactions list.
 
@@ -176,7 +105,7 @@ Verification:
 - Add a test that reprocessing the same item does not duplicate an already-generated due occurrence.
 - Run recurring transaction tests.
 
-### 6. Show next-week recurring events in the main transaction list with `.eggBlue` outline
+### 2. Show next-week recurring events in the main transaction list with `.eggBlue` outline
 
 Goal: A recurring event due within the next seven days should appear in `TransactionsListView` as a single upcoming transaction row with an `.eggBlue` outline, without being permanently saved as a normal transaction until the due date happens.
 
@@ -199,7 +128,7 @@ Verification:
 - Manually verify with preview data: one overdue recurring item, one due in the next seven days, and one due later than seven days.
 - Confirm the overdue item appears as an actual generated transaction, the next-week item appears with an `.eggBlue` outline, and the later item does not appear in the main transactions list.
 
-### 7. Add a next 30 days recurring transactions view
+### 3. Add a next 30 days recurring transactions view
 
 Goal: Add a view that shows upcoming recurring income and expenses for the next 30 days.
 
@@ -217,7 +146,7 @@ Verification:
 - Test daily, weekly, biweekly, monthly, and yearly recurrence projection across a 30-day window.
 - Confirm inactive and ended recurring transactions are excluded.
 
-### 8. Add a debt payoff planner
+### 4. Add a debt payoff planner
 
 Goal: For credit card and loan accounts, estimate payoff timelines and payment strategies.
 
@@ -234,7 +163,7 @@ Verification:
 - Add unit tests for payoff math, including zero interest, high interest, insufficient payment, and extra payment scenarios.
 - Manually verify displayed dates and currency formatting for credit card and loan accounts.
 
-### 9. Add a cash flow calendar
+### 5. Add a cash flow calendar
 
 Goal: Show actual transactions, upcoming recurring events, bills, and forecasted daily cash position in a calendar-style view.
 
@@ -252,7 +181,7 @@ Verification:
 - Confirm transfers are neutral once transfer transactions exist.
 - Confirm bill due dates for credit cards and loans appear without changing cash balance unless a payment transaction exists.
 
-### 10. Make homepage savings goals and budget eggs horizontal scroll tiles
+### 6. Make homepage savings goals and budget eggs horizontal scroll tiles
 
 Goal: On the homepage, savings goals and budget eggs should be horizontally scrollable tile rows. Remove manage buttons and make each tile navigate to the appropriate manage/detail view.
 
@@ -271,7 +200,7 @@ Verification:
 - Confirm horizontal scroll works and every tile navigates to the intended manage/detail view.
 - Confirm no manage buttons remain in those homepage sections.
 
-### 11. Calculate monthly savings needed for each savings goal
+### 7. Calculate monthly savings needed for each savings goal
 
 Goal: For each savings goal, calculate how much needs to be saved per month to hit the target by the target date.
 
@@ -291,7 +220,7 @@ Verification:
 - Run savings goal tests or add a new focused test class.
 - Manually verify dashboard and savings goal list formatting with preview data.
 
-### 12. Refine background animations
+### 8. Refine background animations
 
 Goal: Remove the horizontal scrolling square/light animation and make the background a static gradient from the top to the middle of the screen. Make leaves drift randomly down instead of falling vertically straight down.
 

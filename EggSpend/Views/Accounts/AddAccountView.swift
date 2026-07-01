@@ -11,6 +11,8 @@ struct AddAccountView: View {
     @State private var selectedType: AccountType = .checking
     @State private var balanceText = ""
     @State private var notes = ""
+    @State private var hasDueDate = false
+    @State private var dueDate = Date.now
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingAccount != nil }
@@ -27,6 +29,11 @@ struct AddAccountView: View {
                             Label(type.rawValue, systemImage: type.icon).tag(type)
                         }
                     }
+                    .onChange(of: selectedType) { _, newType in
+                        if newType != .credit && newType != .loan {
+                            hasDueDate = false
+                        }
+                    }
                     HStack {
                         Text(selectedType.isAsset ? "Balance" : "Amount Owed")
                             .foregroundStyle(.secondary)
@@ -35,6 +42,12 @@ struct AddAccountView: View {
                         TextField("0.00", text: $balanceText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
+                    }
+                    if selectedType == .credit || selectedType == .loan {
+                        Toggle("Has Due Date", isOn: $hasDueDate)
+                        if hasDueDate {
+                            DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                        }
                     }
                 }
 
@@ -69,11 +82,13 @@ struct AddAccountView: View {
             return
         }
         let stored = selectedType.isAsset ? abs(balance) : -abs(balance)
+        let resolvedDueDate = (selectedType == .credit || selectedType == .loan) && hasDueDate ? dueDate : nil
         if let account = editingAccount {
             account.name = name.trimmingCharacters(in: .whitespaces)
             account.type = selectedType
             account.balance = stored
             account.notes = notes
+            account.dueDate = resolvedDueDate
         } else {
             let account = Account(
                 name: name.trimmingCharacters(in: .whitespaces),
@@ -81,6 +96,7 @@ struct AddAccountView: View {
                 balance: stored,
                 notes: notes
             )
+            account.dueDate = resolvedDueDate
             modelContext.insert(account)
         }
         dismiss()
@@ -92,6 +108,8 @@ struct AddAccountView: View {
         selectedType = account.type
         balanceText = String(format: "%.2f", abs(account.balance))
         notes = account.notes
+        hasDueDate = account.dueDate != nil
+        dueDate = account.dueDate ?? Date.now
     }
 }
 

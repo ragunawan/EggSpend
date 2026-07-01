@@ -38,6 +38,7 @@ final class Account {
     var balance: Double = 0
     var notes: String = ""
     var createdAt: Date = Date.now
+    var dueDate: Date?
 
     var type: AccountType {
         get { AccountType(rawValue: typeRaw) ?? .other }

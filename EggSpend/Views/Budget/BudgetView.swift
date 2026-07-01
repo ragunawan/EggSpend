@@ -49,18 +49,26 @@ struct BudgetView: View {
                 if budgets.isEmpty {
                     emptyState
                 } else {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            summaryHeroCard
-                            periodPicker.appearRise(delay: 0.05)
-                            if !overBudget.isEmpty   { budgetGroup("Over Budget 🚨",   overBudget,   accent: .red).appearRise(delay: 0.1) }
-                            if !warningBudgets.isEmpty { budgetGroup("Watch Out ⚠️", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
-                            if !healthyBudgets.isEmpty { budgetGroup("On Track ✓",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
-                            inactiveBudgetsSection.appearRise(delay: 0.25)
+                    VStack(spacing: 20) {
+                        summaryHeroCard
+                        periodPicker.appearRise(delay: 0.05)
+
+                        ScrollView {
+                            VStack(spacing: 16) {
+                                if !overBudget.isEmpty   { budgetGroup("Over Budget 🚨",   overBudget,   accent: .red).appearRise(delay: 0.1) }
+                                if !warningBudgets.isEmpty { budgetGroup("Watch Out ⚠️", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
+                                if !healthyBudgets.isEmpty { budgetGroup("On Track ✓",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
+                                inactiveBudgetsSection.appearRise(delay: 0.25)
+                            }
+                            .padding(12)
                         }
-                        .padding(.horizontal)
-                        .padding(.bottom, 32)
+                        .frame(maxHeight: .infinity)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
                     }
+                    .padding(.horizontal)
+                    .padding(.bottom, 32)
                 }
             }
             .background(AnimatedCanopyBackground())
