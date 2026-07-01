@@ -16,10 +16,12 @@
 		AA0200000000000000000014 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000014 /* Budget.swift */; };
 		AA0200000000000000000015 /* RecurringTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000015 /* RecurringTransaction.swift */; };
 		AA0200000000000000000037 /* SavingsGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004C /* SavingsGoal.swift */; };
+		AA0200000000000000000047 /* Transfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005C /* Transfer.swift */; };
 		AA0200000000000000000006 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000006 /* DashboardView.swift */; };
 		AA0200000000000000000007 /* TransactionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000007 /* TransactionsListView.swift */; };
 		AA0200000000000000000008 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000008 /* AddTransactionView.swift */; };
 		AA0200000000000000000009 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000009 /* TransactionDetailView.swift */; };
+		AA020000000000000000004A /* TransferDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005F /* TransferDetailView.swift */; };
 		AA020000000000000000000A /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000A /* NetWorthView.swift */; };
 		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
 		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
@@ -37,10 +39,12 @@
 		AA020000000000000000000E /* CategoryBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000E /* CategoryBadgeView.swift */; };
 		AA020000000000000000000F /* AmountLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000F /* AmountLabel.swift */; };
 		AA0200000000000000000010 /* TransactionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000010 /* TransactionRowView.swift */; };
+		AA0200000000000000000049 /* TransferRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005E /* TransferRowView.swift */; };
 		AA0200000000000000000011 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000011 /* PersistenceController.swift */; };
 		AA020000000000000000003D /* SyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000052 /* SyncStatus.swift */; };
 		AA020000000000000000001F /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001E /* CSVParser.swift */; };
 		AA020000000000000000002F /* AccountBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000044 /* AccountBalanceService.swift */; };
+		AA0200000000000000000048 /* TransferBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005D /* TransferBalanceService.swift */; };
 		AA0200000000000000000020 /* CSVImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001F /* CSVImportView.swift */; };
 		AA0200000000000000000021 /* CategoryManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000036 /* CategoryManagementView.swift */; };
 		AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000037 /* AddEditCategoryView.swift */; };
@@ -74,6 +78,7 @@
 		AA020000000000000000003E /* CloudKitSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000053 /* CloudKitSchemaTests.swift */; };
 		AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */; };
 		AA0200000000000000000044 /* NotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000059 /* NotificationSchedulerTests.swift */; };
+		AA020000000000000000004B /* TransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000060 /* TransferTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -98,10 +103,12 @@
 		AA0100000000000000000014 /* Budget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Budget.swift; sourceTree = "<group>"; };
 		AA0100000000000000000015 /* RecurringTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransaction.swift; sourceTree = "<group>"; };
 		AA010000000000000000004C /* SavingsGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoal.swift; sourceTree = "<group>"; };
+		AA010000000000000000005C /* Transfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transfer.swift; sourceTree = "<group>"; };
 		AA0100000000000000000006 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000007 /* TransactionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000008 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000009 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
+		AA010000000000000000005F /* TransferDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetailView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000A /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -119,10 +126,12 @@
 		AA010000000000000000000E /* CategoryBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBadgeView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000F /* AmountLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmountLabel.swift; sourceTree = "<group>"; };
 		AA0100000000000000000010 /* TransactionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRowView.swift; sourceTree = "<group>"; };
+		AA010000000000000000005E /* TransferRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferRowView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000011 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		AA0100000000000000000052 /* SyncStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatus.swift; sourceTree = "<group>"; };
 		AA010000000000000000001E /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		AA0100000000000000000044 /* AccountBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceService.swift; sourceTree = "<group>"; };
+		AA010000000000000000005D /* TransferBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferBalanceService.swift; sourceTree = "<group>"; };
 		AA010000000000000000001F /* CSVImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVImportView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000036 /* CategoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagementView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000037 /* AddEditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditCategoryView.swift; sourceTree = "<group>"; };
@@ -157,6 +166,7 @@
 		AA0100000000000000000053 /* CloudKitSchemaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSchemaTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeSpendCalculatorTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000059 /* NotificationSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSchedulerTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000060 /* TransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -221,6 +231,7 @@
 				AA0100000000000000000014 /* Budget.swift */,
 				AA0100000000000000000015 /* RecurringTransaction.swift */,
 				AA010000000000000000004C /* SavingsGoal.swift */,
+				AA010000000000000000005C /* Transfer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -261,6 +272,7 @@
 				AA0100000000000000000008 /* AddTransactionView.swift */,
 				AA0100000000000000000009 /* TransactionDetailView.swift */,
 				AA010000000000000000004A /* TransactionFilterView.swift */,
+				AA010000000000000000005F /* TransferDetailView.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -320,6 +332,7 @@
 				AA010000000000000000000E /* CategoryBadgeView.swift */,
 				AA010000000000000000000F /* AmountLabel.swift */,
 				AA0100000000000000000010 /* TransactionRowView.swift */,
+				AA010000000000000000005E /* TransferRowView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -346,6 +359,7 @@
 			children = (
 				AA010000000000000000001E /* CSVParser.swift */,
 				AA0100000000000000000044 /* AccountBalanceService.swift */,
+				AA010000000000000000005D /* TransferBalanceService.swift */,
 				AA0100000000000000000046 /* MonthlyReviewCalculator.swift */,
 				AA0100000000000000000049 /* TransactionFilter.swift */,
 				AA0100000000000000000054 /* SafeSpendCalculator.swift */,
@@ -417,6 +431,7 @@
 				AA0100000000000000000053 /* CloudKitSchemaTests.swift */,
 				AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */,
 				AA0100000000000000000059 /* NotificationSchedulerTests.swift */,
+				AA0100000000000000000060 /* TransferTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -531,10 +546,12 @@
 				AA0200000000000000000014 /* Budget.swift in Sources */,
 				AA0200000000000000000015 /* RecurringTransaction.swift in Sources */,
 				AA0200000000000000000037 /* SavingsGoal.swift in Sources */,
+				AA0200000000000000000047 /* Transfer.swift in Sources */,
 				AA0200000000000000000006 /* DashboardView.swift in Sources */,
 				AA0200000000000000000007 /* TransactionsListView.swift in Sources */,
 				AA0200000000000000000008 /* AddTransactionView.swift in Sources */,
 				AA0200000000000000000009 /* TransactionDetailView.swift in Sources */,
+				AA020000000000000000004A /* TransferDetailView.swift in Sources */,
 				AA020000000000000000000A /* NetWorthView.swift in Sources */,
 				AA020000000000000000000B /* MetricsView.swift in Sources */,
 				AA020000000000000000000C /* AccountsView.swift in Sources */,
@@ -552,10 +569,12 @@
 				AA020000000000000000000E /* CategoryBadgeView.swift in Sources */,
 				AA020000000000000000000F /* AmountLabel.swift in Sources */,
 				AA0200000000000000000010 /* TransactionRowView.swift in Sources */,
+				AA0200000000000000000049 /* TransferRowView.swift in Sources */,
 				AA0200000000000000000011 /* PersistenceController.swift in Sources */,
 				AA020000000000000000003D /* SyncStatus.swift in Sources */,
 				AA020000000000000000001F /* CSVParser.swift in Sources */,
 				AA020000000000000000002F /* AccountBalanceService.swift in Sources */,
+				AA0200000000000000000048 /* TransferBalanceService.swift in Sources */,
 				AA0200000000000000000020 /* CSVImportView.swift in Sources */,
 				AA0200000000000000000021 /* CategoryManagementView.swift in Sources */,
 				AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */,
@@ -594,6 +613,7 @@
 				AA020000000000000000003E /* CloudKitSchemaTests.swift in Sources */,
 				AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */,
 				AA0200000000000000000044 /* NotificationSchedulerTests.swift in Sources */,
+				AA020000000000000000004B /* TransferTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

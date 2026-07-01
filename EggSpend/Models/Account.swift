@@ -52,6 +52,12 @@ final class Account {
     @Relationship(deleteRule: .nullify, inverse: \SavingsGoal.linkedAccount)
     var savingsGoals: [SavingsGoal]? = []
 
+    @Relationship(deleteRule: .nullify, inverse: \Transfer.fromAccount)
+    var transfersOut: [Transfer]? = []
+
+    @Relationship(deleteRule: .nullify, inverse: \Transfer.toAccount)
+    var transfersIn: [Transfer]? = []
+
     init(name: String, type: AccountType, balance: Double, notes: String = "") {
         self.id = UUID()
         self.name = name
@@ -61,5 +67,7 @@ final class Account {
         self.createdAt = .now
         self.transactions = []
         self.savingsGoals = []
+        self.transfersOut = []
+        self.transfersIn = []
     }
 }

@@ -1,6 +1,16 @@
 import SwiftUI
 import SwiftData
 
+enum EntryKind: String, CaseIterable, Hashable {
+    case income = "Income"
+    case expense = "Expense"
+    case transfer = "Transfer"
+
+    var transactionType: TransactionType? {
+        TransactionType(rawValue: rawValue)
+    }
+}
+
 struct AddTransactionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -10,22 +20,37 @@ struct AddTransactionView: View {
     @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
 
     var editingTransaction: Transaction? = nil
+    var editingTransfer: Transfer? = nil
+    var initialEntryKind: EntryKind = .expense
 
     @State private var title = ""
     @State private var amountText = ""
     @State private var date = Date.now
-    @State private var selectedType: TransactionType = .expense
+    @State private var selectedEntryKind: EntryKind = .expense
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var selectedAccount: Account? = nil
     @State private var selectedBudget: Budget? = nil
+    @State private var fromAccount: Account? = nil
+    @State private var toAccount: Account? = nil
     @State private var notes = ""
     @State private var showValidationError = false
 
-    private var isEditing: Bool { editingTransaction != nil }
+    private var isEditing: Bool { editingTransaction != nil || editingTransfer != nil }
+
+    // Which segments the type picker offers: all three for a new entry, Income/Expense
+    // only when editing an existing Transaction (preserves prior editing behavior), and
+    // none when editing an existing Transfer (converting record kinds isn't supported).
+    private var pickerCases: [EntryKind] {
+        if isEditing {
+            return editingTransfer != nil ? [] : [.income, .expense]
+        }
+        return EntryKind.allCases
+    }
 
     private var availableCategories: [TransactionCategory] {
+        guard let type = selectedEntryKind.transactionType else { return [] }
         // Archived categories are hidden from the picker — only active categories appear here.
-        categories.filter { ($0.appliesTo == nil || $0.appliesTo == selectedType) && !$0.isArchived }
+        return categories.filter { ($0.appliesTo == nil || $0.appliesTo == type) && !$0.isArchived }
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
@@ -35,19 +60,34 @@ struct AddTransactionView: View {
     }
 
     private var amount: Double { Double(amountText) ?? 0 }
-    private var isValid: Bool { !title.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 }
+
+    private var isValid: Bool {
+        guard amount > 0 else { return false }
+        switch selectedEntryKind {
+        case .income, .expense:
+            return !title.trimmingCharacters(in: .whitespaces).isEmpty
+        case .transfer:
+            guard let fromAccount, let toAccount else { return false }
+            return fromAccount.id != toAccount.id
+        }
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 typePicker
-                detailsSection
-                accountSection
-                if selectedType == .expense { budgetSection }
-                categorySection
+                if selectedEntryKind == .transfer {
+                    transferDetailsSection
+                    transferAccountsSection
+                } else {
+                    detailsSection
+                    accountSection
+                    if selectedEntryKind == .expense { budgetSection }
+                    categorySection
+                }
                 notesSection
             }
-            .navigationTitle(isEditing ? "Edit Transaction" : "New Transaction")
+            .navigationTitle(navigationTitleText)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -61,25 +101,39 @@ struct AddTransactionView: View {
             .alert("Missing Information", isPresented: $showValidationError) {
                 Button("OK") {}
             } message: {
-                Text("Please enter a title and an amount greater than zero.")
+                Text(selectedEntryKind == .transfer
+                     ? "Please choose two different accounts and an amount greater than zero."
+                     : "Please enter a title and an amount greater than zero.")
             }
             .onAppear { populateIfEditing() }
         }
     }
 
+    private var navigationTitleText: String {
+        switch (isEditing, selectedEntryKind) {
+        case (true, .transfer): return "Edit Transfer"
+        case (false, .transfer): return "New Transfer"
+        case (true, _): return "Edit Transaction"
+        case (false, _): return "New Transaction"
+        }
+    }
+
+    @ViewBuilder
     private var typePicker: some View {
-        Section {
-            Picker("Type", selection: $selectedType) {
-                ForEach(TransactionType.allCases, id: \.self) { type in
-                    Text(type.rawValue).tag(type)
+        if !pickerCases.isEmpty {
+            Section {
+                Picker("Type", selection: $selectedEntryKind) {
+                    ForEach(pickerCases, id: \.self) { kind in
+                        Text(kind.rawValue).tag(kind)
+                    }
                 }
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: selectedType) { _, newType in
-                if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != selectedType {
-                    selectedCategory = nil
+                .pickerStyle(.segmented)
+                .onChange(of: selectedEntryKind) { _, newKind in
+                    if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != newKind.transactionType {
+                        selectedCategory = nil
+                    }
+                    if newKind != .expense { selectedBudget = nil }
                 }
-                if newType != .expense { selectedBudget = nil }
             }
         }
     }
@@ -87,6 +141,18 @@ struct AddTransactionView: View {
     private var detailsSection: some View {
         Section("Details") {
             TextField("Title", text: $title)
+            HStack {
+                Text("$")
+                    .foregroundStyle(.secondary)
+                TextField("0.00", text: $amountText)
+                    .keyboardType(.decimalPad)
+            }
+            DatePicker("Date", selection: $date, displayedComponents: .date)
+        }
+    }
+
+    private var transferDetailsSection: some View {
+        Section("Details") {
             HStack {
                 Text("$")
                     .foregroundStyle(.secondary)
@@ -111,6 +177,37 @@ struct AddTransactionView: View {
                     }
                 }
             }
+        }
+    }
+
+    private var transferAccountsSection: some View {
+        Section {
+            if accounts.count < 2 {
+                Text("Add at least two accounts to make a transfer.")
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker("From", selection: $fromAccount) {
+                    Text("Select").tag(Optional<Account>.none)
+                    ForEach(accounts) { account in
+                        Label(account.name, systemImage: account.type.icon)
+                            .tag(Optional(account))
+                    }
+                }
+                Picker("To", selection: $toAccount) {
+                    Text("Select").tag(Optional<Account>.none)
+                    ForEach(accounts) { account in
+                        Label(account.name, systemImage: account.type.icon)
+                            .tag(Optional(account))
+                    }
+                }
+                if let fromAccount, let toAccount, fromAccount.id == toAccount.id {
+                    Label("Choose two different accounts.", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+        } header: {
+            Text("Accounts")
         }
     }
 
@@ -171,6 +268,17 @@ struct AddTransactionView: View {
             showValidationError = true
             return
         }
+        switch selectedEntryKind {
+        case .income, .expense:
+            saveTransaction()
+        case .transfer:
+            saveTransfer()
+        }
+        dismiss()
+    }
+
+    private func saveTransaction() {
+        guard let type = selectedEntryKind.transactionType else { return }
         if let tx = editingTransaction {
             // Capture old account before any changes so we can reverse its effect.
             let oldAccount = tx.account
@@ -179,7 +287,7 @@ struct AddTransactionView: View {
             tx.title = title.trimmingCharacters(in: .whitespaces)
             tx.amount = amount
             tx.date = date
-            tx.type = selectedType
+            tx.type = type
             tx.category = selectedCategory
             tx.account = selectedAccount
             tx.notes = notes
@@ -191,7 +299,7 @@ struct AddTransactionView: View {
                 title: title.trimmingCharacters(in: .whitespaces),
                 amount: amount,
                 date: date,
-                type: selectedType,
+                type: type,
                 category: selectedCategory,
                 account: selectedAccount,
                 notes: notes
@@ -200,21 +308,55 @@ struct AddTransactionView: View {
             AccountBalanceService.apply(tx, to: selectedAccount)
             BudgetAlertCoordinator.checkBudgets(context: modelContext)
         }
-        dismiss()
+    }
+
+    private func saveTransfer() {
+        if let transfer = editingTransfer {
+            // Capture old accounts before any changes so we can reverse their effect.
+            TransferBalanceService.reverse(transfer)
+
+            transfer.amount = amount
+            transfer.date = date
+            transfer.fromAccount = fromAccount
+            transfer.toAccount = toAccount
+            transfer.notes = notes
+
+            TransferBalanceService.apply(transfer)
+        } else {
+            let transfer = Transfer(
+                amount: amount,
+                date: date,
+                fromAccount: fromAccount,
+                toAccount: toAccount,
+                notes: notes
+            )
+            modelContext.insert(transfer)
+            TransferBalanceService.apply(transfer)
+        }
     }
 
     private func populateIfEditing() {
-        guard let tx = editingTransaction else { return }
-        title = tx.title
-        amountText = String(format: "%.2f", tx.amount)
-        date = tx.date
-        selectedType = tx.type
-        selectedCategory = tx.category
-        selectedAccount = tx.account
-        if tx.type == .expense {
-            selectedBudget = availableBudgets.first { $0.category?.id == tx.category?.id }
+        if let tx = editingTransaction {
+            title = tx.title
+            amountText = String(format: "%.2f", tx.amount)
+            date = tx.date
+            selectedEntryKind = tx.type == .income ? .income : .expense
+            selectedCategory = tx.category
+            selectedAccount = tx.account
+            if tx.type == .expense {
+                selectedBudget = availableBudgets.first { $0.category?.id == tx.category?.id }
+            }
+            notes = tx.notes
+        } else if let transfer = editingTransfer {
+            selectedEntryKind = .transfer
+            amountText = String(format: "%.2f", transfer.amount)
+            date = transfer.date
+            fromAccount = transfer.fromAccount
+            toAccount = transfer.toAccount
+            notes = transfer.notes
+        } else {
+            selectedEntryKind = initialEntryKind
         }
-        notes = tx.notes
     }
 }
 

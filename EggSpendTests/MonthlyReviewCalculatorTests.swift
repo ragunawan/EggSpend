@@ -8,7 +8,7 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
 
     override func setUpWithError() throws {
         let schema = Schema([Transaction.self, TransactionCategory.self, Account.self,
-                             Budget.self, RecurringTransaction.self, SavingsGoal.self])
+                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)
@@ -223,6 +223,40 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
         XCTAssertEqual(result.topCategories.last?.amount ?? 0, 80, accuracy: 0.001)
         XCTAssertEqual(result.budgetOverruns.first?.name, "Food Budget")
         XCTAssertEqual(result.netWorthChange, result.netWorthAtEnd - result.netWorthAtStart, accuracy: 0.001)
+    }
+
+    /// Regression guard for the motivating goal of the `Transfer` model: moving money
+    /// between the user's own accounts must not be visible to income/expense/savings-rate
+    /// calculations, since a `Transfer` is never inserted as a `Transaction` row.
+    func testTransferDoesNotAffectIncomeExpensesOrSavingsRate() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let savings = Account(name: "Savings", type: .savings, balance: 500)
+        context.insert(checking)
+        context.insert(savings)
+
+        let month = date(2026, 3, 15)
+        let txs = [
+            Transaction(title: "Salary", amount: 3000, date: date(2026, 3, 1), type: .income),
+            Transaction(title: "Rent",   amount: 1200, date: date(2026, 3, 6), type: .expense)
+        ]
+        txs.forEach { context.insert($0) }
+
+        let before = MonthlyReviewCalculator.calculate(
+            month: month, transactions: txs, accounts: [checking, savings], budgets: []
+        )
+
+        let transfer = Transfer(amount: 500, date: date(2026, 3, 10), fromAccount: checking, toAccount: savings)
+        context.insert(transfer)
+        TransferBalanceService.apply(transfer)
+        try context.save()
+
+        let after = MonthlyReviewCalculator.calculate(
+            month: month, transactions: txs, accounts: [checking, savings], budgets: []
+        )
+
+        XCTAssertEqual(before.income, after.income, accuracy: 0.001)
+        XCTAssertEqual(before.expenses, after.expenses, accuracy: 0.001)
+        XCTAssertEqual(before.savingsRate ?? 0, after.savingsRate ?? 0, accuracy: 0.001)
     }
 
     func testCalculateHandlesEmptyMonthGracefully() {

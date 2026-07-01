@@ -1,15 +1,36 @@
 import SwiftUI
 import SwiftData
 
+enum LedgerRow: Identifiable {
+    case transaction(Transaction)
+    case transfer(Transfer)
+
+    var id: UUID {
+        switch self {
+        case .transaction(let tx): return tx.id
+        case .transfer(let transfer): return transfer.id
+        }
+    }
+
+    var date: Date {
+        switch self {
+        case .transaction(let tx): return tx.date
+        case .transfer(let transfer): return transfer.date
+        }
+    }
+}
+
 struct TransactionsListView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query(sort: \Transfer.date, order: .reverse) private var transfers: [Transfer]
     @State private var searchText = ""
     @State private var filter = TransactionFilter()
+    @State private var hideTransfers = false
     @State private var showAddTransaction = false
     @State private var showImport = false
     @State private var showFilterSheet = false
 
-    private var filtered: [Transaction] {
+    private var filteredTransactions: [Transaction] {
         transactions.filter { tx in
             let matchesSearch = searchText.isEmpty
                 || tx.title.localizedCaseInsensitiveContains(searchText)
@@ -19,16 +40,31 @@ struct TransactionsListView: View {
         }
     }
 
-    private var grouped: [(String, [Transaction])] {
+    private var filteredTransfers: [Transfer] {
+        guard !hideTransfers else { return [] }
+        return transfers.filter { transfer in
+            searchText.isEmpty
+                || transfer.notes.localizedCaseInsensitiveContains(searchText)
+                || (transfer.fromAccount?.name.localizedCaseInsensitiveContains(searchText) ?? false)
+                || (transfer.toAccount?.name.localizedCaseInsensitiveContains(searchText) ?? false)
+        }
+    }
+
+    private var rows: [LedgerRow] {
+        (filteredTransactions.map(LedgerRow.transaction) + filteredTransfers.map(LedgerRow.transfer))
+            .sorted { $0.date > $1.date }
+    }
+
+    private var grouped: [(String, [LedgerRow])] {
         let formatter = DateFormatter.sectionHeader
-        var dict: [String: [Transaction]] = [:]
-        for tx in filtered {
-            let key = formatter.string(from: tx.date)
-            dict[key, default: []].append(tx)
+        var dict: [String: [LedgerRow]] = [:]
+        for row in rows {
+            let key = formatter.string(from: row.date)
+            dict[key, default: []].append(row)
         }
         return dict.sorted { lhs, rhs in
-            let d1 = filtered.first { formatter.string(from: $0.date) == lhs.key }?.date ?? .distantPast
-            let d2 = filtered.first { formatter.string(from: $0.date) == rhs.key }?.date ?? .distantPast
+            let d1 = rows.first { formatter.string(from: $0.date) == lhs.key }?.date ?? .distantPast
+            let d2 = rows.first { formatter.string(from: $0.date) == rhs.key }?.date ?? .distantPast
             return d1 > d2
         }
     }
@@ -42,7 +78,7 @@ struct TransactionsListView: View {
                     activeFilterBanner
 
                     Group {
-                        if transactions.isEmpty {
+                        if transactions.isEmpty && transfers.isEmpty {
                             ContentUnavailableView {
                                 Label {
                                     Text("No Transactions")
@@ -52,7 +88,7 @@ struct TransactionsListView: View {
                             } description: {
                                 Text("Tap + to record your first transaction.")
                             }
-                        } else if filtered.isEmpty {
+                        } else if rows.isEmpty {
                             if filter.isActive && searchText.isEmpty {
                                 ContentUnavailableView {
                                     Label {
@@ -72,14 +108,12 @@ struct TransactionsListView: View {
                             List {
                                 ForEach(grouped, id: \.0) { section, items in
                                     Section {
-                                        ForEach(items) { tx in
-                                            NavigationLink(destination: TransactionDetailView(transaction: tx)) {
-                                                TransactionRowView(transaction: tx)
-                                            }
-                                            .listRowBackground(Color.clear)
+                                        ForEach(items) { row in
+                                            rowView(for: row)
+                                                .listRowBackground(Color.clear)
                                         }
                                         .onDelete { indexSet in
-                                            deleteTransactions(items, at: indexSet)
+                                            deleteRows(items, at: indexSet)
                                         }
                                     } header: {
                                         Text(section)
@@ -130,7 +164,21 @@ struct TransactionsListView: View {
                 AddTransactionView()
             }
             .sheet(isPresented: $showFilterSheet) {
-                TransactionFilterView(filter: $filter)
+                TransactionFilterView(filter: $filter, hideTransfers: $hideTransfers)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func rowView(for row: LedgerRow) -> some View {
+        switch row {
+        case .transaction(let tx):
+            NavigationLink(destination: TransactionDetailView(transaction: tx)) {
+                TransactionRowView(transaction: tx)
+            }
+        case .transfer(let transfer):
+            NavigationLink(destination: TransferDetailView(transfer: transfer)) {
+                TransferRowView(transfer: transfer)
             }
         }
     }
@@ -175,11 +223,16 @@ struct TransactionsListView: View {
 
     @Environment(\.modelContext) private var modelContext
 
-    private func deleteTransactions(_ items: [Transaction], at offsets: IndexSet) {
+    private func deleteRows(_ items: [LedgerRow], at offsets: IndexSet) {
         for index in offsets {
-            let tx = items[index]
-            AccountBalanceService.reverse(tx, from: tx.account)
-            modelContext.delete(tx)
+            switch items[index] {
+            case .transaction(let tx):
+                AccountBalanceService.reverse(tx, from: tx.account)
+                modelContext.delete(tx)
+            case .transfer(let transfer):
+                TransferBalanceService.reverse(transfer)
+                modelContext.delete(transfer)
+            }
         }
     }
 }

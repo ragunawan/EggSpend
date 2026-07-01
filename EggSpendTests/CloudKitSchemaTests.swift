@@ -8,7 +8,7 @@ final class CloudKitSchemaTests: XCTestCase {
 
     override func setUpWithError() throws {
         let schema = Schema([Transaction.self, TransactionCategory.self, Account.self,
-                             Budget.self, RecurringTransaction.self, SavingsGoal.self])
+                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)
@@ -43,6 +43,24 @@ final class CloudKitSchemaTests: XCTestCase {
         XCTAssertEqual(fetchedCategories.first?.recurringTransactions?.first?.id, recurring.id)
     }
 
+    func testAccountTransferInverseRelationship() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let savings = Account(name: "Savings", type: .savings, balance: 500)
+        context.insert(checking)
+        context.insert(savings)
+        let transfer = Transfer(amount: 200, fromAccount: checking, toAccount: savings)
+        context.insert(transfer)
+        try context.save()
+
+        let fetchedAccounts = try context.fetch(FetchDescriptor<Account>(sortBy: [SortDescriptor(\.name)]))
+        let fetchedChecking = fetchedAccounts.first { $0.name == "Checking" }
+        let fetchedSavings = fetchedAccounts.first { $0.name == "Savings" }
+        XCTAssertEqual(fetchedChecking?.transfersOut?.count, 1)
+        XCTAssertEqual(fetchedChecking?.transfersOut?.first?.id, transfer.id)
+        XCTAssertEqual(fetchedSavings?.transfersIn?.count, 1)
+        XCTAssertEqual(fetchedSavings?.transfersIn?.first?.id, transfer.id)
+    }
+
     func testCategoryDeletionNullifiesBudgetAndRecurringTransaction() throws {
         let category = TransactionCategory(name: "Temp", icon: "star", colorHex: "AABBCC")
         context.insert(category)
@@ -66,7 +84,7 @@ final class CloudKitSchemaTests: XCTestCase {
     /// fall back to local-only storage.
     func testSchemaIsCloudKitCompatible() throws {
         let schema = Schema([Transaction.self, TransactionCategory.self, Account.self,
-                             Budget.self, RecurringTransaction.self, SavingsGoal.self])
+                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .automatic)
         XCTAssertNoThrow(try ModelContainer(for: schema, configurations: [config]))
     }

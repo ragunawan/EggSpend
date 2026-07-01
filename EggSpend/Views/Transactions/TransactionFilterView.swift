@@ -6,19 +6,23 @@ import SwiftData
 /// writes back to `filter` when the user taps Apply.
 struct TransactionFilterView: View {
     @Binding var filter: TransactionFilter
+    @Binding var hideTransfers: Bool
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \TransactionCategory.sortOrder) private var allCategories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
 
     @State private var draft: TransactionFilter
+    @State private var draftHideTransfers: Bool
     @State private var minAmountText: String
     @State private var maxAmountText: String
 
-    init(filter: Binding<TransactionFilter>) {
+    init(filter: Binding<TransactionFilter>, hideTransfers: Binding<Bool>) {
         _filter = filter
+        _hideTransfers = hideTransfers
         let initial = filter.wrappedValue
         _draft = State(initialValue: initial)
+        _draftHideTransfers = State(initialValue: hideTransfers.wrappedValue)
         _minAmountText = State(initialValue: initial.minAmount.map { String(format: "%.2f", $0) } ?? "")
         _maxAmountText = State(initialValue: initial.maxAmount.map { String(format: "%.2f", $0) } ?? "")
     }
@@ -28,7 +32,7 @@ struct TransactionFilterView: View {
     }
 
     private var hasUnappliedDraft: Bool {
-        draft.isActive || !minAmountText.isEmpty || !maxAmountText.isEmpty
+        draft.isActive || draftHideTransfers || !minAmountText.isEmpty || !maxAmountText.isEmpty
     }
 
     var body: some View {
@@ -45,6 +49,7 @@ struct TransactionFilterView: View {
                         dateRangeSection
                         amountRangeSection
                         recurringSection
+                        transfersSection
                     }
                     .padding(16)
                 }
@@ -75,6 +80,7 @@ struct TransactionFilterView: View {
             if hasUnappliedDraft {
                 Button("Reset", role: .destructive) {
                     draft.reset()
+                    draftHideTransfers = false
                     minAmountText = ""
                     maxAmountText = ""
                 }
@@ -256,6 +262,18 @@ struct TransactionFilterView: View {
         }
     }
 
+    // MARK: - Transfers
+
+    private var transfersSection: some View {
+        FilterSectionCard(title: "Transfers", systemImage: "arrow.left.arrow.right.circle") {
+            Toggle(isOn: $draftHideTransfers) {
+                Label("Hide transfers", systemImage: "eye.slash")
+                    .font(.subheadline)
+            }
+            .tint(.yolk)
+        }
+    }
+
     // MARK: - Helpers
 
     private func toggle(_ id: UUID, in set: inout Set<UUID>) {
@@ -266,6 +284,7 @@ struct TransactionFilterView: View {
         draft.minAmount = Double(minAmountText)
         draft.maxAmount = Double(maxAmountText)
         filter = draft
+        hideTransfers = draftHideTransfers
         dismiss()
     }
 }
@@ -316,6 +335,7 @@ private struct FilterOptionChip: View {
 
 #Preview {
     @Previewable @State var filter = TransactionFilter()
-    return TransactionFilterView(filter: $filter)
+    @Previewable @State var hideTransfers = false
+    return TransactionFilterView(filter: $filter, hideTransfers: $hideTransfers)
         .modelContainer(PersistenceController.previewContainer())
 }

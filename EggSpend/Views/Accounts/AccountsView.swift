@@ -4,6 +4,7 @@ import SwiftData
 struct AccountsView: View {
     @Query(sort: \Account.createdAt) private var accounts: [Account]
     @State private var showAddAccount = false
+    @State private var showAddTransfer = false
 
     var body: some View {
         NavigationStack {
@@ -27,9 +28,18 @@ struct AccountsView: View {
                         Image(systemName: "plus")
                     }
                 }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { showAddTransfer = true } label: {
+                        Image(systemName: "arrow.left.arrow.right.circle")
+                    }
+                    .disabled(accounts.count < 2)
+                }
             }
             .sheet(isPresented: $showAddAccount) {
                 AddAccountView()
+            }
+            .sheet(isPresented: $showAddTransfer) {
+                AddTransactionView(initialEntryKind: .transfer)
             }
             .overlay {
                 if accounts.isEmpty {
