@@ -4,7 +4,7 @@ Use these answers for App Store Connect based on the current app behavior.
 
 ## Privacy Policy
 
-- Privacy policy URL: none currently.
+- Privacy policy URL: https://github.com/ragunawan/EggSpend/blob/main/docs/app-store-privacy.md
 
 ## Data Collection
 
