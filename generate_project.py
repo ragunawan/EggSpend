@@ -644,6 +644,7 @@ def pbxproj():
         a(f"\t\t\t\tENABLE_PREVIEWS = YES;")
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = EggSpend;")
+        a(f"\t\t\t\tINFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;")
         a(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;")
