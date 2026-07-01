@@ -22,6 +22,26 @@ The app processes the following user-provided data on device/private iCloud only
 
 These are used only for app functionality and are not collected by the developer.
 
+## App Permissions
+
+EggSpend does not request any sensitive system permissions:
+
+- Camera: not requested.
+- Photo library: not requested.
+- Location: not requested.
+- Contacts: not requested.
+- Face ID / biometric authentication: not requested.
+- Push notifications: not requested.
+- Microphone: not requested.
+
+CSV import uses the system file picker (SwiftUI `.fileImporter`) to read a user-selected local file; it does not access the photo library or camera.
+
+## Network Access
+
+- No direct network requests are made by the app (no `URLSession` usage).
+- The only network activity is Apple's own CloudKit sync, used by SwiftData to sync records to the user's private iCloud account (container `iCloud.dev.gnwn.EggSpend`). This is optional and automatically falls back to local-only storage if iCloud is unavailable or the user isn't signed in.
+- No third-party SDKs, dependencies, analytics, or crash-reporting services are included in the app.
+
 ## Tracking And Analytics
 
 - Tracking across apps/websites: no.
@@ -29,6 +49,15 @@ These are used only for app functionality and are not collected by the developer
 - Third-party analytics: no.
 - Third-party crash reporting: no.
 - Developer account/sign-in requirement: no.
+
+## Data Deletion
+
+- All data lives on-device or in the user's private iCloud account; the developer holds no copy and cannot access or delete it on the user's behalf.
+- Users can delete data by removing records in-app, or by deleting the app, which removes local data and syncs any deletions to the user's private CloudKit database if iCloud sync was enabled.
+
+## Children's Privacy
+
+- EggSpend collects no personal data from any user, including children, and has no account system or age gating.
 
 ## Privacy Manifest
 
