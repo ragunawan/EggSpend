@@ -1,10 +1,12 @@
-# App Store Privacy Details
+---
+title: EggSpend Privacy Policy
+---
 
-Use these answers for App Store Connect based on the current app behavior.
+# App Store Privacy Details
 
 ## Privacy Policy
 
-- Privacy policy URL: https://github.com/ragunawan/EggSpend/blob/main/docs/app-store-privacy.md
+- Privacy policy URL: https://ragunawan.github.io/EggSpend/app-store-privacy.html
 
 ## Data Collection
 
