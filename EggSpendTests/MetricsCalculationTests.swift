@@ -121,6 +121,20 @@ final class MetricsCalculationTests: XCTestCase {
         XCTAssertEqual(byCategory["Transport"] ?? 0, 12, accuracy: 0.001)
     }
 
+    func testCompactCurrencyAxisFormatterUsesLargeValueSuffixes() {
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 7_500_000_000_000), "$7.5T")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 2_000_000_000), "$2B")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 125_000_000), "$125M")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 42_500), "$42.5K")
+    }
+
+    func testCompactCurrencyAxisFormatterRoundsAwayFloatingPointNoise() {
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 7_500_000_000_003.072), "$7.5T")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 750.49), "$750")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: -1_250_000_000_000), "-$1.3T")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: .nan), "$0")
+    }
+
     private func insertTransactions(_ data: [(String, Double, TransactionType)]) {
         for (title, amount, type) in data {
             context.insert(Transaction(title: title, amount: amount, type: type))

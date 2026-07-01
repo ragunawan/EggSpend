@@ -2,6 +2,35 @@ import SwiftUI
 import SwiftData
 import Charts
 
+enum CompactCurrencyAxisFormatter {
+    static func string(from value: Double, currencySymbol: String = "$") -> String {
+        guard value.isFinite else { return "\(currencySymbol)0" }
+
+        let sign = value < 0 ? "-" : ""
+        let magnitude = abs(value)
+        let units: [(threshold: Double, divisor: Double, suffix: String)] = [
+            (1_000_000_000_000, 1_000_000_000_000, "T"),
+            (1_000_000_000, 1_000_000_000, "B"),
+            (1_000_000, 1_000_000, "M"),
+            (1_000, 1_000, "K")
+        ]
+
+        for unit in units where magnitude >= unit.threshold {
+            return "\(sign)\(currencySymbol)\(compactNumber(magnitude / unit.divisor))\(unit.suffix)"
+        }
+
+        return "\(sign)\(currencySymbol)\(compactNumber(magnitude.rounded()))"
+    }
+
+    private static func compactNumber(_ value: Double) -> String {
+        let roundedToTenth = (value * 10).rounded() / 10
+        if roundedToTenth.rounded() == roundedToTenth {
+            return String(format: "%.0f", roundedToTenth)
+        }
+        return String(format: "%.1f", roundedToTenth)
+    }
+}
+
 struct MetricsView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var accounts: [Account]
@@ -213,7 +242,14 @@ struct MetricsView: View {
             }
             .chartXSelection(value: $selectedNetWorthDate)
             .chartYAxis {
-                AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+                AxisMarks(values: .automatic(desiredCount: 5)) { value in
+                    AxisGridLine()
+                    AxisValueLabel {
+                        if let worth = value.as(Double.self) {
+                            Text(CompactCurrencyAxisFormatter.string(from: worth))
+                        }
+                    }
+                }
             }
             .chartXAxis {
                 AxisMarks(values: .automatic) { value in

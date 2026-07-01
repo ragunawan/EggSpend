@@ -79,14 +79,6 @@ Domain logic lives outside views in three locations:
 - Use `Decimal` or currency-safe formatting for any new money logic; avoid `Double` arithmetic for financial totals (the existing codebase uses `Double` — be intentional about extending that pattern).
 - Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes.
 
-## Claude Todo
-
-- [ ] Fix Metrics chart y-axis labels for very large currency values.
-  - Add a compact currency formatter for chart axis labels, e.g. `$7.5T` instead of printing every digit.
-  - Apply it to `MetricsView.netWorthChart` so Swift Charts floating-point tick noise such as trailing `3072` is not exposed.
-  - Prefer display-only formatting; do not change the underlying net worth calculation in this pass.
-  - Verify with preview/sample data and an extreme balance value that the 25%, 50%, 75%, and 100% ticks render compactly and without stray low-order digits.
-
 ## Naming
 
 - Repository/folder/project: `EggSpend`
