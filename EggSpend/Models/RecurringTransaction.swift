@@ -60,6 +60,9 @@ final class RecurringTransaction {
     @Relationship(deleteRule: .nullify)
     var category: TransactionCategory?
 
+    @Relationship(deleteRule: .nullify)
+    var account: Account?
+
     // MARK: Computed Wrappers
 
     var type: TransactionType {
@@ -81,6 +84,7 @@ final class RecurringTransaction {
         frequency: RecurrenceFrequency = .monthly,
         startDate: Date = .now,
         category: TransactionCategory? = nil,
+        account: Account? = nil,
         notes: String = ""
     ) {
         self.id = UUID()
@@ -95,6 +99,7 @@ final class RecurringTransaction {
         self.isActive = true
         self.createdAt = .now
         self.category = category
+        self.account = account
     }
 
     // MARK: Date Advancement
@@ -141,12 +146,14 @@ func processRecurringTransactions(
                 date: item.nextDueDate,
                 type: item.type,
                 category: item.category,
+                account: item.account,
                 notes: item.notes.isEmpty
                     ? "Auto-generated from recurring: \(item.title)"
                     : item.notes,
                 isGenerated: true
             )
             context.insert(transaction)
+            AccountBalanceService.apply(transaction, to: item.account)
             item.advanceNextDueDate()
             NotificationScheduler.syncReminder(for: item)
         }

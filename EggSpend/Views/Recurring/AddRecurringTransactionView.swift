@@ -5,6 +5,7 @@ struct AddRecurringTransactionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var categories: [TransactionCategory]
+    @Query(sort: \Account.name) private var accounts: [Account]
 
     var editingItem: RecurringTransaction? = nil
 
@@ -16,6 +17,7 @@ struct AddRecurringTransactionView: View {
     @State private var hasEndDate = false
     @State private var endDate = Date.now.addingTimeInterval(60 * 60 * 24 * 365)
     @State private var selectedCategory: TransactionCategory? = nil
+    @State private var selectedAccount: Account? = nil
     @State private var notes = ""
     @State private var isActive = true
     @State private var reminderEnabled = false
@@ -97,6 +99,21 @@ struct AddRecurringTransactionView: View {
                     }
                 }
 
+                Section("Account") {
+                    if accounts.isEmpty {
+                        Text("No accounts added yet")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Picker("Account", selection: $selectedAccount) {
+                            Text("None").tag(Optional<Account>.none)
+                            ForEach(accounts) { account in
+                                Label(account.name, systemImage: account.type.icon)
+                                    .tag(Optional(account))
+                            }
+                        }
+                    }
+                }
+
                 Section("Notes") {
                     TextField("Optional note", text: $notes, axis: .vertical).lineLimit(2...4)
                 }
@@ -134,6 +151,7 @@ struct AddRecurringTransactionView: View {
             item.startDate = startDate
             item.endDate = hasEndDate ? endDate : nil
             item.category = selectedCategory
+            item.account = selectedAccount
             item.notes = notes
             item.isActive = isActive
         } else {
@@ -144,6 +162,7 @@ struct AddRecurringTransactionView: View {
                 frequency: frequency,
                 startDate: startDate,
                 category: selectedCategory,
+                account: selectedAccount,
                 notes: notes
             )
             item.endDate = hasEndDate ? endDate : nil
@@ -165,6 +184,7 @@ struct AddRecurringTransactionView: View {
         hasEndDate = item.endDate != nil
         endDate = item.endDate ?? Date.now.addingTimeInterval(60 * 60 * 24 * 365)
         selectedCategory = item.category
+        selectedAccount = item.account
         notes = item.notes
         isActive = item.isActive
         reminderEnabled = item.reminderEnabled

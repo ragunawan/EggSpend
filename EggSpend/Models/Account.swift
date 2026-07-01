@@ -58,6 +58,9 @@ final class Account {
     @Relationship(deleteRule: .nullify, inverse: \Transfer.toAccount)
     var transfersIn: [Transfer]? = []
 
+    @Relationship(deleteRule: .nullify, inverse: \RecurringTransaction.account)
+    var recurringTransactions: [RecurringTransaction]? = []
+
     init(name: String, type: AccountType, balance: Double, notes: String = "") {
         self.id = UUID()
         self.name = name
@@ -69,5 +72,6 @@ final class Account {
         self.savingsGoals = []
         self.transfersOut = []
         self.transfersIn = []
+        self.recurringTransactions = []
     }
 }

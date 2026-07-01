@@ -210,23 +210,25 @@ enum PersistenceController {
         let salaryCat = cats2.first { $0.name == "Salary" }
         let netflixCat = cats2.first { $0.name == "Entertainment" }
         let rentCat = cats2.first { $0.name == "Housing" }
+        let accountDescriptor = FetchDescriptor<Account>()
+        let savedAccounts = (try? context.fetch(accountDescriptor)) ?? []
+        let checkingAccount = savedAccounts.first { $0.name == "Chase Checking" }
 
-        let recurring: [(String, Double, TransactionType, RecurrenceFrequency, TransactionCategory?)] = [
-            ("Salary Deposit", 4_200, .income,  .biweekly, salaryCat),
-            ("Netflix",         17.99, .expense, .monthly,  netflixCat),
-            ("Rent",         2_200,   .expense, .monthly,  rentCat)
+        let recurring: [(String, Double, TransactionType, RecurrenceFrequency, TransactionCategory?, Account?)] = [
+            ("Salary Deposit", 4_200, .income,  .biweekly, salaryCat, checkingAccount),
+            ("Netflix",         17.99, .expense, .monthly,  netflixCat, nil),
+            ("Rent",         2_200,   .expense, .monthly,  rentCat, checkingAccount)
         ]
         let cal = Calendar.current
-        for (title, amount, type, freq, cat) in recurring {
+        for (title, amount, type, freq, cat, acct) in recurring {
             let start = cal.date(byAdding: .month, value: -1, to: .now) ?? .now
             let item = RecurringTransaction(title: title, amount: amount, type: type,
-                                            frequency: freq, startDate: start, category: cat)
+                                            frequency: freq, startDate: start, category: cat,
+                                            account: acct)
             context.insert(item)
         }
 
         // Seed sample savings goals
-        let accountDescriptor = FetchDescriptor<Account>()
-        let savedAccounts = (try? context.fetch(accountDescriptor)) ?? []
         let savingsAccount = savedAccounts.first { $0.name == "High Yield Savings" }
 
         context.insert(SavingsGoal(

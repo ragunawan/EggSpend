@@ -118,6 +118,10 @@ struct RecurringTransactionsView: View {
                         Text("Next: \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption).foregroundStyle(.secondary)
                     }
+                    if let account = item.account {
+                        Label(account.name, systemImage: account.type.icon)
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 AmountLabel(amount: item.amount, type: item.type, font: .callout)

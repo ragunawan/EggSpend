@@ -199,42 +199,7 @@ Verification:
 - Manually verify with preview data: one overdue recurring item, one due in the next seven days, and one due later than seven days.
 - Confirm the overdue item appears as an actual generated transaction, the next-week item appears with an `.eggBlue` outline, and the later item does not appear in the main transactions list.
 
-### 7. Add transfer transactions
-
-Goal: Support moving money between two accounts without counting the movement as income or expense.
-
-Implementation plan:
-- Extend the transaction model carefully. Options:
-  - Add a third `TransactionType.transfer` case and store `fromAccount`/`toAccount` relationships.
-  - Or add a dedicated `Transfer` model that creates linked balancing transactions. Prefer the simpler model only if it keeps reports and budgets correct.
-- Update `TransactionType`-dependent UI and logic so transfers are excluded from budget spending, income/expense totals, and category requirements.
-- Update `AddTransactionView` with a transfer mode that requires source account, destination account, amount, and date.
-- Update `AccountBalanceService` to subtract from the source account and add to the destination account, with safe reversal when editing/deleting.
-- Update `TransactionRowView`, transaction detail, filters, CSV import assumptions, metrics, monthly review, forecast, and safe-to-spend calculations so transfers do not distort cash flow.
-- Add tests for creating, editing, and deleting transfers, including balance reversal and exclusion from budgets.
-
-Verification:
-- Run transaction, budget, metrics, monthly review, forecast, and account balance tests.
-- Manually verify a transfer changes both account balances but does not appear as spending or income.
-
-### 8. Add recurring transaction account assignment
-
-Goal: Recurring transactions can be linked to an account so generated transactions update the correct account balance.
-
-Implementation plan:
-- Add an optional `account: Account?` relationship to `RecurringTransaction`.
-- Update `AddRecurringTransactionView` with an account picker matching the transaction account picker pattern.
-- When `processRecurringTransactions(_:context:)` generates a `Transaction`, pass `account: item.account`.
-- After inserting each generated transaction, call `AccountBalanceService.apply(_:to:)` for the generated transaction's account.
-- If duplicate prevention is added for generated recurring transactions, ensure account balance is not applied twice.
-- Show the linked account in `RecurringTransactionsView` rows when present.
-- Update preview data to include at least one recurring item linked to an account.
-
-Verification:
-- Add recurring transaction tests for generated account-linked expenses and income.
-- Confirm generated recurring transactions appear in the main list with the account badge and update account balances exactly once.
-
-### 9. Add a next 30 days recurring transactions view
+### 7. Add a next 30 days recurring transactions view
 
 Goal: Add a view that shows upcoming recurring income and expenses for the next 30 days.
 
@@ -252,7 +217,7 @@ Verification:
 - Test daily, weekly, biweekly, monthly, and yearly recurrence projection across a 30-day window.
 - Confirm inactive and ended recurring transactions are excluded.
 
-### 10. Add a debt payoff planner
+### 8. Add a debt payoff planner
 
 Goal: For credit card and loan accounts, estimate payoff timelines and payment strategies.
 
@@ -269,7 +234,7 @@ Verification:
 - Add unit tests for payoff math, including zero interest, high interest, insufficient payment, and extra payment scenarios.
 - Manually verify displayed dates and currency formatting for credit card and loan accounts.
 
-### 11. Add a cash flow calendar
+### 9. Add a cash flow calendar
 
 Goal: Show actual transactions, upcoming recurring events, bills, and forecasted daily cash position in a calendar-style view.
 
@@ -287,7 +252,7 @@ Verification:
 - Confirm transfers are neutral once transfer transactions exist.
 - Confirm bill due dates for credit cards and loans appear without changing cash balance unless a payment transaction exists.
 
-### 12. Make homepage savings goals and budget eggs horizontal scroll tiles
+### 10. Make homepage savings goals and budget eggs horizontal scroll tiles
 
 Goal: On the homepage, savings goals and budget eggs should be horizontally scrollable tile rows. Remove manage buttons and make each tile navigate to the appropriate manage/detail view.
 
@@ -306,7 +271,7 @@ Verification:
 - Confirm horizontal scroll works and every tile navigates to the intended manage/detail view.
 - Confirm no manage buttons remain in those homepage sections.
 
-### 13. Calculate monthly savings needed for each savings goal
+### 11. Calculate monthly savings needed for each savings goal
 
 Goal: For each savings goal, calculate how much needs to be saved per month to hit the target by the target date.
 
@@ -326,7 +291,7 @@ Verification:
 - Run savings goal tests or add a new focused test class.
 - Manually verify dashboard and savings goal list formatting with preview data.
 
-### 14. Refine background animations
+### 12. Refine background animations
 
 Goal: Remove the horizontal scrolling square/light animation and make the background a static gradient from the top to the middle of the screen. Make leaves drift randomly down instead of falling vertically straight down.
 

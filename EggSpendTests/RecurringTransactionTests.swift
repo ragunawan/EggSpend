@@ -143,4 +143,33 @@ final class RecurringTransactionTests: XCTestCase {
         XCTAssertEqual(fetched.first?.reminderEnabled, true)
         XCTAssertEqual(fetched.first?.reminderDaysBefore, 5)
     }
+
+    func testRecurringTransactionAccountPersists() throws {
+        let account = Account(name: "Chase Checking", type: .checking, balance: 1000)
+        context.insert(account)
+        let item = RecurringTransaction(title: "Rent", amount: 1500, type: .expense,
+                                        frequency: .monthly, account: account)
+        context.insert(item)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        XCTAssertEqual(fetched.first?.account?.name, "Chase Checking")
+    }
+
+    func testProcessRecurringAppliesAccountBalance() throws {
+        let account = Account(name: "Chase Checking", type: .checking, balance: 1000)
+        context.insert(account)
+
+        let past = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
+        let expense = RecurringTransaction(title: "Rent", amount: 200, type: .expense,
+                                           frequency: .monthly, startDate: past, account: account)
+        expense.nextDueDate = past
+        context.insert(expense)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        processRecurringTransactions(all, context: context)
+
+        XCTAssertEqual(account.balance, 800, accuracy: 0.001)
+    }
 }
