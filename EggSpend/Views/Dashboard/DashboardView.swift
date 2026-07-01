@@ -53,7 +53,7 @@ struct DashboardView: View {
                         monthlySnapshotRow
                         cashFlowForecastCard
                         monthlyReviewCard
-                        if !topGoals.isEmpty { savingsGoalsPreviewSection }
+                        savingsGoalsPreviewSection
                         if !topBudgets.isEmpty { budgetPreviewSection }
                         recentTransactionsSection
                     }
@@ -302,17 +302,26 @@ struct DashboardView: View {
             }
             .buttonStyle(.plain)
 
-            HStack(spacing: 16) {
-                ForEach(topGoals) { goal in
-                    VStack(spacing: 6) {
-                        EggProgressView(progress: goal.progress, size: 56)
-                        Text(goal.name)
-                            .font(.caption2).lineLimit(1).foregroundStyle(Color.twig)
-                    }
-                    .frame(maxWidth: .infinity)
+            if topGoals.isEmpty {
+                NavigationLink(destination: SavingsGoalsView()) {
+                    Text("No goals yet — tap to add one, like a down payment or vacation fund.")
+                        .font(.caption)
+                        .foregroundStyle(Color.twig)
                 }
+                .buttonStyle(.plain)
+            } else {
+                HStack(spacing: 16) {
+                    ForEach(topGoals) { goal in
+                        VStack(spacing: 6) {
+                            EggProgressView(progress: goal.progress, size: 56)
+                            Text(goal.name)
+                                .font(.caption2).lineLimit(1).foregroundStyle(Color.twig)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .padding(.vertical, 4)
             }
-            .padding(.vertical, 4)
         }
         .padding()
         .nestCard()

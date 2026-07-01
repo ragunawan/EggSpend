@@ -328,12 +328,14 @@ struct AddEditCategoryView: View {
             cat.typeFilter = typeFilter?.rawValue
             cat.isArchived = isArchived
         } else {
-            // Create mode
+            // Create mode — append new categories after existing ones.
+            let nextSortOrder = (allCategories.map(\.sortOrder).max() ?? -1) + 1
             let newCategory = TransactionCategory(
                 name: trimmedName,
                 icon: effectiveIcon,
                 colorHex: effectiveColorHex.uppercased(),
-                typeFilter: typeFilter
+                typeFilter: typeFilter,
+                sortOrder: nextSortOrder
             )
             modelContext.insert(newCategory)
         }

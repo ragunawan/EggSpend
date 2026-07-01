@@ -4,7 +4,7 @@ import SwiftData
 struct CategoryManagementView: View {
     @Environment(\.modelContext) private var modelContext
 
-    @Query(sort: \TransactionCategory.name) private var categories: [TransactionCategory]
+    @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Query(sort: \Transaction.date) private var transactions: [Transaction]
 
     @State private var showAddCategory = false

@@ -7,6 +7,7 @@ struct AddTransactionView: View {
 
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
 
     var editingTransaction: Transaction? = nil
 
@@ -16,6 +17,7 @@ struct AddTransactionView: View {
     @State private var selectedType: TransactionType = .expense
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var selectedAccount: Account? = nil
+    @State private var selectedBudget: Budget? = nil
     @State private var notes = ""
     @State private var showValidationError = false
 
@@ -24,7 +26,12 @@ struct AddTransactionView: View {
     private var availableCategories: [TransactionCategory] {
         // Archived categories are hidden from the picker — only active categories appear here.
         categories.filter { ($0.appliesTo == nil || $0.appliesTo == selectedType) && !$0.isArchived }
-            .sorted { $0.name < $1.name }
+            .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    // Budgets only ever track expense spend, so the selector is expense-only.
+    private var availableBudgets: [Budget] {
+        budgets.sorted { $0.name < $1.name }
     }
 
     private var amount: Double { Double(amountText) ?? 0 }
@@ -36,6 +43,7 @@ struct AddTransactionView: View {
                 typePicker
                 detailsSection
                 accountSection
+                if selectedType == .expense { budgetSection }
                 categorySection
                 notesSection
             }
@@ -67,10 +75,11 @@ struct AddTransactionView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .onChange(of: selectedType) { _, _ in
+            .onChange(of: selectedType) { _, newType in
                 if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != selectedType {
                     selectedCategory = nil
                 }
+                if newType != .expense { selectedBudget = nil }
             }
         }
     }
@@ -105,6 +114,29 @@ struct AddTransactionView: View {
         }
     }
 
+    private var budgetSection: some View {
+        Section {
+            if availableBudgets.isEmpty {
+                Text("No budgets added yet")
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker("Budget", selection: $selectedBudget) {
+                    Text("None").tag(Optional<Budget>.none)
+                    ForEach(availableBudgets) { budget in
+                        Text(budget.name).tag(Optional(budget))
+                    }
+                }
+                .onChange(of: selectedBudget) { _, newBudget in
+                    if let newBudget { selectedCategory = newBudget.category }
+                }
+            }
+        } header: {
+            Text("Budget")
+        } footer: {
+            Text("Assigns this transaction's category to match the selected budget.")
+        }
+    }
+
     private var categorySection: some View {
         Section("Category") {
             if availableCategories.isEmpty {
@@ -112,10 +144,15 @@ struct AddTransactionView: View {
                     .foregroundStyle(.secondary)
             } else {
                 Picker("Category", selection: $selectedCategory) {
-                    Text("None").tag(Optional<TransactionCategory>.none)
                     ForEach(availableCategories) { cat in
                         Label(cat.name, systemImage: cat.icon)
                             .tag(Optional(cat))
+                    }
+                    Text("None").tag(Optional<TransactionCategory>.none)
+                }
+                .onChange(of: selectedCategory) { _, newCategory in
+                    if let selectedBudget, selectedBudget.category?.id != newCategory?.id {
+                        self.selectedBudget = nil
                     }
                 }
             }
@@ -172,6 +209,9 @@ struct AddTransactionView: View {
         selectedType = tx.type
         selectedCategory = tx.category
         selectedAccount = tx.account
+        if tx.type == .expense {
+            selectedBudget = availableBudgets.first { $0.category?.id == tx.category?.id }
+        }
         notes = tx.notes
     }
 }

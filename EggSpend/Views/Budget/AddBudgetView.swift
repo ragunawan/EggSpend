@@ -39,7 +39,7 @@ struct AddBudgetView: View {
                 Section("Category (optional)") {
                     Picker("Category", selection: $selectedCategory) {
                         Text("All Expenses").tag(Optional<TransactionCategory>.none)
-                        ForEach(categories.filter { $0.appliesTo == nil || $0.appliesTo == .expense }) { cat in
+                        ForEach(categories.filter { $0.appliesTo == nil || $0.appliesTo == .expense }.sorted { $0.sortOrder < $1.sortOrder }) { cat in
                             Label(cat.name, systemImage: cat.icon).tag(Optional(cat))
                         }
                     }

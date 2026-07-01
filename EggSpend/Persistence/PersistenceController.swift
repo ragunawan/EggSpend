@@ -24,8 +24,8 @@ enum PersistenceController {
             ("Other", "ellipsis.circle.fill", "95A5A6", nil)
         ]
 
-        for (name, icon, color, typeFilter) in defaults {
-            let category = TransactionCategory(name: name, icon: icon, colorHex: color, typeFilter: typeFilter)
+        for (index, (name, icon, color, typeFilter)) in defaults.enumerated() {
+            let category = TransactionCategory(name: name, icon: icon, colorHex: color, typeFilter: typeFilter, sortOrder: index)
             context.insert(category)
         }
 

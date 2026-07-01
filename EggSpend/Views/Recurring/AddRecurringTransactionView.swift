@@ -26,7 +26,7 @@ struct AddRecurringTransactionView: View {
 
     private var availableCategories: [TransactionCategory] {
         categories.filter { $0.appliesTo == nil || $0.appliesTo == selectedType }
-            .sorted { $0.name < $1.name }
+            .sorted { $0.sortOrder < $1.sortOrder }
     }
 
     var body: some View {
@@ -68,10 +68,10 @@ struct AddRecurringTransactionView: View {
 
                 Section("Category") {
                     Picker("Category", selection: $selectedCategory) {
-                        Text("None").tag(Optional<TransactionCategory>.none)
                         ForEach(availableCategories) { cat in
                             Label(cat.name, systemImage: cat.icon).tag(Optional(cat))
                         }
+                        Text("None").tag(Optional<TransactionCategory>.none)
                     }
                 }
 

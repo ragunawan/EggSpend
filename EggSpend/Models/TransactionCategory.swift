@@ -12,6 +12,7 @@ final class TransactionCategory {
     var colorHex: String = ""
     var typeFilter: String?
     var isArchived: Bool = false
+    var sortOrder: Int = 0
 
     @Relationship(deleteRule: .nullify, inverse: \Transaction.category)
     var transactions: [Transaction]? = []
@@ -31,13 +32,14 @@ final class TransactionCategory {
         return TransactionType(rawValue: raw)
     }
 
-    init(name: String, icon: String, colorHex: String, typeFilter: TransactionType? = nil) {
+    init(name: String, icon: String, colorHex: String, typeFilter: TransactionType? = nil, sortOrder: Int = 0) {
         self.id = UUID()
         self.name = name
         self.icon = icon
         self.colorHex = colorHex
         self.typeFilter = typeFilter?.rawValue
         self.isArchived = false
+        self.sortOrder = sortOrder
         self.transactions = []
         self.budgets = []
         self.recurringTransactions = []

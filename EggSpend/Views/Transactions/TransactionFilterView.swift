@@ -8,7 +8,7 @@ struct TransactionFilterView: View {
     @Binding var filter: TransactionFilter
     @Environment(\.dismiss) private var dismiss
 
-    @Query(sort: \TransactionCategory.name) private var allCategories: [TransactionCategory]
+    @Query(sort: \TransactionCategory.sortOrder) private var allCategories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
 
     @State private var draft: TransactionFilter
