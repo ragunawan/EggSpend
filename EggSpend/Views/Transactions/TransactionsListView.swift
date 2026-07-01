@@ -4,11 +4,13 @@ import SwiftData
 enum LedgerRow: Identifiable {
     case transaction(Transaction)
     case transfer(Transfer)
+    case upcoming(RecurringOccurrence)
 
-    var id: UUID {
+    var id: String {
         switch self {
-        case .transaction(let tx): return tx.id
-        case .transfer(let transfer): return transfer.id
+        case .transaction(let tx): return "transaction-\(tx.id.uuidString)"
+        case .transfer(let transfer): return "transfer-\(transfer.id.uuidString)"
+        case .upcoming(let occurrence): return "upcoming-\(occurrence.id)"
         }
     }
 
@@ -16,13 +18,21 @@ enum LedgerRow: Identifiable {
         switch self {
         case .transaction(let tx): return tx.date
         case .transfer(let transfer): return transfer.date
+        case .upcoming(let occurrence): return occurrence.dueDate
         }
+    }
+
+    var isUpcoming: Bool {
+        if case .upcoming = self { return true }
+        return false
     }
 }
 
 struct TransactionsListView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Transfer.date, order: .reverse) private var transfers: [Transfer]
+    @Query(filter: #Predicate<RecurringTransaction> { $0.isActive == true }, sort: \RecurringTransaction.nextDueDate)
+    private var recurring: [RecurringTransaction]
     @State private var searchText = ""
     @State private var filter = TransactionFilter()
     @State private var hideTransfers = false
@@ -50,8 +60,25 @@ struct TransactionsListView: View {
         }
     }
 
+    private var upcomingRecurring: [RecurringOccurrence] {
+        RecurringProjection.occurrences(from: recurring, start: .now, days: 7)
+            .filter { $0.dueDate > Date.now }
+            .filter { occurrence in
+                let matchesSearch = searchText.isEmpty
+                    || occurrence.title.localizedCaseInsensitiveContains(searchText)
+                    || occurrence.notes.localizedCaseInsensitiveContains(searchText)
+                    || (occurrence.category?.name.localizedCaseInsensitiveContains(searchText) ?? false)
+                    || (occurrence.account?.name.localizedCaseInsensitiveContains(searchText) ?? false)
+                return matchesSearch && matchesFilter(occurrence)
+            }
+    }
+
     private var rows: [LedgerRow] {
-        (filteredTransactions.map(LedgerRow.transaction) + filteredTransfers.map(LedgerRow.transfer))
+        (
+            filteredTransactions.map(LedgerRow.transaction)
+            + filteredTransfers.map(LedgerRow.transfer)
+            + upcomingRecurring.map(LedgerRow.upcoming)
+        )
             .sorted { $0.date > $1.date }
     }
 
@@ -111,6 +138,7 @@ struct TransactionsListView: View {
                                         ForEach(items) { row in
                                             rowView(for: row)
                                                 .listRowBackground(Color.clear)
+                                                .deleteDisabled(row.isUpcoming)
                                         }
                                         .onDelete { indexSet in
                                             deleteRows(items, at: indexSet)
@@ -171,6 +199,9 @@ struct TransactionsListView: View {
             .sheet(isPresented: $showFilterSheet) {
                 TransactionFilterView(filter: $filter, hideTransfers: $hideTransfers)
             }
+            .onAppear {
+                processRecurringTransactions(Array(recurring), context: modelContext)
+            }
         }
     }
 
@@ -184,6 +215,10 @@ struct TransactionsListView: View {
         case .transfer(let transfer):
             NavigationLink(destination: TransferDetailView(transfer: transfer)) {
                 TransferRowView(transfer: transfer)
+            }
+        case .upcoming(let occurrence):
+            NavigationLink(destination: RecurringTransactionsView()) {
+                UpcomingRecurringRowView(occurrence: occurrence)
             }
         }
     }
@@ -237,8 +272,88 @@ struct TransactionsListView: View {
             case .transfer(let transfer):
                 TransferBalanceService.reverse(transfer)
                 modelContext.delete(transfer)
+            case .upcoming:
+                continue
             }
         }
+    }
+
+    private func matchesFilter(_ occurrence: RecurringOccurrence) -> Bool {
+        if let type = filter.type, occurrence.type != type {
+            return false
+        }
+        if !filter.categoryIDs.isEmpty {
+            guard let categoryID = occurrence.category?.id, filter.categoryIDs.contains(categoryID) else {
+                return false
+            }
+        }
+        if !filter.accountIDs.isEmpty {
+            guard let accountID = occurrence.account?.id, filter.accountIDs.contains(accountID) else {
+                return false
+            }
+        }
+        if let startDate = filter.startDate, occurrence.dueDate < Calendar.current.startOfDay(for: startDate) {
+            return false
+        }
+        if let endDate = filter.endDate, occurrence.dueDate > Calendar.current.endOfDay(for: endDate) {
+            return false
+        }
+        if let minAmount = filter.minAmount, occurrence.amount < minAmount {
+            return false
+        }
+        if let maxAmount = filter.maxAmount, occurrence.amount > maxAmount {
+            return false
+        }
+        if filter.generatedOnly {
+            return false
+        }
+        return true
+    }
+}
+
+private struct UpcomingRecurringRowView: View {
+    let occurrence: RecurringOccurrence
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill((occurrence.category?.color ?? Color.eggBlue).opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: occurrence.category?.icon ?? occurrence.source.frequency.icon)
+                    .font(.system(size: 17))
+                    .foregroundStyle(occurrence.category?.color ?? Color.eggBlue)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(occurrence.title)
+                    .font(.body)
+                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text("Upcoming")
+                        .font(.caption)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.eggBlue.opacity(0.15), in: Capsule())
+                        .foregroundStyle(Color.eggBlue)
+                    if let category = occurrence.category {
+                        CategoryBadgeView(category: category, compact: true)
+                    }
+                    Text(occurrence.dueDate, style: .date)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 8)
+            AmountLabel(amount: occurrence.amount, type: occurrence.type, font: .callout)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.eggBlue, lineWidth: 1.5)
+        }
+        .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }
 }
 

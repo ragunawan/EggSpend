@@ -17,6 +17,7 @@
 		AA0200000000000000000015 /* RecurringTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000015 /* RecurringTransaction.swift */; };
 		AA0200000000000000000037 /* SavingsGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004C /* SavingsGoal.swift */; };
 		AA0200000000000000000047 /* Transfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005C /* Transfer.swift */; };
+		AA020000000000000000004C /* RecurringProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000061 /* RecurringProjection.swift */; };
 		AA0200000000000000000006 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000006 /* DashboardView.swift */; };
 		AA0200000000000000000007 /* TransactionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000007 /* TransactionsListView.swift */; };
 		AA0200000000000000000008 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000008 /* AddTransactionView.swift */; };
@@ -26,10 +27,12 @@
 		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
 		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
 		AA020000000000000000000D /* AddAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000D /* AddAccountView.swift */; };
+		AA020000000000000000004F /* DebtPayoffPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000064 /* DebtPayoffPlannerView.swift */; };
 		AA0200000000000000000019 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000019 /* BudgetView.swift */; };
 		AA020000000000000000001A /* AddBudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001A /* AddBudgetView.swift */; };
 		AA020000000000000000001B /* BudgetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000040 /* BudgetDetailView.swift */; };
 		AA020000000000000000001C /* RecurringTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001B /* RecurringTransactionsView.swift */; };
+		AA020000000000000000004D /* RecurringNext30DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000062 /* RecurringNext30DaysView.swift */; };
 		AA020000000000000000001D /* AddRecurringTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001C /* AddRecurringTransactionView.swift */; };
 		AA0200000000000000000016 /* NestHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000016 /* NestHeaderView.swift */; };
 		AA0200000000000000000017 /* EggProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000017 /* EggProgressView.swift */; };
@@ -50,6 +53,7 @@
 		AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000037 /* AddEditCategoryView.swift */; };
 		AA0200000000000000000023 /* ForecastEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000041 /* ForecastEngine.swift */; };
 		AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000042 /* CashFlowForecastView.swift */; };
+		AA0200000000000000000050 /* CashFlowCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000065 /* CashFlowCalendarView.swift */; };
 		AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000046 /* MonthlyReviewCalculator.swift */; };
 		AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000047 /* MonthlyReviewView.swift */; };
 		AA0200000000000000000034 /* TransactionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000049 /* TransactionFilter.swift */; };
@@ -57,6 +61,7 @@
 		AA0200000000000000000038 /* SavingsGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004D /* SavingsGoalsView.swift */; };
 		AA0200000000000000000039 /* AddSavingsGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004E /* AddSavingsGoalView.swift */; };
 		AA020000000000000000003F /* SafeSpendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000054 /* SafeSpendCalculator.swift */; };
+		AA020000000000000000004E /* DebtPayoffCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000063 /* DebtPayoffCalculator.swift */; };
 		AA0200000000000000000040 /* SafeToSpendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000055 /* SafeToSpendView.swift */; };
 		AA0200000000000000000042 /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000057 /* NotificationScheduler.swift */; };
 		AA0200000000000000000043 /* BudgetAlertCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000058 /* BudgetAlertCoordinator.swift */; };
@@ -79,6 +84,7 @@
 		AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */; };
 		AA0200000000000000000044 /* NotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000059 /* NotificationSchedulerTests.swift */; };
 		AA020000000000000000004B /* TransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000060 /* TransferTests.swift */; };
+		AA0200000000000000000051 /* DebtPayoffCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000066 /* DebtPayoffCalculatorTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -104,6 +110,7 @@
 		AA0100000000000000000015 /* RecurringTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransaction.swift; sourceTree = "<group>"; };
 		AA010000000000000000004C /* SavingsGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoal.swift; sourceTree = "<group>"; };
 		AA010000000000000000005C /* Transfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transfer.swift; sourceTree = "<group>"; };
+		AA0100000000000000000061 /* RecurringProjection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringProjection.swift; sourceTree = "<group>"; };
 		AA0100000000000000000006 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000007 /* TransactionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000008 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
@@ -113,10 +120,12 @@
 		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000D /* AddAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAccountView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000064 /* DebtPayoffPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPayoffPlannerView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000019 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
 		AA010000000000000000001A /* AddBudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBudgetView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000040 /* BudgetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetailView.swift; sourceTree = "<group>"; };
 		AA010000000000000000001B /* RecurringTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransactionsView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000062 /* RecurringNext30DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringNext30DaysView.swift; sourceTree = "<group>"; };
 		AA010000000000000000001C /* AddRecurringTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecurringTransactionView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000016 /* NestHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestHeaderView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000017 /* EggProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggProgressView.swift; sourceTree = "<group>"; };
@@ -137,6 +146,7 @@
 		AA0100000000000000000037 /* AddEditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditCategoryView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000041 /* ForecastEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastEngine.swift; sourceTree = "<group>"; };
 		AA0100000000000000000042 /* CashFlowForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowForecastView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000065 /* CashFlowCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowCalendarView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000046 /* MonthlyReviewCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewCalculator.swift; sourceTree = "<group>"; };
 		AA0100000000000000000047 /* MonthlyReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000049 /* TransactionFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilter.swift; sourceTree = "<group>"; };
@@ -144,6 +154,7 @@
 		AA010000000000000000004D /* SavingsGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000004E /* AddSavingsGoalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSavingsGoalView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000054 /* SafeSpendCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeSpendCalculator.swift; sourceTree = "<group>"; };
+		AA0100000000000000000063 /* DebtPayoffCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPayoffCalculator.swift; sourceTree = "<group>"; };
 		AA0100000000000000000055 /* SafeToSpendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeToSpendView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000057 /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
 		AA0100000000000000000058 /* BudgetAlertCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetAlertCoordinator.swift; sourceTree = "<group>"; };
@@ -167,6 +178,7 @@
 		AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeSpendCalculatorTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000059 /* NotificationSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSchedulerTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000060 /* TransferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000066 /* DebtPayoffCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPayoffCalculatorTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -291,6 +303,7 @@
 			isa = PBXGroup;
 			children = (
 				AA010000000000000000001B /* RecurringTransactionsView.swift */,
+				AA0100000000000000000062 /* RecurringNext30DaysView.swift */,
 				AA010000000000000000001C /* AddRecurringTransactionView.swift */,
 			);
 			path = Recurring;
@@ -317,6 +330,7 @@
 			children = (
 				AA010000000000000000000C /* AccountsView.swift */,
 				AA010000000000000000000D /* AddAccountView.swift */,
+				AA0100000000000000000064 /* DebtPayoffPlannerView.swift */,
 			);
 			path = Accounts;
 			sourceTree = "<group>";
@@ -363,6 +377,8 @@
 				AA0100000000000000000046 /* MonthlyReviewCalculator.swift */,
 				AA0100000000000000000049 /* TransactionFilter.swift */,
 				AA0100000000000000000054 /* SafeSpendCalculator.swift */,
+				AA0100000000000000000063 /* DebtPayoffCalculator.swift */,
+				AA0100000000000000000061 /* RecurringProjection.swift */,
 				AA0100000000000000000057 /* NotificationScheduler.swift */,
 				AA0100000000000000000058 /* BudgetAlertCoordinator.swift */,
 			);
@@ -374,6 +390,7 @@
 			children = (
 				AA0100000000000000000041 /* ForecastEngine.swift */,
 				AA0100000000000000000042 /* CashFlowForecastView.swift */,
+				AA0100000000000000000065 /* CashFlowCalendarView.swift */,
 			);
 			path = Forecast;
 			sourceTree = "<group>";
@@ -432,6 +449,7 @@
 				AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */,
 				AA0100000000000000000059 /* NotificationSchedulerTests.swift */,
 				AA0100000000000000000060 /* TransferTests.swift */,
+				AA0100000000000000000066 /* DebtPayoffCalculatorTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -547,6 +565,7 @@
 				AA0200000000000000000015 /* RecurringTransaction.swift in Sources */,
 				AA0200000000000000000037 /* SavingsGoal.swift in Sources */,
 				AA0200000000000000000047 /* Transfer.swift in Sources */,
+				AA020000000000000000004C /* RecurringProjection.swift in Sources */,
 				AA0200000000000000000006 /* DashboardView.swift in Sources */,
 				AA0200000000000000000007 /* TransactionsListView.swift in Sources */,
 				AA0200000000000000000008 /* AddTransactionView.swift in Sources */,
@@ -556,10 +575,12 @@
 				AA020000000000000000000B /* MetricsView.swift in Sources */,
 				AA020000000000000000000C /* AccountsView.swift in Sources */,
 				AA020000000000000000000D /* AddAccountView.swift in Sources */,
+				AA020000000000000000004F /* DebtPayoffPlannerView.swift in Sources */,
 				AA0200000000000000000019 /* BudgetView.swift in Sources */,
 				AA020000000000000000001A /* AddBudgetView.swift in Sources */,
 				AA020000000000000000001B /* BudgetDetailView.swift in Sources */,
 				AA020000000000000000001C /* RecurringTransactionsView.swift in Sources */,
+				AA020000000000000000004D /* RecurringNext30DaysView.swift in Sources */,
 				AA020000000000000000001D /* AddRecurringTransactionView.swift in Sources */,
 				AA0200000000000000000016 /* NestHeaderView.swift in Sources */,
 				AA0200000000000000000017 /* EggProgressView.swift in Sources */,
@@ -580,6 +601,7 @@
 				AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */,
 				AA0200000000000000000023 /* ForecastEngine.swift in Sources */,
 				AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */,
+				AA0200000000000000000050 /* CashFlowCalendarView.swift in Sources */,
 				AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */,
 				AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */,
 				AA0200000000000000000034 /* TransactionFilter.swift in Sources */,
@@ -587,6 +609,7 @@
 				AA0200000000000000000038 /* SavingsGoalsView.swift in Sources */,
 				AA0200000000000000000039 /* AddSavingsGoalView.swift in Sources */,
 				AA020000000000000000003F /* SafeSpendCalculator.swift in Sources */,
+				AA020000000000000000004E /* DebtPayoffCalculator.swift in Sources */,
 				AA0200000000000000000040 /* SafeToSpendView.swift in Sources */,
 				AA0200000000000000000042 /* NotificationScheduler.swift in Sources */,
 				AA0200000000000000000043 /* BudgetAlertCoordinator.swift in Sources */,
@@ -614,6 +637,7 @@
 				AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */,
 				AA0200000000000000000044 /* NotificationSchedulerTests.swift in Sources */,
 				AA020000000000000000004B /* TransferTests.swift in Sources */,
+				AA0200000000000000000051 /* DebtPayoffCalculatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

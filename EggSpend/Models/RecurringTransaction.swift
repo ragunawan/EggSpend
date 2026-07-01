@@ -129,6 +129,8 @@ func processRecurringTransactions(
     context: ModelContext
 ) {
     let now = Date.now
+    let existingGenerated = (try? context.fetch(FetchDescriptor<Transaction>()))?
+        .filter { $0.isGenerated && $0.recurringSourceID != nil && $0.recurringDueDate != nil } ?? []
 
     for item in items {
         // Skip inactive items or those whose end date has passed.
@@ -140,20 +142,30 @@ func processRecurringTransactions(
             // Don't generate past the end date.
             if let end = item.endDate, item.nextDueDate > end { break }
 
-            let transaction = Transaction(
-                title: item.title,
-                amount: item.amount,
-                date: item.nextDueDate,
-                type: item.type,
-                category: item.category,
-                account: item.account,
-                notes: item.notes.isEmpty
-                    ? "Auto-generated from recurring: \(item.title)"
-                    : item.notes,
-                isGenerated: true
-            )
-            context.insert(transaction)
-            AccountBalanceService.apply(transaction, to: item.account)
+            let dueDate = item.nextDueDate
+            let alreadyGenerated = existingGenerated.contains { transaction in
+                transaction.recurringSourceID == item.id
+                    && transaction.recurringDueDate.map { Calendar.current.isDate($0, inSameDayAs: dueDate) } == true
+            }
+
+            if !alreadyGenerated {
+                let transaction = Transaction(
+                    title: item.title,
+                    amount: item.amount,
+                    date: dueDate,
+                    type: item.type,
+                    category: item.category,
+                    account: item.account,
+                    notes: item.notes.isEmpty
+                        ? "Auto-generated from recurring: \(item.title)"
+                        : item.notes,
+                    isGenerated: true,
+                    recurringSourceID: item.id,
+                    recurringDueDate: dueDate
+                )
+                context.insert(transaction)
+                AccountBalanceService.apply(transaction, to: item.account)
+            }
             item.advanceNextDueDate()
             NotificationScheduler.syncReminder(for: item)
         }

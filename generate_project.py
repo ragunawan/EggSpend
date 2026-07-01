@@ -91,6 +91,12 @@ FR = {
     "TransferRowView":         u(1, 0x5E),
     "TransferDetailView":      u(1, 0x5F),
     "TEST_Transfer":           u(1, 0x60),
+    "RecurringProjection":     u(1, 0x61),
+    "RecurringNext30DaysView": u(1, 0x62),
+    "DebtPayoffCalculator":    u(1, 0x63),
+    "DebtPayoffPlannerView":   u(1, 0x64),
+    "CashFlowCalendarView":    u(1, 0x65),
+    "TEST_DebtPayoff":         u(1, 0x66),
 }
 
 # Build files
@@ -162,6 +168,7 @@ APP_SOURCES = [
     ("RecurringTransaction", "Models/RecurringTransaction.swift"),
     ("SavingsGoal",          "Models/SavingsGoal.swift"),
     ("Transfer",             "Models/Transfer.swift"),
+    ("RecurringProjection",  "Utilities/RecurringProjection.swift"),
     ("DashboardView",        "Views/Dashboard/DashboardView.swift"),
     ("TransactionsListView", "Views/Transactions/TransactionsListView.swift"),
     ("AddTransactionView",   "Views/Transactions/AddTransactionView.swift"),
@@ -171,10 +178,12 @@ APP_SOURCES = [
     ("MetricsView",          "Views/Metrics/MetricsView.swift"),
     ("AccountsView",         "Views/Accounts/AccountsView.swift"),
     ("AddAccountView",       "Views/Accounts/AddAccountView.swift"),
+    ("DebtPayoffPlannerView", "Views/Accounts/DebtPayoffPlannerView.swift"),
     ("BudgetView",           "Views/Budget/BudgetView.swift"),
     ("AddBudgetView",        "Views/Budget/AddBudgetView.swift"),
     ("BudgetDetailView",     "Views/Budget/BudgetDetailView.swift"),
     ("RecurringTransactionsView", "Views/Recurring/RecurringTransactionsView.swift"),
+    ("RecurringNext30DaysView", "Views/Recurring/RecurringNext30DaysView.swift"),
     ("AddRecurringTransactionView","Views/Recurring/AddRecurringTransactionView.swift"),
     ("NestHeaderView",       "Views/Components/NestHeaderView.swift"),
     ("EggProgressView",      "Views/Components/EggProgressView.swift"),
@@ -195,6 +204,7 @@ APP_SOURCES = [
     ("AddEditCategoryView",    "Views/Categories/AddEditCategoryView.swift"),
     ("ForecastEngine",        "Views/Forecast/ForecastEngine.swift"),
     ("CashFlowForecastView",  "Views/Forecast/CashFlowForecastView.swift"),
+    ("CashFlowCalendarView",  "Views/Forecast/CashFlowCalendarView.swift"),
     ("MonthlyReviewCalculator", "Utilities/MonthlyReviewCalculator.swift"),
     ("MonthlyReviewView",       "Views/MonthlyReview/MonthlyReviewView.swift"),
     ("TransactionFilter",       "Utilities/TransactionFilter.swift"),
@@ -202,6 +212,7 @@ APP_SOURCES = [
     ("SavingsGoalsView",        "Views/SavingsGoals/SavingsGoalsView.swift"),
     ("AddSavingsGoalView",      "Views/SavingsGoals/AddSavingsGoalView.swift"),
     ("SafeSpendCalculator",     "Utilities/SafeSpendCalculator.swift"),
+    ("DebtPayoffCalculator",    "Utilities/DebtPayoffCalculator.swift"),
     ("SafeToSpendView",         "Views/SafeSpend/SafeToSpendView.swift"),
     ("NotificationScheduler",   "Utilities/NotificationScheduler.swift"),
     ("BudgetAlertCoordinator",  "Utilities/BudgetAlertCoordinator.swift"),
@@ -225,6 +236,7 @@ TEST_SOURCES = [
     ("TEST_SafeSpend",          "EggSpendTests/SafeSpendCalculatorTests.swift"),
     ("TEST_NotificationScheduler", "EggSpendTests/NotificationSchedulerTests.swift"),
     ("TEST_Transfer",           "EggSpendTests/TransferTests.swift"),
+    ("TEST_DebtPayoff",         "EggSpendTests/DebtPayoffCalculatorTests.swift"),
 ]
 
 def pbxproj():
@@ -398,15 +410,15 @@ def pbxproj():
     simple_group("Dashboard",    "Dashboard",    ["DashboardView"])
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
-    simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","AddRecurringTransactionView"])
+    simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
-    simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView"])
+    simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "TransactionFilter", "SafeSpendCalculator", "NotificationScheduler", "BudgetAlertCoordinator"])
-    simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator"])
+    simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])
     simple_group("SafeSpend",   "SafeSpend",    ["SafeToSpendView"])

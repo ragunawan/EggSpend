@@ -79,6 +79,12 @@ struct RecurringTransactionsView: View {
                         .foregroundStyle(Color.yolk)
                 }
             }
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink(destination: RecurringNext30DaysView()) {
+                    Image(systemName: "calendar.badge.clock")
+                }
+                .foregroundStyle(Color.yolk)
+            }
         }
         .overlay {
             if items.isEmpty {

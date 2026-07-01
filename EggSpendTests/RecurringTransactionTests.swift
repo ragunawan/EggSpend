@@ -77,6 +77,34 @@ final class RecurringTransactionTests: XCTestCase {
         XCTAssertFalse(transactions.isEmpty, "Should have generated at least one transaction")
         XCTAssertEqual(transactions.first?.title, "Subscription")
         XCTAssertTrue(item.nextDueDate > past, "nextDueDate should have advanced")
+        XCTAssertEqual(transactions.first?.recurringSourceID, item.id)
+        XCTAssertNotNil(transactions.first?.recurringDueDate)
+    }
+
+    func testProcessRecurringDoesNotDuplicateExistingGeneratedOccurrence() throws {
+        let past = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
+        let item = RecurringTransaction(title: "Subscription", amount: 9.99,
+                                        type: .expense, frequency: .monthly, startDate: past)
+        item.nextDueDate = past
+        context.insert(item)
+        let existing = Transaction(
+            title: "Subscription",
+            amount: 9.99,
+            date: past,
+            type: .expense,
+            isGenerated: true,
+            recurringSourceID: item.id,
+            recurringDueDate: past
+        )
+        context.insert(existing)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        processRecurringTransactions(all, context: context)
+
+        let transactions = try context.fetch(FetchDescriptor<Transaction>())
+        XCTAssertEqual(transactions.count, 1)
+        XCTAssertTrue(item.nextDueDate > past)
     }
 
     func testProcessRecurringRespectsEndDate() throws {
@@ -171,5 +199,22 @@ final class RecurringTransactionTests: XCTestCase {
         processRecurringTransactions(all, context: context)
 
         XCTAssertEqual(account.balance, 800, accuracy: 0.001)
+    }
+
+    func testRecurringProjectionIncludesNext30DaysAndExcludesEndedItems() {
+        let calendar = Calendar.current
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: .now)!
+        let weekly = RecurringTransaction(title: "Gym", amount: 30, type: .expense,
+                                          frequency: .weekly, startDate: tomorrow)
+        weekly.nextDueDate = tomorrow
+
+        let ended = RecurringTransaction(title: "Old", amount: 10, type: .expense,
+                                         frequency: .daily, startDate: tomorrow)
+        ended.nextDueDate = tomorrow
+        ended.endDate = calendar.date(byAdding: .day, value: -1, to: .now)
+
+        let occurrences = RecurringProjection.occurrences(from: [weekly, ended], start: .now, days: 30)
+        XCTAssertEqual(occurrences.filter { $0.title == "Gym" }.count, 5)
+        XCTAssertFalse(occurrences.contains { $0.title == "Old" })
     }
 }

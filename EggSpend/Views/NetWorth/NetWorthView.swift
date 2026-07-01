@@ -145,10 +145,15 @@ struct NetWorthView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(liabilities) { account in
-                        Button { editingAccount = account } label: {
+                        NavigationLink(destination: DebtPayoffPlannerView(account: account)) {
                             AccountRowView(account: account)
                         }
-                        .buttonStyle(.plain)
+                        .swipeActions(edge: .leading) {
+                            Button("Edit", systemImage: "pencil") {
+                                editingAccount = account
+                            }
+                            .tint(Color.yolk)
+                        }
                     }
                     .onDelete { indexSet in deleteAccounts(liabilities, at: indexSet) }
                 }

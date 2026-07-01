@@ -67,6 +67,14 @@ struct CashFlowForecastView: View {
         }
         .navigationTitle("Cash Flow Forecast")
         .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                NavigationLink(destination: CashFlowCalendarView()) {
+                    Image(systemName: "calendar")
+                }
+                .foregroundStyle(Color.yolk)
+            }
+        }
     }
 
     // MARK: - Period Picker

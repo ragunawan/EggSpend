@@ -39,6 +39,9 @@ final class Account {
     var notes: String = ""
     var createdAt: Date = Date.now
     var dueDate: Date?
+    var annualPercentageRate: Double?
+    var minimumPayment: Double?
+    var plannedExtraPayment: Double?
 
     var type: AccountType {
         get { AccountType(rawValue: typeRaw) ?? .other }
@@ -46,6 +49,7 @@ final class Account {
     }
 
     var isAsset: Bool { type.isAsset }
+    var isLiability: Bool { type == .credit || type == .loan }
 
     @Relationship(deleteRule: .nullify, inverse: \Transaction.account)
     var transactions: [Transaction]? = []

@@ -62,52 +62,15 @@ struct ForecastEngine {
         from recurring: [RecurringTransaction],
         horizonDays: Int
     ) -> [ForecastEvent] {
-        let calendar = Calendar.current
-        let now = Date.now
-        let todayStart = calendar.startOfDay(for: now)
-        guard let windowEnd = calendar.date(byAdding: .day, value: horizonDays, to: todayStart) else {
-            return []
-        }
-
-        var events: [ForecastEvent] = []
-
-        for item in recurring {
-            guard item.isActive else { continue }
-            if let end = item.endDate, end < now { continue }
-
-            // Fast-forward to the first occurrence on or after today
-            var cursor = item.nextDueDate
-            while cursor < todayStart {
-                guard let next = calendar.date(
-                    byAdding: item.frequency.calendarComponent,
-                    value: item.frequency.calendarValue,
-                    to: cursor
-                ) else { break }
-                cursor = next
+        RecurringProjection.occurrences(from: recurring, start: .now, days: horizonDays)
+            .map { occurrence in
+                ForecastEvent(
+                    date: occurrence.dueDate,
+                    title: occurrence.title,
+                    amount: occurrence.signedAmount,
+                    categoryIcon: occurrence.category?.icon ?? occurrence.source.frequency.icon
+                )
             }
-
-            // Enumerate occurrences within the forecast window
-            while cursor <= windowEnd {
-                if let itemEnd = item.endDate, cursor > itemEnd { break }
-
-                let signed = item.type == .income ? item.amount : -item.amount
-                events.append(ForecastEvent(
-                    date: cursor,
-                    title: item.title,
-                    amount: signed,
-                    categoryIcon: item.category?.icon ?? item.frequency.icon
-                ))
-
-                guard let next = calendar.date(
-                    byAdding: item.frequency.calendarComponent,
-                    value: item.frequency.calendarValue,
-                    to: cursor
-                ) else { break }
-                cursor = next
-            }
-        }
-
-        return events.sorted { $0.date < $1.date }
     }
 
     // Builds one data point per day (today + horizonDays).

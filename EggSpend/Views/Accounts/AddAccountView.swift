@@ -13,6 +13,9 @@ struct AddAccountView: View {
     @State private var notes = ""
     @State private var hasDueDate = false
     @State private var dueDate = Date.now
+    @State private var aprText = ""
+    @State private var minimumPaymentText = ""
+    @State private var extraPaymentText = ""
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingAccount != nil }
@@ -32,6 +35,9 @@ struct AddAccountView: View {
                     .onChange(of: selectedType) { _, newType in
                         if newType != .credit && newType != .loan {
                             hasDueDate = false
+                            aprText = ""
+                            minimumPaymentText = ""
+                            extraPaymentText = ""
                         }
                     }
                     HStack {
@@ -48,6 +54,23 @@ struct AddAccountView: View {
                         if hasDueDate {
                             DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
                         }
+                    }
+                }
+
+                if selectedType == .credit || selectedType == .loan {
+                    Section("Payoff Planning") {
+                        HStack {
+                            Text("APR")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            TextField("0.00", text: $aprText)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                            Text("%")
+                                .foregroundStyle(.secondary)
+                        }
+                        currencyField("Minimum Payment", text: $minimumPaymentText)
+                        currencyField("Extra Payment", text: $extraPaymentText)
                     }
                 }
 
@@ -89,6 +112,9 @@ struct AddAccountView: View {
             account.balance = stored
             account.notes = notes
             account.dueDate = resolvedDueDate
+            account.annualPercentageRate = selectedType.isAsset ? nil : Double(aprText)
+            account.minimumPayment = selectedType.isAsset ? nil : Double(minimumPaymentText)
+            account.plannedExtraPayment = selectedType.isAsset ? nil : Double(extraPaymentText)
         } else {
             let account = Account(
                 name: name.trimmingCharacters(in: .whitespaces),
@@ -97,6 +123,9 @@ struct AddAccountView: View {
                 notes: notes
             )
             account.dueDate = resolvedDueDate
+            account.annualPercentageRate = selectedType.isAsset ? nil : Double(aprText)
+            account.minimumPayment = selectedType.isAsset ? nil : Double(minimumPaymentText)
+            account.plannedExtraPayment = selectedType.isAsset ? nil : Double(extraPaymentText)
             modelContext.insert(account)
         }
         dismiss()
@@ -110,6 +139,22 @@ struct AddAccountView: View {
         notes = account.notes
         hasDueDate = account.dueDate != nil
         dueDate = account.dueDate ?? Date.now
+        aprText = account.annualPercentageRate.map { String(format: "%.2f", $0) } ?? ""
+        minimumPaymentText = account.minimumPayment.map { String(format: "%.2f", $0) } ?? ""
+        extraPaymentText = account.plannedExtraPayment.map { String(format: "%.2f", $0) } ?? ""
+    }
+
+    private func currencyField(_ label: String, text: Binding<String>) -> some View {
+        HStack {
+            Text(label)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text("$")
+                .foregroundStyle(.secondary)
+            TextField("0.00", text: text)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+        }
     }
 }
 
