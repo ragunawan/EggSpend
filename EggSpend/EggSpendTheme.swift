@@ -70,7 +70,12 @@ extension Color {
     static let yolk = Color(lightHex: "D4820A", darkHex: "F0B040")
 
     /// Bark / twig — secondary muted brown.
-    static let twig = Color(lightHex: "9E7348", darkHex: "6A4D2E")
+    static let twig = Color(lightHex: "9E7348", darkHex: "B08F63")
+
+    /// Deep canopy green — background-only wash, kept dark and desaturated
+    /// in dark mode so it reads as a tinted dark background rather than a
+    /// bright accent color. `nestLeafGreen` stays bright for text/icons.
+    static let nestCanopyTop = Color(lightHex: "3D7A3B", darkHex: "132313")
 }
 
 // MARK: - Gradient Extensions
@@ -79,7 +84,7 @@ extension LinearGradient {
 
     /// Soft canopy gradient — green fading to cream, top to bottom.
     static let nestCanopy = LinearGradient(
-        colors: [Color.nestLeafGreen.opacity(0.55), Color.nestCream.opacity(0.85)],
+        colors: [Color.nestCanopyTop.opacity(0.55), Color.nestCream.opacity(0.85)],
         startPoint: .top,
         endPoint: .bottom
     )
