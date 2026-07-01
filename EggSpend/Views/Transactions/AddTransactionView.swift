@@ -185,6 +185,7 @@ struct AddTransactionView: View {
             tx.notes = notes
 
             AccountBalanceService.apply(tx, to: selectedAccount)
+            BudgetAlertCoordinator.checkBudgets(context: modelContext)
         } else {
             let tx = Transaction(
                 title: title.trimmingCharacters(in: .whitespaces),
@@ -197,6 +198,7 @@ struct AddTransactionView: View {
             )
             modelContext.insert(tx)
             AccountBalanceService.apply(tx, to: selectedAccount)
+            BudgetAlertCoordinator.checkBudgets(context: modelContext)
         }
         dismiss()
     }

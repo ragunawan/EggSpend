@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct EggSpendApp: App {
@@ -28,6 +29,10 @@ struct EggSpendApp: App {
             return (fallback, .localOnly(reason: error.localizedDescription))
         }
     }()
+
+    init() {
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+    }
 
     var body: some Scene {
         WindowGroup {

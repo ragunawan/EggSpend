@@ -13,6 +13,7 @@ struct AddBudgetView: View {
     @State private var period: BudgetPeriod = .monthly
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var isActive = true
+    @State private var alertsEnabled = false
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingBudget != nil }
@@ -34,6 +35,21 @@ struct AddBudgetView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                }
+
+                Section {
+                    Toggle("Alert Near Limit & When Exceeded", isOn: $alertsEnabled)
+                        .onChange(of: alertsEnabled) { _, newValue in
+                            if newValue {
+                                NotificationScheduler.requestAuthorizationIfNeeded { granted in
+                                    DispatchQueue.main.async {
+                                        if !granted { alertsEnabled = false }
+                                    }
+                                }
+                            }
+                        }
+                } footer: {
+                    Text("Notifies you at 80% and 100% of this budget's limit.")
                 }
 
                 Section("Category (optional)") {
@@ -76,6 +92,7 @@ struct AddBudgetView: View {
             b.period = period
             b.category = selectedCategory
             b.isActive = isActive
+            b.alertsEnabled = alertsEnabled
         } else {
             let budget = Budget(
                 name: name.trimmingCharacters(in: .whitespaces),
@@ -84,6 +101,7 @@ struct AddBudgetView: View {
                 category: selectedCategory,
                 colorHex: selectedCategory?.colorHex ?? "D4820A"
             )
+            budget.alertsEnabled = alertsEnabled
             modelContext.insert(budget)
         }
         dismiss()
@@ -96,6 +114,7 @@ struct AddBudgetView: View {
         period = b.period
         selectedCategory = b.category
         isActive = b.isActive
+        alertsEnabled = b.alertsEnabled
     }
 }
 

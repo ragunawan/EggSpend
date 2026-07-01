@@ -26,6 +26,16 @@ enum BudgetPeriod: String, Codable, CaseIterable {
     }
 }
 
+// MARK: - Budget Alert Threshold
+
+enum BudgetAlertThreshold: Int, Comparable {
+    case none = 0
+    case nearLimit = 80
+    case exceeded = 100
+
+    static func < (lhs: Self, rhs: Self) -> Bool { lhs.rawValue < rhs.rawValue }
+}
+
 // MARK: - Budget Model
 
 @Model
@@ -38,6 +48,10 @@ final class Budget {
     /// Hex color used when no category is assigned (e.g. "D4820A").
     var colorHex: String = "D4820A"
     var createdAt: Date = Date.now
+    var alertsEnabled: Bool = false
+    /// Highest BudgetAlertThreshold already notified for `lastAlertedPeriodStart`.
+    var lastAlertedThresholdRaw: Int = BudgetAlertThreshold.none.rawValue
+    var lastAlertedPeriodStart: Date?
 
     @Relationship(deleteRule: .nullify)
     var category: TransactionCategory?
@@ -47,6 +61,11 @@ final class Budget {
     var period: BudgetPeriod {
         get { BudgetPeriod(rawValue: periodRaw) ?? .monthly }
         set { periodRaw = newValue.rawValue }
+    }
+
+    var lastAlertedThreshold: BudgetAlertThreshold {
+        get { BudgetAlertThreshold(rawValue: lastAlertedThresholdRaw) ?? .none }
+        set { lastAlertedThresholdRaw = newValue.rawValue }
     }
 
     // MARK: Init
@@ -71,7 +90,7 @@ final class Budget {
     // MARK: Period Helpers
 
     /// Returns the start and end dates for the current calendar period.
-    private func currentPeriodRange() -> (start: Date, end: Date) {
+    func currentPeriodRange() -> (start: Date, end: Date) {
         let calendar = Calendar.current
         let now = Date.now
         let component = period.calendarComponent
@@ -159,5 +178,30 @@ final class Budget {
         case ..<1.0:  return .twig
         default:      return .red
         }
+    }
+
+    // MARK: Alert Evaluation
+
+    /// Determines whether a budget-alert notification should fire given `transactions`,
+    /// updating `lastAlertedThreshold`/`lastAlertedPeriodStart` to prevent re-firing the
+    /// same threshold within the same period. Returns nil if no new alert is warranted.
+    /// Callers are responsible for actually presenting/scheduling the notification.
+    @discardableResult
+    func evaluateAlert(from transactions: [Transaction]) -> BudgetAlertThreshold? {
+        guard alertsEnabled, isActive else { return nil }
+        let period = currentPeriodRange()
+
+        // Reset alert state if we've rolled into a new period.
+        if lastAlertedPeriodStart != period.start {
+            lastAlertedThreshold = .none
+            lastAlertedPeriodStart = period.start
+        }
+
+        let p = progress(from: transactions)
+        let crossed: BudgetAlertThreshold = p >= 1.0 ? .exceeded : (p >= 0.8 ? .nearLimit : .none)
+
+        guard crossed != .none, crossed > lastAlertedThreshold else { return nil }
+        lastAlertedThreshold = crossed
+        return crossed
     }
 }

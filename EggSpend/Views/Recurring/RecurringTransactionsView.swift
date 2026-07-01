@@ -39,6 +39,7 @@ struct RecurringTransactionsView: View {
                                 .swipeActions(edge: .leading) {
                                     Button("Pause", systemImage: "pause.circle.fill") {
                                         item.isActive = false
+                                        NotificationScheduler.syncReminder(for: item)
                                     }
                                     .tint(.orange)
                                 }
@@ -55,6 +56,7 @@ struct RecurringTransactionsView: View {
                                 .swipeActions(edge: .leading) {
                                     Button("Resume", systemImage: "play.circle.fill") {
                                         item.isActive = true
+                                        NotificationScheduler.syncReminder(for: item)
                                     }
                                     .tint(.green)
                                 }
@@ -125,7 +127,10 @@ struct RecurringTransactionsView: View {
     }
 
     private func delete(from list: [RecurringTransaction], at offsets: IndexSet) {
-        for i in offsets { modelContext.delete(list[i]) }
+        for i in offsets {
+            NotificationScheduler.cancelReminder(for: list[i].id)
+            modelContext.delete(list[i])
+        }
     }
 }
 

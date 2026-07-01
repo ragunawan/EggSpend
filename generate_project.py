@@ -81,6 +81,9 @@ FR = {
     "SafeSpendCalculator":     u(1, 0x54),
     "SafeToSpendView":         u(1, 0x55),
     "TEST_SafeSpend":          u(1, 0x56),
+    "NotificationScheduler":       u(1, 0x57),
+    "BudgetAlertCoordinator":      u(1, 0x58),
+    "TEST_NotificationScheduler":  u(1, 0x59),
 }
 
 # Build files
@@ -187,6 +190,8 @@ APP_SOURCES = [
     ("AddSavingsGoalView",      "Views/SavingsGoals/AddSavingsGoalView.swift"),
     ("SafeSpendCalculator",     "Utilities/SafeSpendCalculator.swift"),
     ("SafeToSpendView",         "Views/SafeSpend/SafeToSpendView.swift"),
+    ("NotificationScheduler",   "Utilities/NotificationScheduler.swift"),
+    ("BudgetAlertCoordinator",  "Utilities/BudgetAlertCoordinator.swift"),
 ]
 
 TEST_SOURCES = [
@@ -205,6 +210,7 @@ TEST_SOURCES = [
     ("TEST_CSVParser",          "EggSpendTests/CSVParserTests.swift"),
     ("TEST_CloudKitSchema",     "EggSpendTests/CloudKitSchemaTests.swift"),
     ("TEST_SafeSpend",          "EggSpendTests/SafeSpendCalculatorTests.swift"),
+    ("TEST_NotificationScheduler", "EggSpendTests/NotificationSchedulerTests.swift"),
 ]
 
 def pbxproj():
@@ -384,7 +390,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","CategoryBadgeView","AmountLabel","TransactionRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "MonthlyReviewCalculator", "TransactionFilter", "SafeSpendCalculator"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "MonthlyReviewCalculator", "TransactionFilter", "SafeSpendCalculator", "NotificationScheduler", "BudgetAlertCoordinator"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])

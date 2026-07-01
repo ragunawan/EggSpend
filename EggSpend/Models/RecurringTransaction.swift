@@ -54,6 +54,8 @@ final class RecurringTransaction {
     var notes: String = ""
     var isActive: Bool = true
     var createdAt: Date = Date.now
+    var reminderEnabled: Bool = false
+    var reminderDaysBefore: Int = 1
 
     @Relationship(deleteRule: .nullify)
     var category: TransactionCategory?
@@ -146,11 +148,13 @@ func processRecurringTransactions(
             )
             context.insert(transaction)
             item.advanceNextDueDate()
+            NotificationScheduler.syncReminder(for: item)
         }
     }
 
     do {
         try context.save()
+        BudgetAlertCoordinator.checkBudgets(context: context)
     } catch {
         // Surface the error to the console; callers can add additional
         // error-handling if required.

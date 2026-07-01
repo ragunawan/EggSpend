@@ -18,6 +18,8 @@ struct AddRecurringTransactionView: View {
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var notes = ""
     @State private var isActive = true
+    @State private var reminderEnabled = false
+    @State private var reminderDaysBefore = 1
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingItem != nil }
@@ -66,6 +68,26 @@ struct AddRecurringTransactionView: View {
                     }
                 }
 
+                Section("Reminder") {
+                    Toggle("Remind Me", isOn: $reminderEnabled)
+                        .onChange(of: reminderEnabled) { _, newValue in
+                            if newValue {
+                                NotificationScheduler.requestAuthorizationIfNeeded { granted in
+                                    DispatchQueue.main.async {
+                                        if !granted { reminderEnabled = false }
+                                    }
+                                }
+                            }
+                        }
+                    if reminderEnabled {
+                        Stepper(
+                            "\(reminderDaysBefore) day\(reminderDaysBefore == 1 ? "" : "s") before",
+                            value: $reminderDaysBefore,
+                            in: 1...14
+                        )
+                    }
+                }
+
                 Section("Category") {
                     Picker("Category", selection: $selectedCategory) {
                         ForEach(availableCategories) { cat in
@@ -102,7 +124,9 @@ struct AddRecurringTransactionView: View {
 
     private func save() {
         guard isValid else { showValidationError = true; return }
-        if let item = editingItem {
+        let item: RecurringTransaction
+        if let editingItem {
+            item = editingItem
             item.title = title.trimmingCharacters(in: .whitespaces)
             item.amount = amount
             item.type = selectedType
@@ -113,7 +137,7 @@ struct AddRecurringTransactionView: View {
             item.notes = notes
             item.isActive = isActive
         } else {
-            let item = RecurringTransaction(
+            item = RecurringTransaction(
                 title: title.trimmingCharacters(in: .whitespaces),
                 amount: amount,
                 type: selectedType,
@@ -125,6 +149,9 @@ struct AddRecurringTransactionView: View {
             item.endDate = hasEndDate ? endDate : nil
             modelContext.insert(item)
         }
+        item.reminderEnabled = reminderEnabled
+        item.reminderDaysBefore = reminderDaysBefore
+        NotificationScheduler.syncReminder(for: item)
         dismiss()
     }
 
@@ -140,6 +167,8 @@ struct AddRecurringTransactionView: View {
         selectedCategory = item.category
         notes = item.notes
         isActive = item.isActive
+        reminderEnabled = item.reminderEnabled
+        reminderDaysBefore = item.reminderDaysBefore
     }
 }
 

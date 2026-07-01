@@ -19,7 +19,7 @@ EggSpend stores user data locally with SwiftData and can sync through the user's
 
 The app processes the following user-provided data on device/private iCloud only:
 
-- Financial Info: transaction amounts, dates, budgets, account balances, recurring transactions, savings goals, and imported CSV financial records.
+- Financial Info: transaction amounts, dates, budgets, account balances, recurring transactions, savings goals, and imported CSV financial records. This includes optional reminder/alert preferences (e.g. "remind me before this bill is due," "alert me when this budget is near its limit") stored alongside the relevant recurring transaction or budget record — these are additional fields on existing Financial Info records, not a new data category.
 - User Content: imported CSV contents and optional notes attached to transactions, accounts, recurring transactions, and savings goals.
 
 These are used only for app functionality and are not collected by the developer.
@@ -33,7 +33,8 @@ EggSpend does not request any sensitive system permissions:
 - Location: not requested.
 - Contacts: not requested.
 - Face ID / biometric authentication: not requested.
-- Push notifications: not requested.
+- Push notifications: not requested (no remote/APNs notifications are used).
+- Local notifications: requested contextually, only when a user explicitly enables a bill reminder or budget alert toggle (off by default). Notifications are scheduled and delivered entirely on-device via `UNUserNotificationCenter`; no notification content, token, or delivery data is transmitted anywhere — there is no push server, no APNs registration, and no analytics tied to notification delivery or interaction.
 - Microphone: not requested.
 
 CSV import uses the system file picker (SwiftUI `.fileImporter`) to read a user-selected local file; it does not access the photo library or camera.

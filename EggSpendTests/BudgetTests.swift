@@ -133,4 +133,66 @@ final class BudgetTests: XCTestCase {
         XCTAssertEqual(fetched.first?.name, "Saved Budget")
         XCTAssertEqual(fetched.first?.period, .weekly)
     }
+
+    // MARK: evaluateAlert
+
+    func testEvaluateAlertFiresAtNearLimitThreshold() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        let tx = Transaction(title: "Groceries", amount: 85, type: .expense)
+        let result = budget.evaluateAlert(from: [tx])
+        XCTAssertEqual(result, .nearLimit)
+        XCTAssertEqual(budget.lastAlertedThreshold, .nearLimit)
+    }
+
+    func testEvaluateAlertFiresAtExceededThreshold() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        let tx = Transaction(title: "Groceries", amount: 110, type: .expense)
+        let result = budget.evaluateAlert(from: [tx])
+        XCTAssertEqual(result, .exceeded)
+    }
+
+    func testEvaluateAlertDoesNotRefireSameThresholdTwice() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        let tx = Transaction(title: "Groceries", amount: 85, type: .expense)
+        XCTAssertEqual(budget.evaluateAlert(from: [tx]), .nearLimit)
+        XCTAssertNil(budget.evaluateAlert(from: [tx]))
+    }
+
+    func testEvaluateAlertSkipsIntermediateWhenJumpingStraightToExceeded() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        let tx = Transaction(title: "Splurge", amount: 120, type: .expense)
+        let result = budget.evaluateAlert(from: [tx])
+        XCTAssertEqual(result, .exceeded)
+        XCTAssertEqual(budget.lastAlertedThreshold, .exceeded)
+    }
+
+    func testEvaluateAlertResetsOnNewPeriod() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        let tx = Transaction(title: "Groceries", amount: 85, type: .expense)
+        XCTAssertEqual(budget.evaluateAlert(from: [tx]), .nearLimit)
+
+        // Simulate rollover into a new period.
+        budget.lastAlertedPeriodStart = Calendar.current.date(byAdding: .month, value: -1, to: budget.lastAlertedPeriodStart!)!
+        XCTAssertEqual(budget.evaluateAlert(from: [tx]), .nearLimit)
+    }
+
+    func testEvaluateAlertReturnsNilWhenAlertsDisabled() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = false
+        let tx = Transaction(title: "Groceries", amount: 110, type: .expense)
+        XCTAssertNil(budget.evaluateAlert(from: [tx]))
+    }
+
+    func testEvaluateAlertReturnsNilWhenBudgetInactive() {
+        let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        budget.isActive = false
+        let tx = Transaction(title: "Groceries", amount: 110, type: .expense)
+        XCTAssertNil(budget.evaluateAlert(from: [tx]))
+    }
 }

@@ -401,6 +401,9 @@ struct CSVImportView: View {
         }
 
         try? modelContext.save()
+        if importType == .transactions {
+            BudgetAlertCoordinator.checkBudgets(context: modelContext)
+        }
         step = .done
     }
 }

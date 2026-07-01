@@ -125,4 +125,22 @@ final class RecurringTransactionTests: XCTestCase {
         XCTAssertEqual(fetched.first?.frequency, .biweekly)
         XCTAssertEqual(fetched.first?.amount ?? 0, 5000, accuracy: 0.001)
     }
+
+    func testReminderFieldsDefaultToDisabled() {
+        let item = RecurringTransaction(title: "Rent", amount: 1500, type: .expense, frequency: .monthly)
+        XCTAssertFalse(item.reminderEnabled)
+        XCTAssertEqual(item.reminderDaysBefore, 1)
+    }
+
+    func testReminderFieldsPersist() throws {
+        let item = RecurringTransaction(title: "Rent", amount: 1500, type: .expense, frequency: .monthly)
+        item.reminderEnabled = true
+        item.reminderDaysBefore = 5
+        context.insert(item)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        XCTAssertEqual(fetched.first?.reminderEnabled, true)
+        XCTAssertEqual(fetched.first?.reminderDaysBefore, 5)
+    }
 }
