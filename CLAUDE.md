@@ -79,35 +79,24 @@ Domain logic lives outside views in three locations:
 - Use `Decimal` or currency-safe formatting for any new money logic; avoid `Double` arithmetic for financial totals (the existing codebase uses `Double` — be intentional about extending that pattern).
 - Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes.
 
-## Implementation Backlog
+## Running & Screenshots
 
-These items are queued for Claude Code to implement. Keep changes scoped and follow the existing SwiftUI patterns in the referenced views.
+There is no XCUITest UI target and no `idb`/`cliclick` in this environment,
+so Simulator interaction goes through `xcrun simctl` directly (build, install,
+`simctl launch ... --preview-data --tab <n>`, `simctl io ... screenshot`).
+This can launch into any tab and screenshot it, but **cannot tap, type, or
+scroll** — synthetic input (AppleScript UI scripting or `CGEventPost`) is
+blocked without an interactive Accessibility permission grant.
 
-### Upcoming Transaction Tile Border
-
-Goal: In the Transactions tab, upcoming recurring transactions should be visually distinct with a dashed blue border around the tile.
-
-Implementation plan:
-- Locate upcoming row rendering in `EggSpend/Views/Transactions/TransactionsListView.swift`, specifically `LedgerRow.upcoming`, `rowView(for:)`, and the `UpcomingRecurringRowView` component in the same feature area.
-- Add the dashed border only to upcoming recurring transaction tiles. Do not affect normal `TransactionRowView` rows or `TransferRowView` rows.
-- Use the existing theme color `.eggBlue` for the border.
-- Prefer a SwiftUI overlay with `RoundedRectangle(...).stroke(style: StrokeStyle(lineWidth: ..., dash: ...))` so the treatment composes with the existing tile background.
-- Match the existing row corner radius and spacing so the border tracks the tile shape.
-- Verify the Transactions tab still shows normal transactions, transfers, and upcoming rows correctly, and that delete remains disabled for upcoming rows.
-
-### Home Carousel Scroll Progress
-
-Goal: Add horizontal scroll progress indicators for the Savings Goals and Budget Eggs carousels on the Home view.
-
-Implementation plan:
-- Work in `EggSpend/Views/Dashboard/DashboardView.swift`.
-- Locate `savingsGoalsPreviewSection` and `budgetPreviewSection`; both use horizontal `ScrollView` plus `HStack` tiles.
-- Add a compact horizontal progress bar below each carousel that reflects scroll position across the full horizontal content width.
-- Keep the indicator visually subtle and theme-aligned. Use `.eggBlue` for savings goals and `.yolk` or budget status-neutral styling for budget eggs.
-- Prefer a reusable local helper view or small local component if both sections share the same mechanics.
-- Preserve the existing tile sizes, spacing, section labels, navigation links, and empty state behavior.
-- Make sure the progress bar is hidden or inert when content does not overflow horizontally.
-- Verify on narrow and wide layouts that the progress indicator does not overlap tiles or add layout jump.
+`scripts/capture_screenshots.sh <simulator-udid> <output-dir> [w h]` rebuilds
+the app, installs it on the given simulator, and captures the five primary
+App Store screenshots (Home/Transactions/Budget/Nest Egg/Metrics) via the
+`--tab` launch argument, optionally resizing to exact target pixel
+dimensions. Used to regenerate `screenshots/iphone-6.3/` and
+`screenshots/ipad-13/` — see `screenshots/README.md` for the device/size
+mapping. The `alternates-*` screenshot variants in that directory were
+captured under some other, undocumented text/accessibility setting; don't
+try to regenerate those without confirming what that setting was first.
 
 ## Naming
 

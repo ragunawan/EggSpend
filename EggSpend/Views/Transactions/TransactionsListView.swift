@@ -184,21 +184,49 @@ struct TransactionsListView: View {
     private var transactionList: some View {
         List {
             ForEach(grouped, id: \.0) { section, items in
+                let groupable = items.filter { !$0.isUpcoming }
+                let upcoming = items.filter { $0.isUpcoming }
+
                 Section {
-                    ForEach(items) { row in
-                        rowView(for: row)
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.visible)
-                            .deleteDisabled(row.isUpcoming)
+                    ForEach(Array(groupable.enumerated()), id: \.element.id) { index, row in
+                        let isFirst = index == 0
+                        let isLast = index == groupable.count - 1
+                        rowView(for: row, showsCardBackground: false)
+                            .listRowBackground(mergedRowBackground(isFirst: isFirst, isLast: isLast))
+                            .listRowSeparator(.hidden)
+                            .overlay(alignment: .bottom) {
+                                if !isLast {
+                                    Rectangle()
+                                        .fill(Color.twig.opacity(0.15))
+                                        .frame(height: 0.5)
+                                        .padding(.leading, 64)
+                                }
+                            }
                     }
                     .onDelete { indexSet in
-                        deleteRows(items, at: indexSet)
+                        deleteRows(groupable, at: indexSet)
+                    }
+
+                    ForEach(upcoming) { row in
+                        rowView(for: row)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                     }
                 } header: {
-                    Text(section)
-                        .font(.headline)
-                        .foregroundStyle(Color.twig)
-                        .textCase(nil)
+                    HStack {
+                        Text(section)
+                            .font(.headline)
+                            .foregroundStyle(Color.twig)
+                        Spacer()
+                        if !groupable.isEmpty {
+                            let total = dailyNetTotal(groupable)
+                            Text(total, format: .currency(code: "USD").sign(strategy: .always()))
+                                .font(.caption.weight(.semibold))
+                                .fontDesign(.rounded)
+                                .foregroundStyle(total >= 0 ? Color.green : Color.red)
+                        }
+                    }
+                    .textCase(nil)
                 }
                 .listSectionSeparator(.visible)
             }
@@ -212,15 +240,35 @@ struct TransactionsListView: View {
     }
 
     @ViewBuilder
-    private func rowView(for row: LedgerRow) -> some View {
+    private func mergedRowBackground(isFirst: Bool, isLast: Bool) -> some View {
+        UnevenRoundedRectangle(
+            topLeadingRadius: isFirst ? 18 : 0,
+            bottomLeadingRadius: isLast ? 18 : 0,
+            bottomTrailingRadius: isLast ? 18 : 0,
+            topTrailingRadius: isFirst ? 18 : 0,
+            style: .continuous
+        )
+        .fill(.regularMaterial)
+        .shadow(color: Color.nestBrown.opacity(0.07), radius: isFirst || isLast ? 5 : 0, y: 2)
+    }
+
+    private func dailyNetTotal(_ items: [LedgerRow]) -> Double {
+        items.reduce(0) { total, row in
+            if case .transaction(let tx) = row { return total + tx.signedAmount }
+            return total
+        }
+    }
+
+    @ViewBuilder
+    private func rowView(for row: LedgerRow, showsCardBackground: Bool = true) -> some View {
         switch row {
         case .transaction(let tx):
             NavigationLink(destination: TransactionDetailView(transaction: tx)) {
-                TransactionRowView(transaction: tx)
+                TransactionRowView(transaction: tx, showsCardBackground: showsCardBackground)
             }
         case .transfer(let transfer):
             NavigationLink(destination: TransferDetailView(transfer: transfer)) {
-                TransferRowView(transfer: transfer)
+                TransferRowView(transfer: transfer, showsCardBackground: showsCardBackground)
             }
         case .upcoming(let occurrence):
             NavigationLink(destination: RecurringTransactionsView()) {
@@ -357,7 +405,7 @@ private struct UpcomingRecurringRowView: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.eggBlue, lineWidth: 1.5)
+                .stroke(Color.eggBlue, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [5, 4]))
         }
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }

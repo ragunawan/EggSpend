@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TransferRowView: View {
     let transfer: Transfer
+    var showsCardBackground: Bool = true
 
     var body: some View {
         HStack(spacing: 12) {
@@ -26,8 +27,13 @@ struct TransferRowView: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
+        .background {
+            if showsCardBackground {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(.regularMaterial)
+                    .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
+            }
+        }
     }
 
     private var title: String {
