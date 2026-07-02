@@ -15,7 +15,10 @@ struct DashboardView: View {
     @State private var showAddTransaction = false
 
     private var netWorth: Double {
-        accounts.reduce(0) { $0 + ($1.isAsset ? $1.balance : -$1.balance) }
+        accounts.reduce(0) { total, account in
+            guard account.countsTowardNetWorth else { return total }
+            return total + (account.isAsset ? account.balance : -abs(account.balance))
+        }
     }
     private var monthlyIncome: Double {
         transactions.filter { $0.type == .income && Calendar.current.isDateInCurrentMonth($0.date) }
@@ -90,7 +93,7 @@ struct DashboardView: View {
     private var nestHeaderSection: some View {
         VStack(spacing: 4) {
             NestHeaderView()
-                .frame(width: 220, height: 130)
+                .frame(width: 250, height: 160)
                 .opacity(headerVisible ? 1 : 0)
                 .scaleEffect(headerVisible ? 1 : 0.75)
             Text("Your Nest")
@@ -386,7 +389,7 @@ private struct BudgetTileView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
-                EggProgressView(progress: progress, size: 52)
+                EggProgressView(progress: progress, size: 46)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption2)
@@ -403,15 +406,15 @@ private struct BudgetTileView: View {
                 Text("\(Int(progress * 100))% used")
                     .font(.caption2)
                     .foregroundStyle(progress > 1 ? .red : Color.twig)
-                Text("\(spent.formatted(.currency(code: "USD"))) of \(budget.limitAmount.formatted(.currency(code: "USD")))")
+                Text("\(formattedTileCurrency(spent)) of \(formattedTileCurrency(budget.limitAmount))")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
         }
-        .frame(width: 148, height: 148, alignment: .topLeading)
-        .padding(12)
+        .frame(width: 132, height: 128, alignment: .topLeading)
+        .padding(10)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -428,7 +431,7 @@ private struct SavingsGoalTileView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
-                EggProgressView(progress: goal.progress, size: 52)
+                EggProgressView(progress: goal.progress, size: 46)
                 Spacer()
                 Image(systemName: goal.icon)
                     .font(.caption)
@@ -447,21 +450,31 @@ private struct SavingsGoalTileView: View {
                     .foregroundStyle(goal.isGoalMet ? Color.nestLeafGreen : Color.twig)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
-                Text("\(goal.currentAmount.formatted(.currency(code: "USD"))) of \(goal.targetAmount.formatted(.currency(code: "USD")))")
+                Text("\(formattedTileCurrency(goal.currentAmount)) of \(formattedTileCurrency(goal.targetAmount))")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
             }
         }
-        .frame(width: 156, height: 148, alignment: .topLeading)
-        .padding(12)
+        .frame(width: 132, height: 128, alignment: .topLeading)
+        .padding(10)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(goal.statusColor.opacity(0.25), lineWidth: 1)
         )
     }
+}
+
+private func formattedTileCurrency(_ amount: Double) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .currency
+    formatter.currencyCode = "USD"
+    formatter.usesSignificantDigits = true
+    formatter.minimumSignificantDigits = 1
+    formatter.maximumSignificantDigits = 3
+    return formatter.string(from: NSNumber(value: amount)) ?? amount.formatted(.currency(code: "USD"))
 }
 
 #Preview {

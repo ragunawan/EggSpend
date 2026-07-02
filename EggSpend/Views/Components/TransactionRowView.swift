@@ -20,9 +20,6 @@ struct TransactionRowView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
-                    Text(transaction.date, style: .date)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
             }
             Spacer(minLength: 8)

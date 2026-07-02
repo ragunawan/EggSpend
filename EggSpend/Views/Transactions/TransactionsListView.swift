@@ -203,17 +203,11 @@ struct TransactionsListView: View {
                 .listSectionSeparator(.visible)
             }
         }
-        .listStyle(.insetGrouped)
+        .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(Color.clear)
         .padding(.horizontal, 12)
         .padding(.top, 8)
-        .background {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(.regularMaterial)
-                .padding(.horizontal, 12)
-                .padding(.top, 8)
-        }
         .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
     }
 

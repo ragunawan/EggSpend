@@ -3,21 +3,21 @@ import SwiftUI
 // MARK: - NestHeaderView
 
 /// Decorative hero graphic showing a bird's nest with three robin eggs.
-/// Designed to fill a ~200×120pt frame at the top of the Dashboard.
+/// Designed to fill a ~250×160pt frame at the top of the Dashboard.
 struct NestHeaderView: View {
 
     @State private var nestScale: CGFloat = 0.4
     @State private var nestOpacity: Double = 0
     @State private var eggScales: [CGFloat] = [0, 0, 0]
     @State private var eggOffsets: [CGFloat] = [0, 0, 0]
-    @State private var crackedEggIndex: Int? = nil
+    @State private var crackedEggIndexes: Set<Int> = []
     @State private var lastTapTime: Date = .distantPast
 
     /// Fractional (x, y) position of each egg within the nest bowl.
     private let eggPositions: [(x: CGFloat, y: CGFloat)] = [
-        (0.34, 0.52),
-        (0.50, 0.46),
-        (0.66, 0.53),
+        (0.31, 0.49),
+        (0.50, 0.40),
+        (0.69, 0.49),
     ]
 
     /// Taps closer together than this feel deliberate/rapid rather than incidental.
@@ -60,7 +60,7 @@ struct NestHeaderView: View {
 
         jumpAllEggs()
 
-        if isFastTap && crackedEggIndex == nil {
+        if isFastTap {
             crackRandomEgg()
         }
     }
@@ -83,8 +83,10 @@ struct NestHeaderView: View {
     }
 
     private func crackRandomEgg() {
-        let index = Int.random(in: eggPositions.indices)
-        crackedEggIndex = index
+        let availableIndexes = eggPositions.indices.filter { !crackedEggIndexes.contains($0) }
+        guard let index = availableIndexes.randomElement() else { return }
+
+        crackedEggIndexes.insert(index)
         Task {
             try? await Task.sleep(for: .seconds(5))
             await MainActor.run {
@@ -94,8 +96,8 @@ struct NestHeaderView: View {
     }
 
     private func respawnEgg(at index: Int) {
-        guard crackedEggIndex == index else { return }
-        crackedEggIndex = nil
+        guard crackedEggIndexes.contains(index) else { return }
+        crackedEggIndexes.remove(index)
         eggScales[index] = 0
         withAnimation(.spring(response: 0.4, dampingFraction: 0.55)) {
             eggScales[index] = 1.0
@@ -229,13 +231,13 @@ struct NestHeaderView: View {
                 ZStack {
                     EggShape()
                         .fill(eggGradient)
-                    if crackedEggIndex == index {
+                    if crackedEggIndexes.contains(index) {
                         CrackShape()
-                            .stroke(Color.white.opacity(0.9), style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                            .stroke(Color.white.opacity(0.95), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                             .blendMode(.overlay)
                     }
                 }
-                .frame(width: w * 0.18, height: w * 0.13)
+                .frame(width: w * 0.24, height: w * 0.18)
                 .scaleEffect(eggScales[index])
                 .offset(y: eggOffsets[index])
                 .position(x: w * pos.x, y: h * pos.y)
