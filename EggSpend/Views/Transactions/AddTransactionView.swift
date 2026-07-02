@@ -178,12 +178,12 @@ struct AddTransactionView: View {
                             Button {
                                 selectedAccount = account
                             } label: {
-                                Label(account.name, systemImage: account.type.icon)
+                                Label(accountSelectionTitle(for: account), systemImage: account.type.icon)
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            Text(selectedAccount?.name ?? "None")
+                            Text(selectedAccount.map(accountSelectionTitle) ?? "None")
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                             Image(systemName: "chevron.up.chevron.down")
@@ -195,6 +195,10 @@ struct AddTransactionView: View {
                 }
             }
         }
+    }
+
+    private func accountSelectionTitle(for account: Account) -> String {
+        "\(account.name) (\(account.balance.formatted(.currency(code: "USD"))))"
     }
 
     private var transferAccountsSection: some View {
