@@ -14,6 +14,13 @@ struct DashboardView: View {
     @State private var headerVisible = false
     @State private var showAddTransaction = false
 
+    @State private var savingsContentWidth: CGFloat = 0
+    @State private var savingsVisibleWidth: CGFloat = 0
+    @State private var savingsScrollOffset: CGFloat = 0
+    @State private var budgetContentWidth: CGFloat = 0
+    @State private var budgetVisibleWidth: CGFloat = 0
+    @State private var budgetScrollOffset: CGFloat = 0
+
     private var netWorth: Double {
         accounts.reduce(0) { total, account in
             guard account.countsTowardNetWorth else { return total }
@@ -279,7 +286,33 @@ struct DashboardView: View {
                 }
                 .padding(.horizontal, 2)
                 .padding(.vertical, 4)
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear
+                            .preference(key: ScrollContentWidthKey.self, value: proxy.size.width)
+                            .preference(
+                                key: ScrollOffsetKey.self,
+                                value: -proxy.frame(in: .named("budgetScroll")).minX
+                            )
+                    }
+                )
             }
+            .coordinateSpace(name: "budgetScroll")
+            .background(
+                GeometryReader { proxy in
+                    Color.clear.preference(key: ScrollVisibleWidthKey.self, value: proxy.size.width)
+                }
+            )
+            .onPreferenceChange(ScrollContentWidthKey.self) { budgetContentWidth = $0 }
+            .onPreferenceChange(ScrollOffsetKey.self) { budgetScrollOffset = max(0, $0) }
+            .onPreferenceChange(ScrollVisibleWidthKey.self) { budgetVisibleWidth = $0 }
+
+            HorizontalScrollProgressBar(
+                contentWidth: budgetContentWidth,
+                visibleWidth: budgetVisibleWidth,
+                scrollOffset: budgetScrollOffset,
+                tint: .yolk
+            )
         }
         .padding(.vertical, 4)
     }
@@ -311,7 +344,33 @@ struct DashboardView: View {
                     }
                     .padding(.horizontal, 2)
                     .padding(.vertical, 4)
+                    .background(
+                        GeometryReader { proxy in
+                            Color.clear
+                                .preference(key: ScrollContentWidthKey.self, value: proxy.size.width)
+                                .preference(
+                                    key: ScrollOffsetKey.self,
+                                    value: -proxy.frame(in: .named("savingsScroll")).minX
+                                )
+                        }
+                    )
                 }
+                .coordinateSpace(name: "savingsScroll")
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(key: ScrollVisibleWidthKey.self, value: proxy.size.width)
+                    }
+                )
+                .onPreferenceChange(ScrollContentWidthKey.self) { savingsContentWidth = $0 }
+                .onPreferenceChange(ScrollOffsetKey.self) { savingsScrollOffset = max(0, $0) }
+                .onPreferenceChange(ScrollVisibleWidthKey.self) { savingsVisibleWidth = $0 }
+
+                HorizontalScrollProgressBar(
+                    contentWidth: savingsContentWidth,
+                    visibleWidth: savingsVisibleWidth,
+                    scrollOffset: savingsScrollOffset,
+                    tint: .eggBlue
+                )
             }
         }
         .padding(.vertical, 4)
@@ -464,6 +523,61 @@ private struct SavingsGoalTileView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(goal.statusColor.opacity(0.25), lineWidth: 1)
         )
+    }
+}
+
+private struct ScrollContentWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+private struct ScrollOffsetKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+private struct ScrollVisibleWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
+private struct HorizontalScrollProgressBar: View {
+    let contentWidth: CGFloat
+    let visibleWidth: CGFloat
+    let scrollOffset: CGFloat
+    var tint: Color = .eggBlue
+    var height: CGFloat = 4
+
+    private var isOverflowing: Bool { contentWidth > visibleWidth + 1 }
+
+    private var thumbFraction: CGFloat {
+        guard contentWidth > 0 else { return 1 }
+        return min(max(visibleWidth / contentWidth, 0.08), 1)
+    }
+
+    private var thumbOffsetFraction: CGFloat {
+        let maxScroll = max(contentWidth - visibleWidth, 1)
+        return min(max(scrollOffset, 0), maxScroll) / maxScroll
+    }
+
+    var body: some View {
+        if isOverflowing {
+            GeometryReader { geo in
+                let thumbWidth = geo.size.width * thumbFraction
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.twig.opacity(0.15))
+                        .frame(height: height)
+                    Capsule()
+                        .fill(tint)
+                        .frame(width: thumbWidth, height: height)
+                        .offset(x: (geo.size.width - thumbWidth) * thumbOffsetFraction)
+                }
+            }
+            .frame(height: height)
+            .padding(.horizontal, 2)
+            .animation(.easeOut(duration: 0.15), value: thumbOffsetFraction)
+        }
     }
 }
 
