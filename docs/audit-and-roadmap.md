@@ -216,4 +216,11 @@ Skip for now: goal-based planners beyond current goals, AI chat coaches (privacy
 4. **Fix recurring materialization edge cases**: ended-item final occurrences (`RecurringTransaction.swift:138`) and the non-advancing-date infinite-loop guard (`:141`); tests in `RecurringTransactionTests`.
 5. **Locale-safe amount entry**: shared `parseAmountInput(_: String) -> Double?` using `Locale.current`, adopted in `AddTransactionView`, `AddAccountView`, `AddBudgetView`, `AddRecurringTransactionView`, `AddSavingsGoalView`; tests under `fr_FR`/`de_DE`.
 
-**Decisions needed from you:** (a) whether bank aggregation (Plaid) is ever in scope — it changes the privacy story; (b) whether AI features may call an external API or must stay on-device/template-based; (c) whether account deletion should become archival; (d) target locales for currency work (display-only vs. true multi-currency accounts).
+## 11. Product decisions (resolved 2026-07-08)
+
+| Question | Decision | Effect on plan |
+|---|---|---|
+| Bank aggregation (Plaid) | **Long-term goal**, not on the current roadmap. | Keep the offline-first privacy story intact through Phase 3. Design the Phase 1 import/dedupe pipeline so an aggregation source can later feed the same `ParsedTransactionResult` path. No Plaid work now. |
+| AI features | **On-device only, behind a toggle shown only when the device supports it.** No external API calls, ever. | Phase 2's "What changed this month?" ships template-based for all devices; an on-device model may optionally enrich the narrative when the toggle is on. Privacy policy stays "no data leaves your device/iCloud." |
+| Account deletion | **Archive instead of delete.** | Phase 0 task 5 changes: add `isArchived` to `Account` (CloudKit-safe default `false`); swipe action becomes Archive with confirmation; archived accounts hidden from pickers and net worth but preserved for history. A true-delete option can live inside an "Archived accounts" list. |
+| Currency | **Display-only** — one currency derived from the user's locale; no multi-currency accounts or FX. | Phase 1 currency task is mechanical: shared formatter + locale-safe input parsing. No exchange-rate model, no per-account currency field. |
