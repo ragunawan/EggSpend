@@ -147,6 +147,22 @@ final class CSVParserTests: XCTestCase {
         XCTAssertNil(CSVParser.parseAmount(""))
     }
 
+    func testParseAmountSignVariants() {
+        let cases: [(String, Double?)] = [
+            ("(12.34)", -12.34),
+            ("12.34-", -12.34),
+            ("\u{2212}12.34", -12.34),   // unicode minus sign
+            ("-12.34", -12.34),
+            ("$1,234.56", 1234.56),
+            ("($1,234.56)", -1234.56),
+            ("12-34", nil),               // ambiguous embedded minus, safely rejected
+            ("1.234,56", nil)             // EU decimal comma format, safely rejected (T5)
+        ]
+        for (input, expected) in cases {
+            XCTAssertEqual(CSVParser.parseAmount(input), expected, "input: \(input)")
+        }
+    }
+
     // MARK: - Account type inference
 
     func testInferAccountTypeChecking() {
@@ -271,6 +287,40 @@ final class CSVParserTests: XCTestCase {
         XCTAssertEqual(results[1].type, .income)
         XCTAssertEqual(results[2].type, .expense)
         XCTAssertEqual(results[3].type, .expense)
+    }
+
+    func testParseTransactionRowsInfersTypeFromKeywordsTableDriven() {
+        let headers = ["Date", "Description", "Amount", "Type"]
+        let mapping = ColumnMapping.autoDetectTransaction(headers: headers)
+        let cases: [(String, TransactionType)] = [
+            ("Purchase", .expense),
+            ("Payment", .expense),
+            ("POS", .expense),
+            ("Deposit", .income),
+            ("Direct Deposit", .income),
+            ("Credit", .income),
+            ("Refund", .income),
+            ("DR", .expense),
+            ("CR", .income)
+        ]
+        for (typeValue, expected) in cases {
+            let rows = [["1/15/2024", "Row", "4.50", typeValue]]
+            let results = CSVParser.parseTransactionRows(rows: rows, headers: headers, mapping: mapping)
+            XCTAssertEqual(results[0].type, expected, "type column: \(typeValue)")
+        }
+    }
+
+    func testParseTransactionRowsUnknownTypeFallsBackToAmountSign() {
+        let headers = ["Date", "Description", "Amount", "Type"]
+        let mapping = ColumnMapping.autoDetectTransaction(headers: headers)
+
+        let expenseRows = [["1/15/2024", "Row", "-50", "xyz"]]
+        let expenseResults = CSVParser.parseTransactionRows(rows: expenseRows, headers: headers, mapping: mapping)
+        XCTAssertEqual(expenseResults[0].type, .expense)
+
+        let incomeRows = [["1/15/2024", "Row", "50", "xyz"]]
+        let incomeResults = CSVParser.parseTransactionRows(rows: incomeRows, headers: headers, mapping: mapping)
+        XCTAssertEqual(incomeResults[0].type, .income)
     }
 
     func testParseTransactionRowsMissingTitleUsesRowFallback() {

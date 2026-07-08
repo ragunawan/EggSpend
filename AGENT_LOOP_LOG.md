@@ -51,3 +51,16 @@ Append-only record of each loop iteration. Maintained by the Documentation Agent
 - Follow-ups filed: (1) trim stale MetricsView comment; (2) track transfer-boundary limitation as B21.
 - Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
 - Next task: T3.
+
+## Loop 4 — 2026-07-08 — T3: CSV amount/type parsing fixes
+- Planner: selected T3 (P0-3, no dependencies).
+- Repo Analyst: task valid; recommended sign-first parseAmount rewrite with embedded-minus rejection; keyword lists with sign fallback; EU `1.234,56` stays safely rejected (T5's scope); flagged 'payment' keyword imprecision as pre-existing pattern.
+- Implementer: rewrote parseAmount (paren/leading/trailing minus incl U+2212 detected before stripping; embedded minus → nil; thousands/decimal logic unchanged); type inference now uses expense/income keyword lists with amount-sign fallback for unknown types; added table-driven tests (16 type cases, 13 amount cases).
+- QA round 1: FAIL — caught "pos" substring-colliding inside "deposit", misclassifying Deposit rows as expense (would have failed CI). Loop returned to implementer per protocol.
+- Implementer revision: whole-word token matching for short keywords pos/dr/cr (split on non-alphanumerics); tests extended with Direct Deposit/DR/CR pins.
+- QA round 2: PASS-WITH-CI-CAVEAT — Python-oracle-verified all 16 type cases + 13 amount cases; parseAmount unchanged from earlier pass; scope clean.
+- Code Review: APPROVE, zero required fixes. Follow-up filed: long keywords still substring-match (e.g. "sale" in "wholesale", "payment" in "Payment Received") — pre-existing pattern, revisit if real exports misfire.
+- Docs: IMPLEMENTATION_PLAN.md, AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md, CHANGELOG.md.
+- Follow-ups filed: long-keyword substring-matching follow-up.
+- Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
+- Next task: T4.
