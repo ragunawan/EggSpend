@@ -8,3 +8,4 @@ DerivedData/
 DerivedDataCodex/
 .claude/*
 !.claude/agents/
+__pycache__/
