@@ -6,7 +6,7 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 |---|-----|---------|----------|----------|--------|
 | B1 | Critical | Liability sign bug adds debt to net worth in Metrics timeline & Monthly Review | `MetricsView.swift:89`, `MonthlyReviewCalculator.swift:113` | T1 | fixed(2026-07-08) |
 | B2 | High | Four divergent net-worth formulas; `includeInNetWorth` inconsistently respected | Dashboard/NetWorth/Metrics/MonthlyReview | T1 | fixed(2026-07-08) |
-| B3 | High | Historical net-worth reconstruction reverses account-less transactions | `MonthlyReviewCalculator.swift:112`, `MetricsView.swift:88` | T2 | open |
+| B3 | High | Historical net-worth reconstruction reverses account-less transactions | `MonthlyReviewCalculator.swift:112`, `MetricsView.swift:88` | T2 | fixed(2026-07-08) |
 | B4 | High | CSV transaction import can't link accounts, never updates balances | `CSVImportView.swift:363-408` | T8 | open |
 | B5 | High | Amount entry broken in comma-decimal locales (`Double(amountText)`) | `AddTransactionView.swift:62` et al. | T5 | open |
 | B6 | High | Currency hard-coded USD (76 sites) | app-wide | T12 | open |
@@ -24,6 +24,7 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 | B18 | Low | `Double` money math app-wide (documented) | app-wide | accepted for now | accepted-risk |
 | B19 | Low | Weekly budget period anchored to locale week | `Budget.swift:101-114` | backlog | open |
 | B20 | Low | Empty Metrics/Forecast charts for new users | `MetricsView.swift`, forecast views | T22 | open |
+| B21 | Medium | Transfers between included and excluded accounts change net worth but are invisible to historical reconstruction | `NetWorthCalculator.swift:at()` | backlog (adjacent T14) | open |
 
 ## Risks (non-bug)
 | # | Risk | Mitigation task |
@@ -35,4 +36,4 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 | R5 | No CI — regressions land unnoticed | T11 | fixed(2026-07-08) — runner-side verification pending first real run |
 | R6 | Manual `generate_project.py`/pbxproj sync — drift breaks builds | QA step 3 checks every loop |
 
-**Note (2026-07-08):** B1/B2 fixed via new shared `NetWorthCalculator` (`EggSpend/Utilities/NetWorthCalculator.swift`), adopted by DashboardView, NetWorthView, MetricsView, and MonthlyReviewCalculator. Metrics and Monthly Review now respect `includeInNetWorth` like Dashboard/NetWorthView already did. B3 (historical reconstruction reversing account-less transactions) remains open — that's T2.
+**Note (2026-07-08):** B1/B2 fixed via new shared `NetWorthCalculator` (`EggSpend/Utilities/NetWorthCalculator.swift`), adopted by DashboardView, NetWorthView, MetricsView, and MonthlyReviewCalculator. Metrics and Monthly Review now respect `includeInNetWorth` like Dashboard/NetWorthView already did. B3 (historical reconstruction reversing account-less transactions) fixed via T2: new `NetWorthCalculator.at(date:accounts:transactions:)` method filters to account-linked transactions only. B21 (transfer-boundary limitation) discovered in T2 code review and registered as separate Medium-severity item for future resolution.

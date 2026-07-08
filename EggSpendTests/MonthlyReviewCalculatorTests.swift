@@ -176,21 +176,58 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
         let checking = Account(name: "Checking", type: .checking, balance: 1000)
         let accounts = [checking]
         let cutoff = date(2026, 3, 1)
-        let txs = [
-            Transaction(title: "Paycheck", amount: 500, date: date(2026, 3, 10), type: .income),
-            Transaction(title: "Rent",     amount: 200, date: date(2026, 3, 15), type: .expense)
-        ]
+        let paycheck = Transaction(title: "Paycheck", amount: 500, date: date(2026, 3, 10), type: .income, account: checking)
+        let rent = Transaction(title: "Rent", amount: 200, date: date(2026, 3, 15), type: .expense, account: checking)
+        let txs = [paycheck, rent]
         // current balance (1000) already reflects +500 income and -200 expense after cutoff,
         // so net worth at cutoff should back those out: 1000 - 500 + 200 = 700
-        let netWorth = MonthlyReviewCalculator.netWorth(accounts: accounts, allTransactions: txs, at: cutoff)
+        let netWorth = NetWorthCalculator.at(date: cutoff, accounts: accounts, transactions: txs)
         XCTAssertEqual(netWorth, 700, accuracy: 0.001)
     }
 
     func testNetWorthIgnoresTransactionsBeforeOrOnDate() {
         let checking = Account(name: "Checking", type: .checking, balance: 1000)
-        let txs = [Transaction(title: "Old", amount: 100, date: date(2026, 2, 1), type: .income)]
-        let netWorth = MonthlyReviewCalculator.netWorth(accounts: [checking], allTransactions: txs, at: date(2026, 3, 1))
+        let txs = [Transaction(title: "Old", amount: 100, date: date(2026, 2, 1), type: .income, account: checking)]
+        let netWorth = NetWorthCalculator.at(date: date(2026, 3, 1), accounts: [checking], transactions: txs)
         XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    /// Unlinked transactions (no `account`) after the cutoff never touched a counted balance,
+    /// so reconstruction stays flat at the current net worth.
+    func testNetWorthAtDateIgnoresUnlinkedTransactions() {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let txs = [
+            Transaction(title: "Cash paycheck", amount: 500, date: date(2026, 3, 10), type: .income, account: nil),
+            Transaction(title: "Cash rent", amount: 200, date: date(2026, 3, 15), type: .expense, account: nil)
+        ]
+        let netWorth = NetWorthCalculator.at(date: date(2026, 3, 1), accounts: [checking], transactions: txs)
+        XCTAssertEqual(netWorth, NetWorthCalculator.current(accounts: [checking]), accuracy: 0.001)
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    /// A transaction linked to a liability that is excluded from net worth never moved a
+    /// counted balance, so it must not be reversed either.
+    func testNetWorthAtDateIgnoresTransactionsOnExcludedLiability() {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let loan = Account(name: "Loan", type: .loan, balance: -5000)
+        loan.includeInNetWorth = false
+        let txs = [
+            Transaction(title: "Loan draw", amount: 1000, date: date(2026, 3, 10), type: .expense, account: loan)
+        ]
+        let netWorth = NetWorthCalculator.at(date: date(2026, 3, 1), accounts: [checking, loan], transactions: txs)
+        XCTAssertEqual(netWorth, NetWorthCalculator.current(accounts: [checking, loan]), accuracy: 0.001)
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    /// Mixed linked and unlinked transactions: only the linked one should be reversed.
+    func testNetWorthAtDateReversesOnlyLinkedTransactions() {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let linked = Transaction(title: "Paycheck", amount: 500, date: date(2026, 3, 10), type: .income, account: checking)
+        let unlinked = Transaction(title: "Cash gift", amount: 300, date: date(2026, 3, 12), type: .income, account: nil)
+        let txs = [linked, unlinked]
+        // Only the linked +500 income is reversible: 1000 - 500 = 500.
+        let netWorth = NetWorthCalculator.at(date: date(2026, 3, 1), accounts: [checking], transactions: txs)
+        XCTAssertEqual(netWorth, 500, accuracy: 0.001)
     }
 
     // MARK: - Full calculation

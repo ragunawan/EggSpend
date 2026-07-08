@@ -11,7 +11,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | ID | Task | Priority | Status | Depends on | Approval needed |
 |----|------|----------|--------|------------|-----------------|
 | T1 | Shared NetWorthCalculator + liability sign fix | P0-1 | done (2026-07-08, commit pending) | — | no |
-| T2 | Restrict net-worth reconstruction to account-linked transactions | P0-2 | pending (next after T11) | T1 | no |
+| T2 | Restrict net-worth reconstruction to account-linked transactions | P0-2 | done (2026-07-08, commit pending) | T1 | no |
 | T3 | CSV amount/type parsing fixes | P0-3 | pending | — | no |
 | T4 | Recurring end-date + infinite-loop guards | P0-4 | pending | — | no |
 | T5 | Locale-safe amount entry | P0-5 | pending | — | no |
@@ -35,17 +35,20 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T23 | CloudKit duplicate-sweep (generated transactions) | P3-4 | pending | T4 | **yes — deletes data, confirm before running** |
 | T24 | Accessibility & localization pass | P3-5 | pending | — | no |
 
-**Next up:** T2 (pending after T11 completes 2026-07-08).
+**Next up:** T3 (pending).
 
 ## Completed
 
 - T1 — Shared NetWorthCalculator + liability sign fix — done 2026-07-08. Added `EggSpend/Utilities/NetWorthCalculator.swift` (`current`, `totals`); adopted at all four call sites (DashboardView, NetWorthView, MetricsView:89, MonthlyReviewCalculator:113); extended `NetWorthCalculationTests`. QA pass-with-CI-caveat (no Swift toolchain in container); code review approved with zero required fixes.
+- T2 — Restrict net-worth reconstruction to account-linked transactions — done 2026-07-08. Added `NetWorthCalculator.at(date:accounts:transactions:)`; deleted `MonthlyReviewCalculator.netWorth` and related calculate() delegation; MetricsView.netWorthTimeline delegates per bucket. Updated 2 existing tests (rewired to linked accounts) and added 3 new tests (unlinked-flat, excluded-liability-not-reversed, mixed exact arithmetic) in `MonthlyReviewCalculatorTests`. QA pass-with-CI-caveat; code review approved with zero required fixes (two follow-ups: trim stale comment in MetricsView, track transfer-boundary limitation as named risk item).
 
 ## Discovered follow-ups / new tickets
 
 - NetWorthView calls `NetWorthCalculator.totals()` twice — minor cleanup opportunity (from T1 code review).
 - Product question: a positive-balance liability account (e.g. an overpaid credit card) is still counted as debt everywhere — pre-existing behavior, needs a product decision eventually (from T1 code review).
 - `NetWorthCalculator.totals` and `.current` could share one predicate/helper to reduce duplication (from T1 code review).
+- Trim stale comment above MetricsView.netWorthTimeline pointing at deleted MonthlyReviewCalculator.netWorth documentation (from T2 code review).
+- Track transfer-boundary limitation as a named register item: transfers between included and excluded accounts change net worth but are invisible to historical reconstruction (from T2 code review).
 - T11 follow-ups (CI workflow):
   1. Add `permissions: contents: read` hardening to GitHub Actions workflow.
   2. Tighter step-level timeout for simulator-boot hangs.

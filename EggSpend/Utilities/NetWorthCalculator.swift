@@ -27,4 +27,20 @@ enum NetWorthCalculator {
             .reduce(0) { $0 + abs($1.balance) }
         return (assets, liabilities)
     }
+
+    /// Reconstructs net worth as of `date` by starting from `current(accounts:)` and reversing
+    /// every transaction dated after `date` that is linked to a net-worth-counting account
+    /// (`account?.countsTowardNetWorth == true`). Only such transactions ever moved a counted
+    /// balance, so only those are reversible; unlinked transactions, or ones tied to an excluded
+    /// liability, never touched the total and must not be subtracted out.
+    ///
+    /// Known limitation: transfers between an included account and an excluded one aren't
+    /// represented here (the excluded leg is simply dropped) — filed as a follow-up.
+    static func at(date: Date, accounts: [Account], transactions: [Transaction]) -> Double {
+        let currentNetWorth = current(accounts: accounts)
+        let delta = transactions
+            .filter { $0.date > date && ($0.account?.countsTowardNetWorth ?? false) }
+            .reduce(0.0) { $0 + $1.signedAmount }
+        return currentNetWorth - delta
+    }
 }

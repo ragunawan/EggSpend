@@ -40,3 +40,14 @@ Append-only record of each loop iteration. Maintained by the Documentation Agent
 - Follow-ups filed: (1) add hardening with `permissions: contents: read`; (2) step-level timeout for simulator-boot; (3) macos-26 runner label validity; (4) .gitignore *.xcresult.
 - Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
 - Next task: T2.
+
+## Loop 3 — 2026-07-08 — T2: Restrict net-worth reconstruction to account-linked transactions
+- Planner: selected T2 (P0-2, dependency T1 done).
+- Repo Analyst: task valid; recommended (orchestrator-approved) tighter filter `account?.countsTowardNetWorth ?? false` instead of literal `account != nil` for consistency with `current()`; flagged transfer-crossing-included/excluded-boundary gap as follow-up; noted two old tests asserted buggy behavior.
+- Implementer: added `NetWorthCalculator.at(date:accounts:transactions:)` for historical reconstruction; deleted `MonthlyReviewCalculator.netWorth` and deleted calculate() delegation code; MetricsView.netWorthTimeline delegates to new `at()` per bucket; MonthlyReviewCalculatorTests — rewired 2 existing tests to linked accounts, added 3 new tests (unlinked-flat, excluded-liability-not-reversed, mixed exact arithmetic). No new files, no generator changes.
+- QA: PASS-WITH-CI-CAVEAT — arithmetic traced, strict `>` boundary preserved, no leftover callers, no scope creep.
+- Code Review: APPROVE, zero required fixes. Follow-ups: (1) trim now-stale comment above MetricsView.netWorthTimeline pointing at deleted calculator doc; (2) ensure transfer-boundary limitation (transfers between included and excluded accounts change net worth but are invisible to reconstruction) is tracked as named register item, not just code comment.
+- Docs: IMPLEMENTATION_PLAN.md, AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md, CHANGELOG.md.
+- Follow-ups filed: (1) trim stale MetricsView comment; (2) track transfer-boundary limitation as B21.
+- Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
+- Next task: T3.

@@ -107,16 +107,6 @@ enum MonthlyReviewCalculator {
             .sorted { $0.overage > $1.overage }
     }
 
-    /// Reconstructs the net worth at `date` by starting from the current account balances
-    /// and reversing every transaction that occurred after `date`.
-    static func netWorth(accounts: [Account], allTransactions: [Transaction], at date: Date) -> Double {
-        let current = NetWorthCalculator.current(accounts: accounts)
-        let delta = allTransactions
-            .filter { $0.date > date }
-            .reduce(0.0) { $0 + ($1.type == .income ? $1.amount : -$1.amount) }
-        return current - delta
-    }
-
     // MARK: - Full calculation
 
     static func calculate(
@@ -129,8 +119,8 @@ enum MonthlyReviewCalculator {
         let inc      = income(from: monthTx)
         let exp      = expenses(from: monthTx)
         let (start, end) = monthBounds(for: month)
-        let nwStart  = netWorth(accounts: accounts, allTransactions: transactions, at: start)
-        let nwEnd    = netWorth(accounts: accounts, allTransactions: transactions, at: end)
+        let nwStart  = NetWorthCalculator.at(date: start, accounts: accounts, transactions: transactions)
+        let nwEnd    = NetWorthCalculator.at(date: end, accounts: accounts, transactions: transactions)
 
         return MonthlyReviewData(
             income:          inc,
