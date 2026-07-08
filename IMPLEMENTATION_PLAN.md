@@ -10,7 +10,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 
 | ID | Task | Priority | Status | Depends on | Approval needed |
 |----|------|----------|--------|------------|-----------------|
-| T1 | Shared NetWorthCalculator + liability sign fix | P0-1 | pending | — | no |
+| T1 | Shared NetWorthCalculator + liability sign fix | P0-1 | in_progress | — | no |
 | T2 | Restrict net-worth reconstruction to account-linked transactions | P0-2 | pending | T1 | no |
 | T3 | CSV amount/type parsing fixes | P0-3 | pending | — | no |
 | T4 | Recurring end-date + infinite-loop guards | P0-4 | pending | — | no |
