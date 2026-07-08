@@ -86,9 +86,7 @@ struct MetricsView: View {
     // Net worth timeline: reconstruct historical net worth from current account balances
     // by reversing every transaction that happened after each bucket boundary.
     private var netWorthTimeline: [(date: Date, worth: Double)] {
-        let currentNetWorth = accounts.reduce(0.0) {
-            $0 + ($1.isAsset ? $1.balance : -$1.balance)
-        }
+        let currentNetWorth = NetWorthCalculator.current(accounts: accounts)
         let cal   = Calendar.current
         let now   = Date.now
         let start = selectedPeriod.dateStart

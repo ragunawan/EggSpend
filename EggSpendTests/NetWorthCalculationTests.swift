@@ -26,8 +26,7 @@ final class NetWorthCalculationTests: XCTestCase {
             ("Investment", .investment, 25000)
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        XCTAssertEqual(assets, 40000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.totals(accounts: accounts).assets, 40000, accuracy: 0.001)
     }
 
     func testTotalLiabilities() throws {
@@ -36,8 +35,7 @@ final class NetWorthCalculationTests: XCTestCase {
             ("Student Loan", .loan, -15000)
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
-        XCTAssertEqual(liabilities, 17000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.totals(accounts: accounts).liabilities, 17000, accuracy: 0.001)
     }
 
     func testNetWorthPositive() throws {
@@ -46,9 +44,7 @@ final class NetWorthCalculationTests: XCTestCase {
             ("Loan", .loan, -10000)
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
-        XCTAssertEqual(assets - liabilities, 40000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 40000, accuracy: 0.001)
     }
 
     func testNetWorthNegative() throws {
@@ -57,9 +53,7 @@ final class NetWorthCalculationTests: XCTestCase {
             ("Credit Card", .credit, -8000)
         ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
-        XCTAssertEqual(assets - liabilities, -7000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), -7000, accuracy: 0.001)
     }
 
     func testExcludedLiabilityDoesNotReduceNetWorth() throws {
@@ -71,10 +65,9 @@ final class NetWorthCalculationTests: XCTestCase {
         try context.save()
 
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
-
-        XCTAssertEqual(assets - liabilities, 20000, accuracy: 0.001)
+        let totals = NetWorthCalculator.totals(accounts: accounts)
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 20000, accuracy: 0.001)
+        XCTAssertEqual(totals.liabilities, 0, accuracy: 0.001)
     }
 
     func testIncludedAndExcludedLiabilitiesCalculateTogether() throws {
@@ -88,10 +81,7 @@ final class NetWorthCalculationTests: XCTestCase {
         try context.save()
 
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let assets = accounts.filter(\.isAsset).reduce(0.0) { $0 + $1.balance }
-        let liabilities = accounts.filter { $0.isLiability && $0.includeInNetWorth }.reduce(0.0) { $0 + abs($1.balance) }
-
-        XCTAssertEqual(assets - liabilities, 3800, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 3800, accuracy: 0.001)
     }
 
     func testLiabilitiesIncludeInNetWorthByDefault() {
@@ -130,12 +120,52 @@ final class NetWorthCalculationTests: XCTestCase {
     }
 
     func testEmptyAccountsNetWorth() throws {
+        XCTAssertEqual(NetWorthCalculator.current(accounts: []), 0)
+        let totals = NetWorthCalculator.totals(accounts: [])
+        XCTAssertEqual(totals.assets, 0)
+        XCTAssertEqual(totals.liabilities, 0)
+    }
+
+    func testMixedAssetsAndLiabilitiesSubtractDebt() throws {
+        insertAccounts([
+            ("Checking", .checking, 25000),
+            ("Savings", .savings, 50000),
+            ("Credit Card", .credit, -1800),
+            ("Car Loan", .loan, -24000)
+        ])
         let accounts = try context.fetch(FetchDescriptor<Account>())
-        let netWorth = accounts.reduce(0.0) { total, account in
-            guard account.countsTowardNetWorth else { return total }
-            return total + (account.isAsset ? account.balance : -abs(account.balance))
-        }
-        XCTAssertEqual(netWorth, 0)
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 49200, accuracy: 0.001)
+        let totals = NetWorthCalculator.totals(accounts: accounts)
+        XCTAssertEqual(totals.assets, 75000, accuracy: 0.001)
+        XCTAssertEqual(totals.liabilities, 25800, accuracy: 0.001)
+        XCTAssertEqual(totals.assets - totals.liabilities,
+                       NetWorthCalculator.current(accounts: accounts), accuracy: 0.001)
+    }
+
+    func testExcludedLiabilityLeftOutOfCurrentAndTotals() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 10000)
+        let loan = Account(name: "Loan", type: .loan, balance: -4000)
+        loan.includeInNetWorth = false
+        context.insert(checking)
+        context.insert(loan)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 10000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.totals(accounts: accounts).liabilities, 0, accuracy: 0.001)
+    }
+
+    // Documents the invariant: assets always count — includeInNetWorth
+    // only excludes liabilities (see Account.countsTowardNetWorth).
+    func testAssetWithIncludeInNetWorthFalseStillCounts() throws {
+        let savings = Account(name: "Savings", type: .savings, balance: 15000)
+        savings.includeInNetWorth = false
+        context.insert(savings)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 15000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.totals(accounts: accounts).assets, 15000, accuracy: 0.001)
     }
 
     func testAccountDeletion() throws {

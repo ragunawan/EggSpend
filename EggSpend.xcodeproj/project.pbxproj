@@ -55,6 +55,7 @@
 		AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000042 /* CashFlowForecastView.swift */; };
 		AA0200000000000000000050 /* CashFlowCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000065 /* CashFlowCalendarView.swift */; };
 		AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000046 /* MonthlyReviewCalculator.swift */; };
+		AA0200000000000000000052 /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000067 /* NetWorthCalculator.swift */; };
 		AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000047 /* MonthlyReviewView.swift */; };
 		AA0200000000000000000034 /* TransactionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000049 /* TransactionFilter.swift */; };
 		AA0200000000000000000035 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004A /* TransactionFilterView.swift */; };
@@ -148,6 +149,7 @@
 		AA0100000000000000000042 /* CashFlowForecastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowForecastView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000065 /* CashFlowCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CashFlowCalendarView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000046 /* MonthlyReviewCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewCalculator.swift; sourceTree = "<group>"; };
+		AA0100000000000000000067 /* NetWorthCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthCalculator.swift; sourceTree = "<group>"; };
 		AA0100000000000000000047 /* MonthlyReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyReviewView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000049 /* TransactionFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilter.swift; sourceTree = "<group>"; };
 		AA010000000000000000004A /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
@@ -375,6 +377,7 @@
 				AA0100000000000000000044 /* AccountBalanceService.swift */,
 				AA010000000000000000005D /* TransferBalanceService.swift */,
 				AA0100000000000000000046 /* MonthlyReviewCalculator.swift */,
+				AA0100000000000000000067 /* NetWorthCalculator.swift */,
 				AA0100000000000000000049 /* TransactionFilter.swift */,
 				AA0100000000000000000054 /* SafeSpendCalculator.swift */,
 				AA0100000000000000000063 /* DebtPayoffCalculator.swift */,
@@ -603,6 +606,7 @@
 				AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */,
 				AA0200000000000000000050 /* CashFlowCalendarView.swift in Sources */,
 				AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */,
+				AA0200000000000000000052 /* NetWorthCalculator.swift in Sources */,
 				AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */,
 				AA0200000000000000000034 /* TransactionFilter.swift in Sources */,
 				AA0200000000000000000035 /* TransactionFilterView.swift in Sources */,

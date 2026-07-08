@@ -22,10 +22,7 @@ struct DashboardView: View {
     @State private var budgetScrollOffset: CGFloat = 0
 
     private var netWorth: Double {
-        accounts.reduce(0) { total, account in
-            guard account.countsTowardNetWorth else { return total }
-            return total + (account.isAsset ? account.balance : -abs(account.balance))
-        }
+        NetWorthCalculator.current(accounts: Array(accounts))
     }
     private var monthlyIncome: Double {
         transactions.filter { $0.type == .income && Calendar.current.isDateInCurrentMonth($0.date) }

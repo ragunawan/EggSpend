@@ -4,8 +4,8 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 
 | # | Sev | Summary | Location | Fix task | Status |
 |---|-----|---------|----------|----------|--------|
-| B1 | Critical | Liability sign bug adds debt to net worth in Metrics timeline & Monthly Review | `MetricsView.swift:89`, `MonthlyReviewCalculator.swift:113` | T1 | open |
-| B2 | High | Four divergent net-worth formulas; `includeInNetWorth` inconsistently respected | Dashboard/NetWorth/Metrics/MonthlyReview | T1 | open |
+| B1 | Critical | Liability sign bug adds debt to net worth in Metrics timeline & Monthly Review | `MetricsView.swift:89`, `MonthlyReviewCalculator.swift:113` | T1 | fixed(2026-07-08) |
+| B2 | High | Four divergent net-worth formulas; `includeInNetWorth` inconsistently respected | Dashboard/NetWorth/Metrics/MonthlyReview | T1 | fixed(2026-07-08) |
 | B3 | High | Historical net-worth reconstruction reverses account-less transactions | `MonthlyReviewCalculator.swift:112`, `MetricsView.swift:88` | T2 | open |
 | B4 | High | CSV transaction import can't link accounts, never updates balances | `CSVImportView.swift:363-408` | T8 | open |
 | B5 | High | Amount entry broken in comma-decimal locales (`Double(amountText)`) | `AddTransactionView.swift:62` et al. | T5 | open |
@@ -34,3 +34,5 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 | R4 | No data export/portability | T13 |
 | R5 | No CI — regressions land unnoticed | T11 |
 | R6 | Manual `generate_project.py`/pbxproj sync — drift breaks builds | QA step 3 checks every loop |
+
+**Note (2026-07-08):** B1/B2 fixed via new shared `NetWorthCalculator` (`EggSpend/Utilities/NetWorthCalculator.swift`), adopted by DashboardView, NetWorthView, MetricsView, and MonthlyReviewCalculator. Metrics and Monthly Review now respect `includeInNetWorth` like Dashboard/NetWorthView already did. B3 (historical reconstruction reversing account-less transactions) remains open — that's T2.

@@ -97,6 +97,7 @@ FR = {
     "DebtPayoffPlannerView":   u(1, 0x64),
     "CashFlowCalendarView":    u(1, 0x65),
     "TEST_DebtPayoff":         u(1, 0x66),
+    "NetWorthCalculator":      u(1, 0x67),
 }
 
 # Build files
@@ -206,6 +207,7 @@ APP_SOURCES = [
     ("CashFlowForecastView",  "Views/Forecast/CashFlowForecastView.swift"),
     ("CashFlowCalendarView",  "Views/Forecast/CashFlowCalendarView.swift"),
     ("MonthlyReviewCalculator", "Utilities/MonthlyReviewCalculator.swift"),
+    ("NetWorthCalculator",      "Utilities/NetWorthCalculator.swift"),
     ("MonthlyReviewView",       "Views/MonthlyReview/MonthlyReviewView.swift"),
     ("TransactionFilter",       "Utilities/TransactionFilter.swift"),
     ("TransactionFilterView",   "Views/Transactions/TransactionFilterView.swift"),
@@ -417,7 +419,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])
@@ -663,7 +665,7 @@ def pbxproj():
         a(f"\t\t\t\tDEVELOPMENT_TEAM = 5T5444U7W2;")
         if debug:
             a(f"\t\t\t\tENABLE_TESTABILITY = YES;")
-        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 2;")
+        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 5;")
         a(f"\t\t\t\tENABLE_PREVIEWS = YES;")
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = EggSpend;")
@@ -696,7 +698,7 @@ def pbxproj():
         a(f"\t\t\t\tBUNDLE_LOADER = \"$(TEST_HOST)\";")
         a(f"\t\t\t\tCODE_SIGN_STYLE = Automatic;")
         a(f"\t\t\t\tDEVELOPMENT_TEAM = 5T5444U7W2;")
-        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 2;")
+        a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 5;")
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
         a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 17.0;")
         a(f"\t\t\t\tMARKETING_VERSION = 1.0;")
@@ -753,7 +755,7 @@ def pbxproj():
     a(f"\trootObject = {PROJECT} /* Project object */;")
     a("}")
 
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 if __name__ == "__main__":

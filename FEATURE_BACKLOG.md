@@ -22,3 +22,4 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 - Anomaly flags (unusually large transaction for its category)
 - Weekly digest notification
 - Configurable budget week anchor (see B19)
+- Product decision needed: how should a positive-balance liability account (e.g. an overpaid credit card) be treated in net worth — still counted as debt today, pre-existing behavior surfaced during T1 code review
