@@ -23,3 +23,4 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 - Weekly digest notification
 - Configurable budget week anchor (see B19)
 - Product decision needed: how should a positive-balance liability account (e.g. an overpaid credit card) be treated in net worth — still counted as debt today, pre-existing behavior surfaced during T1 code review
+- UX: "Materialized N historical transactions" toast notification when a long-unprocessed recurring item (e.g. fresh CloudKit restore) generates a batch of backlogged occurrences on launch; correct per spec but silent bulk creation could surprise users (from T4 code review).

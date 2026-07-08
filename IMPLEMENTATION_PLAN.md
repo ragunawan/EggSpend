@@ -13,7 +13,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T1 | Shared NetWorthCalculator + liability sign fix | P0-1 | done (2026-07-08, commit pending) | — | no |
 | T2 | Restrict net-worth reconstruction to account-linked transactions | P0-2 | done (2026-07-08, commit pending) | T1 | no |
 | T3 | CSV amount/type parsing fixes | P0-3 | done (2026-07-08, commit pending) | — | no |
-| T4 | Recurring end-date + infinite-loop guards | P0-4 | pending | — | no |
+| T4 | Recurring end-date + infinite-loop guards | P0-4 | done (2026-07-08, commit pending) | — | no |
 | T5 | Locale-safe amount entry | P0-5 | pending | — | no |
 | T6 | Surface save failures in critical paths | P0-6 | pending | — | no |
 | T7 | Archive accounts instead of delete | P1-1 | pending | T1 | no (decision resolved: archive) |
@@ -35,13 +35,14 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T23 | CloudKit duplicate-sweep (generated transactions) | P3-4 | pending | T4 | **yes — deletes data, confirm before running** |
 | T24 | Accessibility & localization pass | P3-5 | pending | — | no |
 
-**Next up:** T4 (pending).
+**Next up:** T5 (Locale-safe amount entry).
 
 ## Completed
 
 - T1 — Shared NetWorthCalculator + liability sign fix — done 2026-07-08. Added `EggSpend/Utilities/NetWorthCalculator.swift` (`current`, `totals`); adopted at all four call sites (DashboardView, NetWorthView, MetricsView:89, MonthlyReviewCalculator:113); extended `NetWorthCalculationTests`. QA pass-with-CI-caveat (no Swift toolchain in container); code review approved with zero required fixes.
 - T2 — Restrict net-worth reconstruction to account-linked transactions — done 2026-07-08. Added `NetWorthCalculator.at(date:accounts:transactions:)`; deleted `MonthlyReviewCalculator.netWorth` and related calculate() delegation; MetricsView.netWorthTimeline delegates per bucket. Updated 2 existing tests (rewired to linked accounts) and added 3 new tests (unlinked-flat, excluded-liability-not-reversed, mixed exact arithmetic) in `MonthlyReviewCalculatorTests`. QA pass-with-CI-caveat; code review approved with zero required fixes (two follow-ups: trim stale comment in MetricsView, track transfer-boundary limitation as named risk item).
 - T3 — CSV amount/type parsing fixes — done 2026-07-08. Rewrote `parseAmount` with sign-first detection (paren, leading, trailing, U+2212); embedded-minus → nil rejection; thousands/decimal logic unchanged. Type inference now uses expense/income keyword lists with amount-sign fallback for unknown types. Added table-driven test cases (16 type, 13 amount). QA round 1: FAIL — caught "pos" substring-colliding inside "deposit", misclassifying Deposit as expense; loop returned to implementer per protocol. Implementer revision: whole-word token matching for short keywords (split on non-alphanumerics); tests extended with Direct Deposit/DR/CR pins. QA round 2: PASS-WITH-CI-CAVEAT — Python-oracle-verified all 16 type cases + 13 amount cases; parseAmount unchanged from earlier pass; scope clean. Code review approved with zero required fixes. Follow-up: long keywords still substring-match (e.g. "sale" in "wholesale", "payment" in "Payment Received") — pre-existing pattern, revisit if real exports misfire.
+- T4 — Recurring end-date + infinite-loop guards — done 2026-07-08. Removed item-level `endDate < now` skip in `processRecurringTransactions`; added `previousDueDate` capture + print-and-break guard when `advanceNextDueDate()` fails to strictly advance (safeguards infinite loop if Calendar.nextDate returns nil). Added 3 new tests (final-occurrence-for-ended-item, ended-item idempotent across relaunch, deep-backlog terminates with pinned 401 count). QA round 1: FAIL — test fixture off-by-one: 5-week-stale monthly item + endDate yesterday generated TWO occurrences, breaking count-1 assertion and introducing date flakiness. Loop returned to implementer per protocol. Implementer revision: fixture changed to nextDueDate = now−14 days, deterministic for all month lengths (monthly advance ≥28d overshoots now by ≥14d). QA round 2: PASS-WITH-CI-CAVEAT — fixture provably deterministic; production file byte-identical; scope surgical. Code review approved with zero required fixes. Follow-ups: (1) consider making Calendar injectable so non-advancing guard branch becomes testable (RecurringProjection already accepts a calendar); (2) UX note — long-unprocessed item (e.g. fresh CloudKit restore) can now materialize a batch of historical transactions silently; correct per spec but consider a "materialized N transactions" toast.
 
 ## Discovered follow-ups / new tickets
 

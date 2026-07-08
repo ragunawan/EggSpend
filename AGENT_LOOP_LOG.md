@@ -64,3 +64,16 @@ Append-only record of each loop iteration. Maintained by the Documentation Agent
 - Follow-ups filed: long-keyword substring-matching follow-up.
 - Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
 - Next task: T4.
+
+## Loop 5 — 2026-07-08 — T4: Recurring end-date + infinite-loop guards
+- Planner: selected T4 (P0-4, no dependencies).
+- Repo Analyst: task valid; removing item-level endDate skip safe (per-occurrence break + dedupe bound generation); recommended inline non-advancing-date guard without making Calendar injectable; confirmed reminderFireDate handles nextDueDate > endDate.
+- Implementer: removed item-level `endDate < now` skip in processRecurringTransactions; added previousDueDate capture + print-and-break guard when advanceNextDueDate() fails to strictly advance; dedupe and AccountBalanceService.apply untouched; 3 new tests (final-occurrence-for-ended-item, ended-item idempotent across relaunch, deep-backlog terminates with pinned 401 count); non-advancing branch documented as an accepted test gap (Calendar not injectable).
+- QA round 1: FAIL — test fixture off-by-one: 5-week-stale monthly item + endDate yesterday generates TWO occurrences, making the count-1 assertion wrong and date-flaky. Loop returned to implementer per protocol.
+- Implementer revision: fixture changed to nextDueDate = now−14 days; deterministic for all month lengths (monthly advance ≥28d overshoots now by ≥14d).
+- QA round 2: PASS-WITH-CI-CAVEAT — fixture provably deterministic; production file byte-identical; scope surgical.
+- Code Review: APPROVE, zero required fixes. Follow-ups: (1) consider making Calendar injectable so the non-advancing guard branch becomes testable (RecurringProjection already accepts a calendar); (2) UX note — a long-unprocessed item (e.g. fresh CloudKit restore) can now materialize a batch of historical transactions silently; correct per spec but consider a "materialized N transactions" toast; (3) reviewer verified all readers of nextDueDate handle the new persisted nextDueDate > endDate state.
+- Docs: IMPLEMENTATION_PLAN.md, AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md, CHANGELOG.md.
+- Follow-ups filed: (1) Calendar injectability for testable non-advancing branch; (2) materialization-toast UX feature.
+- Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
+- Next task: T5.
