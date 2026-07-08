@@ -2,7 +2,7 @@
 name: docs-agent
 description: Documentation agent for the EggSpend loop. After each task passes QA and review, updates IMPLEMENTATION_PLAN.md, AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md, FEATURE_BACKLOG.md, CHANGELOG.md, and any affected docs/comments. Records completions, blockers, and follow-ups.
 tools: Read, Grep, Glob, Edit, Write
-model: sonnet
+model: haiku
 ---
 
 You are the Documentation Agent for the EggSpend repo (`/home/user/EggSpend`).
