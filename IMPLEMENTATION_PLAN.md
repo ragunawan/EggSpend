@@ -11,7 +11,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | ID | Task | Priority | Status | Depends on | Approval needed |
 |----|------|----------|--------|------------|-----------------|
 | T1 | Shared NetWorthCalculator + liability sign fix | P0-1 | done (2026-07-08, commit pending) | — | no |
-| T2 | Restrict net-worth reconstruction to account-linked transactions | P0-2 | pending | T1 | no |
+| T2 | Restrict net-worth reconstruction to account-linked transactions | P0-2 | pending (next after T11) | T1 | no |
 | T3 | CSV amount/type parsing fixes | P0-3 | pending | — | no |
 | T4 | Recurring end-date + infinite-loop guards | P0-4 | pending | — | no |
 | T5 | Locale-safe amount entry | P0-5 | pending | — | no |
@@ -20,7 +20,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T8 | CSV import: account selection + balance application | P1-2 | pending | T2, T3 | no |
 | T9 | CSV import duplicate detection | P1-3 | pending | T8 | **yes — dedupe strictness** |
 | T10 | Balance edits as explicit adjustments | P1-4 | pending | — | **yes — ledger/metrics visibility** |
-| T11 | CI: GitHub Actions test workflow | P1-5 | pending | — | no |
+| T11 | CI: GitHub Actions test workflow — **pulled forward by user 2026-07-08** (ahead of T2; container has no Swift toolchain, CI closes the verification gap for all subsequent loops) | P1-5 | done (2026-07-08, commit pending) | — | no |
 | T12 | Display-currency abstraction | P1-6 | pending | T5 | no (decision resolved: display-only) |
 | T13 | CSV/JSON export + Settings screen | P1-7 | pending | — | no |
 | T14 | BalanceSnapshot history model | P2-1 | pending | T1, T2 | no (additive schema) |
@@ -35,7 +35,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T23 | CloudKit duplicate-sweep (generated transactions) | P3-4 | pending | T4 | **yes — deletes data, confirm before running** |
 | T24 | Accessibility & localization pass | P3-5 | pending | — | no |
 
-**Next up:** T2.
+**Next up:** T2 (pending after T11 completes 2026-07-08).
 
 ## Completed
 
@@ -46,6 +46,11 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 - NetWorthView calls `NetWorthCalculator.totals()` twice — minor cleanup opportunity (from T1 code review).
 - Product question: a positive-balance liability account (e.g. an overpaid credit card) is still counted as debt everywhere — pre-existing behavior, needs a product decision eventually (from T1 code review).
 - `NetWorthCalculator.totals` and `.current` could share one predicate/helper to reduce duplication (from T1 code review).
+- T11 follow-ups (CI workflow):
+  1. Add `permissions: contents: read` hardening to GitHub Actions workflow.
+  2. Tighter step-level timeout for simulator-boot hangs.
+  3. Confirm `macos-26` runner label validity at merge time.
+  4. Add `*.xcresult` to .gitignore.
 
 ## Blockers awaiting user decision
 

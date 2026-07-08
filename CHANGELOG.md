@@ -4,3 +4,4 @@
 
 - Added App Store encryption compliance metadata declaring no non-exempt encryption.
 - Fixed a bug where net worth in the Metrics timeline and Monthly Review was computed by adding liability balances instead of subtracting them, inflating reported net worth; introduced a shared `NetWorthCalculator` now used consistently by Dashboard, Nest Egg, Metrics, and Monthly Review, and Metrics/Monthly Review now respect the "include in net worth" account setting.
+- Added GitHub Actions CI workflow (`.github/workflows/test.yml`) with runtime simulator resolution and artifact capture; tests now run on macOS runners for all PRs and pushes to main and claude/* branches.

@@ -29,3 +29,14 @@ Append-only record of each loop iteration. Maintained by the Documentation Agent
 - Follow-ups filed: (1) NetWorthView computes `totals()` twice — minor cleanup; (2) product question: positive-balance liability (overpaid credit card) counted as debt everywhere — pre-existing, needs product decision eventually; (3) `totals`/`current` could share one predicate.
 - Commit: this loop's commit (next commit on branch `claude/finance-app-audit-roadmap-t8y2p4`).
 - Next task: T2.
+
+## Loop 2 — 2026-07-08 — T11: CI: GitHub Actions test workflow
+- Planner: encoded user's pull-forward decision; T11 in_progress; T2 queued next.
+- Repo Analyst: greenfield .github; shared scheme test-ready; all tests in-memory (no iCloud/notification needs on runner); flagged simulator-name fragility → recommended runtime device resolution.
+- Implementer: created `.github/workflows/test.yml` only — triggers PR + push(main, claude/**); macos-26 runner, Xcode 26.0 pinned via setup-xcode; runtime simulator resolution (iPhone 17 exact match, else first iPhone, else clean failure) exported via GITHUB_ENV; xcbeautify best-effort with plain fallback under pipefail; xcresult artifact uploaded on failure.
+- QA: PASS-WITH-CI-CAVEAT — YAML valid, structure audited, simulator-resolution python fixture-tested on all three paths; green-run and broken-test-fails criteria only verifiable on GitHub after push.
+- Code Review: APPROVE, zero required fixes. Follow-ups filed: (1) add `permissions: contents: read` hardening; (2) tighter step-level timeout for simulator-boot hangs; (3) confirm macos-26 runner label validity at merge time; (4) gitignore *.xcresult.
+- Docs: IMPLEMENTATION_PLAN.md, AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md, CHANGELOG.md.
+- Follow-ups filed: (1) add hardening with `permissions: contents: read`; (2) step-level timeout for simulator-boot; (3) macos-26 runner label validity; (4) .gitignore *.xcresult.
+- Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
+- Next task: T2.

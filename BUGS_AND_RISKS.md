@@ -32,7 +32,7 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 | R2 | Silent CloudKit→local fallback; user may believe data is backed up | surface SyncStatus (batch with T13 Settings) |
 | R3 | No app lock | T20 |
 | R4 | No data export/portability | T13 |
-| R5 | No CI — regressions land unnoticed | T11 |
+| R5 | No CI — regressions land unnoticed | T11 | fixed(2026-07-08) — runner-side verification pending first real run |
 | R6 | Manual `generate_project.py`/pbxproj sync — drift breaks builds | QA step 3 checks every loop |
 
 **Note (2026-07-08):** B1/B2 fixed via new shared `NetWorthCalculator` (`EggSpend/Utilities/NetWorthCalculator.swift`), adopted by DashboardView, NetWorthView, MetricsView, and MonthlyReviewCalculator. Metrics and Monthly Review now respect `includeInNetWorth` like Dashboard/NetWorthView already did. B3 (historical reconstruction reversing account-less transactions) remains open — that's T2.
