@@ -30,7 +30,7 @@ struct CashFlowCalendarView: View {
             let actuals = transactions.filter { calendar.isDate($0.date, inSameDayAs: date) }
             let recurringForDay = recurringOccurrences.filter { calendar.isDate($0.dueDate, inSameDayAs: date) }
             let bills = accounts.filter { account in
-                guard account.isLiability, let dueDate = account.dueDate else { return false }
+                guard !account.isArchived, account.isLiability, let dueDate = account.dueDate else { return false }
                 return calendar.component(.day, from: dueDate) == calendar.component(.day, from: date)
             }
             let actualNet = actuals.reduce(0) { $0 + $1.signedAmount }

@@ -183,6 +183,53 @@ final class NetWorthCalculationTests: XCTestCase {
         XCTAssertEqual(accounts.count, 1)
     }
 
+    func testArchivedAccountExcludedFromCurrentAndTotals() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 5000)
+        let oldSavings = Account(name: "Old Savings", type: .savings, balance: 20000)
+        oldSavings.isArchived = true
+        context.insert(checking)
+        context.insert(oldSavings)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 5000, accuracy: 0.001)
+        let totals = NetWorthCalculator.totals(accounts: accounts)
+        XCTAssertEqual(totals.assets, 5000, accuracy: 0.001)
+    }
+
+    func testArchivedLiabilityExcludedFromCurrentAndTotals() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 5000)
+        let oldCard = Account(name: "Old Card", type: .credit, balance: -1200)
+        oldCard.isArchived = true
+        context.insert(checking)
+        context.insert(oldCard)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 5000, accuracy: 0.001)
+        XCTAssertEqual(NetWorthCalculator.totals(accounts: accounts).liabilities, 0, accuracy: 0.001)
+    }
+
+    func testUnarchivingAccountRestoresPreviousTotals() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 5000)
+        let savings = Account(name: "Savings", type: .savings, balance: 20000)
+        context.insert(checking)
+        context.insert(savings)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let baseline = NetWorthCalculator.current(accounts: accounts)
+        XCTAssertEqual(baseline, 25000, accuracy: 0.001)
+
+        savings.isArchived = true
+        try context.save()
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), 5000, accuracy: 0.001)
+
+        savings.isArchived = false
+        try context.save()
+        XCTAssertEqual(NetWorthCalculator.current(accounts: accounts), baseline, accuracy: 0.001)
+    }
+
     func testAccountTypeIcons() {
         for type in AccountType.allCases {
             XCTAssertFalse(type.icon.isEmpty, "\(type.rawValue) should have an icon")

@@ -41,6 +41,16 @@ final class CashFlowForecastTests: XCTestCase {
         XCTAssertEqual(ForecastEngine.liquidBalance(from: []), 0, accuracy: 0.001)
     }
 
+    func testLiquidBalanceExcludesArchivedCheckingAccount() {
+        let checking = Account(name: "Checking", type: .checking, balance: 1_000)
+        let archivedChecking = Account(name: "Old Checking", type: .checking, balance: 4_000)
+        archivedChecking.isArchived = true
+        let savings = Account(name: "Savings", type: .savings, balance: 2_000)
+
+        let result = ForecastEngine.liquidBalance(from: [checking, archivedChecking, savings])
+        XCTAssertEqual(result, 3_000, accuracy: 0.001)
+    }
+
     // MARK: - averageDailyNetFlow
 
     func testAverageDailyNetFlowWithNoTransactions() {

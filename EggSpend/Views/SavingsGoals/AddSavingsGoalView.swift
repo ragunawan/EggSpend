@@ -41,6 +41,11 @@ struct AddSavingsGoalView: View {
     private var targetAmount: Double { AmountParser.parse(targetAmountText) ?? 0 }
     private var currentAmount: Double { AmountParser.parse(currentAmountText) ?? 0 }
     private var tracksLinkedAccount: Bool { linkedAccount != nil }
+    // Archived accounts are hidden from the picker unless already linked (editing an
+    // existing goal), otherwise the picker would render blank.
+    private var availableAccounts: [Account] {
+        accounts.filter { !$0.isArchived || $0 == linkedAccount }
+    }
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && targetAmount > 0
     }
@@ -65,7 +70,7 @@ struct AddSavingsGoalView: View {
                 Section {
                     Picker("Linked Account", selection: $linkedAccount) {
                         Text("None — track manually").tag(Optional<Account>.none)
-                        ForEach(accounts) { account in
+                        ForEach(availableAccounts) { account in
                             Label(account.name, systemImage: account.type.icon).tag(Optional(account))
                         }
                     }

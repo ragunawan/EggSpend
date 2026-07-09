@@ -33,6 +33,12 @@ struct AddRecurringTransactionView: View {
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
+    // Archived accounts are hidden from the picker unless already selected (editing an
+    // existing item linked to one), otherwise the picker would render blank.
+    private var availableAccounts: [Account] {
+        accounts.filter { !$0.isArchived || $0 == selectedAccount }
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -106,7 +112,7 @@ struct AddRecurringTransactionView: View {
                     } else {
                         Picker("Account", selection: $selectedAccount) {
                             Text("None").tag(Optional<Account>.none)
-                            ForEach(accounts) { account in
+                            ForEach(availableAccounts) { account in
                                 Label(account.name, systemImage: account.type.icon)
                                     .tag(Optional(account))
                             }

@@ -34,7 +34,7 @@ struct ForecastEngine {
     // Credit card and loan balances are liabilities and are excluded from starting balance.
     static func liquidBalance(from accounts: [Account]) -> Double {
         accounts
-            .filter { $0.type == .checking || $0.type == .savings }
+            .filter { !$0.isArchived && ($0.type == .checking || $0.type == .savings) }
             .reduce(0.0) { $0 + $1.balance }
     }
 

@@ -47,6 +47,20 @@ struct AddTransactionView: View {
         return EntryKind.allCases
     }
 
+    // Archived accounts are hidden from pickers unless already selected (editing an
+    // existing transaction/transfer linked to one), otherwise the picker would render blank.
+    private var availableAccounts: [Account] {
+        accounts.filter { !$0.isArchived || $0 == selectedAccount }
+    }
+
+    private var availableFromAccounts: [Account] {
+        accounts.filter { !$0.isArchived || $0 == fromAccount }
+    }
+
+    private var availableToAccounts: [Account] {
+        accounts.filter { !$0.isArchived || $0 == toAccount }
+    }
+
     private var availableCategories: [TransactionCategory] {
         guard let type = selectedEntryKind.transactionType else { return [] }
         // Archived categories are hidden from the picker — only active categories appear here.
@@ -174,7 +188,7 @@ struct AddTransactionView: View {
                     Spacer()
                     Menu {
                         Button("None") { selectedAccount = nil }
-                        ForEach(accounts) { account in
+                        ForEach(availableAccounts) { account in
                             Button {
                                 selectedAccount = account
                             } label: {
@@ -209,14 +223,14 @@ struct AddTransactionView: View {
             } else {
                 Picker("From", selection: $fromAccount) {
                     Text("Select").tag(Optional<Account>.none)
-                    ForEach(accounts) { account in
+                    ForEach(availableFromAccounts) { account in
                         Label(account.name, systemImage: account.type.icon)
                             .tag(Optional(account))
                     }
                 }
                 Picker("To", selection: $toAccount) {
                     Text("Select").tag(Optional<Account>.none)
-                    ForEach(accounts) { account in
+                    ForEach(availableToAccounts) { account in
                         Label(account.name, systemImage: account.type.icon)
                             .tag(Optional(account))
                     }

@@ -43,6 +43,7 @@ final class Account {
     var minimumPayment: Double?
     var plannedExtraPayment: Double?
     var includeInNetWorth: Bool = true
+    var isArchived: Bool = false
 
     var type: AccountType {
         get { AccountType(rawValue: typeRaw) ?? .other }

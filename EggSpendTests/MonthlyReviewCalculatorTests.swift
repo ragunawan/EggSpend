@@ -230,6 +230,20 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
         XCTAssertEqual(netWorth, 500, accuracy: 0.001)
     }
 
+    /// A transaction linked to an archived account never moved a counted balance
+    /// (archived accounts are excluded from `current`), so it must not be reversed either.
+    func testNetWorthAtDateIgnoresTransactionsOnArchivedAccount() {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let oldSavings = Account(name: "Old Savings", type: .savings, balance: 5000)
+        oldSavings.isArchived = true
+        let txs = [
+            Transaction(title: "Old deposit", amount: 200, date: date(2026, 3, 10), type: .income, account: oldSavings)
+        ]
+        let netWorth = NetWorthCalculator.at(date: date(2026, 3, 1), accounts: [checking, oldSavings], transactions: txs)
+        XCTAssertEqual(netWorth, NetWorthCalculator.current(accounts: [checking, oldSavings]), accuracy: 0.001)
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
     // MARK: - Full calculation
 
     func testCalculateProducesConsistentSummary() {

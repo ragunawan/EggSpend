@@ -12,17 +12,19 @@ enum NetWorthCalculator {
     /// Net worth = included account balances, with liabilities subtracted.
     static func current(accounts: [Account]) -> Double {
         accounts.reduce(0) { total, account in
-            guard account.countsTowardNetWorth else { return total }
+            guard !account.isArchived, account.countsTowardNetWorth else { return total }
             return total + (account.isAsset ? account.balance : -abs(account.balance))
         }
     }
 
     /// Positive asset and liability magnitudes for summary/chart displays.
     /// `assets` sums every asset account; `liabilities` sums `abs(balance)`
-    /// over liability accounts where `includeInNetWorth == true`.
+    /// over liability accounts where `includeInNetWorth == true`. Archived
+    /// accounts are excluded from both.
     static func totals(accounts: [Account]) -> (assets: Double, liabilities: Double) {
-        let assets = accounts.filter(\.isAsset).reduce(0) { $0 + $1.balance }
-        let liabilities = accounts
+        let active = accounts.filter { !$0.isArchived }
+        let assets = active.filter(\.isAsset).reduce(0) { $0 + $1.balance }
+        let liabilities = active
             .filter { $0.isLiability && $0.includeInNetWorth }
             .reduce(0) { $0 + abs($1.balance) }
         return (assets, liabilities)
@@ -39,7 +41,7 @@ enum NetWorthCalculator {
     static func at(date: Date, accounts: [Account], transactions: [Transaction]) -> Double {
         let currentNetWorth = current(accounts: accounts)
         let delta = transactions
-            .filter { $0.date > date && ($0.account?.countsTowardNetWorth ?? false) }
+            .filter { $0.date > date && !($0.account?.isArchived ?? false) && ($0.account?.countsTowardNetWorth ?? false) }
             .reduce(0.0) { $0 + $1.signedAmount }
         return currentNetWorth - delta
     }

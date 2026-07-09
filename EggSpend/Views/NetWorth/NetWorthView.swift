@@ -7,10 +7,13 @@ struct NetWorthView: View {
     @State private var showAddAccount = false
     @State private var showImport = false
     @State private var editingAccount: Account? = nil
+    @State private var accountToArchive: Account? = nil
+    @State private var accountToDelete: Account? = nil
 
-    private var assets: [Account] { accounts.filter(\.isAsset) }
-    private var liabilities: [Account] { accounts.filter { !$0.isAsset } }
+    private var assets: [Account] { accounts.filter { $0.isAsset && !$0.isArchived } }
+    private var liabilities: [Account] { accounts.filter { !$0.isAsset && !$0.isArchived } }
     private var includedLiabilities: [Account] { liabilities.filter(\.includeInNetWorth) }
+    private var archivedAccounts: [Account] { accounts.filter(\.isArchived) }
 
     private var totalAssets: Double { NetWorthCalculator.totals(accounts: Array(accounts)).assets }
     private var totalLiabilities: Double { NetWorthCalculator.totals(accounts: Array(accounts)).liabilities }
@@ -26,6 +29,7 @@ struct NetWorthView: View {
                     chartSection
                     assetsSection
                     liabilitiesSection
+                    archivedSection
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
@@ -54,6 +58,44 @@ struct NetWorthView: View {
             }
             .sheet(item: $editingAccount) { account in
                 AddAccountView(editingAccount: account)
+            }
+            .confirmationDialog(
+                "Archive Account",
+                isPresented: Binding(
+                    get: { accountToArchive != nil },
+                    set: { isPresented in if !isPresented { accountToArchive = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Archive") {
+                    accountToArchive?.isArchived = true
+                    accountToArchive = nil
+                }
+                Button("Cancel", role: .cancel) { accountToArchive = nil }
+            } message: {
+                if let name = accountToArchive?.name {
+                    Text("\"\(name)\" will be hidden from pickers, net worth, and forecasts. Its transaction history is kept, and you can unarchive it anytime from the Archived section.")
+                }
+            }
+            .confirmationDialog(
+                "Delete Account",
+                isPresented: Binding(
+                    get: { accountToDelete != nil },
+                    set: { isPresented in if !isPresented { accountToDelete = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    if let account = accountToDelete {
+                        modelContext.delete(account)
+                        accountToDelete = nil
+                    }
+                }
+                Button("Cancel", role: .cancel) { accountToDelete = nil }
+            } message: {
+                if let name = accountToDelete?.name {
+                    Text("Permanently delete \"\(name)\"? This cannot be undone. Its transactions keep their history but lose the account link.")
+                }
             }
         }
         .listRowBackground(Color.clear)
@@ -129,8 +171,13 @@ struct NetWorthView: View {
                             AccountRowView(account: account)
                         }
                         .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing) {
+                            Button("Archive", systemImage: "archivebox") {
+                                accountToArchive = account
+                            }
+                            .tint(Color.twig)
+                        }
                     }
-                    .onDelete { indexSet in deleteAccounts(assets, at: indexSet) }
                 }
             }
             .appearRise(delay: 0.15)
@@ -168,8 +215,13 @@ struct NetWorthView: View {
                             }
                             .tint(Color.yolk)
                         }
+                        .swipeActions(edge: .trailing) {
+                            Button("Archive", systemImage: "archivebox") {
+                                accountToArchive = account
+                            }
+                            .tint(Color.twig)
+                        }
                     }
-                    .onDelete { indexSet in deleteAccounts(liabilities, at: indexSet) }
                 }
             }
             .appearRise(delay: 0.2)
@@ -177,13 +229,31 @@ struct NetWorthView: View {
         .listRowBackground(Color.clear)
     }
 
-    @Environment(\.modelContext) private var modelContext
-
-    private func deleteAccounts(_ list: [Account], at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(list[index])
+    @ViewBuilder
+    private var archivedSection: some View {
+        if !archivedAccounts.isEmpty {
+            Section("Archived") {
+                ForEach(archivedAccounts) { account in
+                    AccountRowView(account: account)
+                        .opacity(0.55)
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            Button("Unarchive", systemImage: "arrow.uturn.backward") {
+                                account.isArchived = false
+                            }
+                            .tint(Color.yolk)
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                accountToDelete = account
+                            }
+                        }
+                }
+            }
+            .listRowBackground(Color.clear)
         }
     }
+
+    @Environment(\.modelContext) private var modelContext
 }
 
 private struct AccountRowView: View {
