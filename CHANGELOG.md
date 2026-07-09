@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Added App Store encryption compliance metadata declaring no non-exempt encryption.
+- Fixed cash-flow forecast to no longer double-count recurring transactions: baseline drift now reflects organic-transaction activity only (excluding auto-generated recurring entries), while recurring transactions are counted once via explicit upcoming-events projections; this prevents the drift baseline and scheduled occurrences from adding the same recurring charge twice within the forecast horizon.
 - Fixed a bug where net worth in the Metrics timeline and Monthly Review was computed by adding liability balances instead of subtracting them, inflating reported net worth; introduced a shared `NetWorthCalculator` now used consistently by Dashboard, Nest Egg, Metrics, and Monthly Review, and Metrics/Monthly Review now respect the "include in net worth" account setting.
 - Added GitHub Actions CI workflow (`.github/workflows/test.yml`) with runtime simulator resolution and artifact capture; tests now run on macOS runners for all PRs and pushes to main and claude/* branches.
 - Fixed historical net-worth reconstruction in Metrics timeline and Monthly Review to only include account-linked transactions; account-less (unlinked) transactions are now excluded from retroactive net worth calculations, respecting the "include in net worth" account setting consistently.

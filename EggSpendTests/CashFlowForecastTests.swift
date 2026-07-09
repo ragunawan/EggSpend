@@ -102,6 +102,17 @@ final class CashFlowForecastTests: XCTestCase {
         XCTAssertEqual(result, 100.0 / 60.0, accuracy: 0.001)
     }
 
+    func testAverageDailyNetFlowExcludesGeneratedTransactions() {
+        let date = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
+        let income = Transaction(title: "Income", amount: 100, date: date, type: .income)
+        let generated = Transaction(title: "Rent", amount: 500, date: date, type: .expense,
+                                    isGenerated: true, recurringSourceID: UUID())
+
+        let result = ForecastEngine.averageDailyNetFlow(from: [income, generated], lookbackDays: 60)
+        // Only the organic income counts: 100 / 60
+        XCTAssertEqual(result, 100.0 / 60.0, accuracy: 0.001)
+    }
+
     // MARK: - upcomingEvents
 
     func testUpcomingEventsReturnsActiveRecurringWithinHorizon() {
@@ -173,6 +184,19 @@ final class CashFlowForecastTests: XCTestCase {
         }
     }
 
+    func testUpcomingEventsIncludesUnmaterializedItemDueToday() {
+        // An item created mid-session with nextDueDate == today and not yet turned into a
+        // Transaction by launch processing should still surface as a real pending event —
+        // same-day occurrences must not be dropped (pins the "no <= now drop" invariant).
+        let item = RecurringTransaction(title: "Coffee Subscription", amount: 12, type: .expense,
+                                        frequency: .monthly, startDate: .now)
+        item.nextDueDate = .now
+
+        let events = ForecastEngine.upcomingEvents(from: [item], horizonDays: 30)
+        XCTAssertEqual(events.count, 1)
+        XCTAssertTrue(Calendar.current.isDateInToday(events.first?.date ?? .distantPast))
+    }
+
     // MARK: - buildForecast
 
     func testBuildForecastPointCountEqualsHorizonPlusOne() {
@@ -237,5 +261,27 @@ final class CashFlowForecastTests: XCTestCase {
         )
         XCTAssertFalse(events.isEmpty)
         XCTAssertTrue(events.allSatisfy { $0.amount > 0 }, "Salary must be positive")
+    }
+
+    func testBuildForecastDoesNotDoubleCountMaterializedRecurring() {
+        // Rent's most recent occurrence already materialized into a Transaction today
+        // (isGenerated == true), and nextDueDate has been advanced 30 days out by launch
+        // processing. Rent should show up exactly once in the forecast inputs: as a
+        // generated transaction excluded from drift, and as a single upcoming event.
+        let rent = RecurringTransaction(title: "Rent", amount: 1_500, type: .expense,
+                                        frequency: .monthly, startDate: .now)
+        let in30 = Calendar.current.date(byAdding: .day, value: 30, to: .now)!
+        rent.nextDueDate = in30
+
+        let materialized = Transaction(title: "Rent", amount: 1_500, date: .now, type: .expense,
+                                       isGenerated: true, recurringSourceID: rent.id,
+                                       recurringDueDate: .now)
+
+        let drift = ForecastEngine.averageDailyNetFlow(from: [materialized], lookbackDays: 60)
+        XCTAssertEqual(drift, 0, accuracy: 0.001, "Generated history must not feed the drift")
+
+        let events = ForecastEngine.upcomingEvents(from: [rent], horizonDays: 60)
+        XCTAssertEqual(events.count, 1, "Rent must appear exactly once as an upcoming event")
+        XCTAssertTrue(Calendar.current.isDate(events.first?.date ?? .distantPast, inSameDayAs: in30))
     }
 }

@@ -52,6 +52,8 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 - T14 follow-ups (BalanceSnapshot history model):
   - Add direct test pinning snapshot-path liability sign math for an INCLUDED liability — currently no test verifies that a liability account with balance -5000 yields a snapshot that contributes -5000 to net worth (via -abs() sign logic); this is a second independent implementation of the sign-ternary pattern in money code and deserves explicit coverage for balance-adjustment correctness verification.
   - Add one-line comment at the scenePhase/.active handler in EggSpendApp documenting that onAppear and .onChange(.active) can both fire on foreground transition, and why update-in-place same-day snapshot deduplication is safe (last-launch-wins idempotence self-heals the double-capture race).
+- T15 follow-ups (Forecast/SafeSpend double-count fix):
+  - Optional: one-clause comment addendum at ForecastEngine.averageDailyNetFlow noting that user-edited generated transactions (e.g. a user manually changes a materialized recurring charge's amount) remain excluded from the drift baseline—they're still marked isGenerated, so filtering preserves the intended invariant (recurring paid out explicitly as events, not implicitly via drift).
 
 ### From TODO.md (user-ranked P0–P3 roadmap, committed to `main` 2026-07-08; see IMPLEMENTATION_PLAN.md "TODO.md reconciliation" for the full mapping — these are the items with no existing task ID)
 

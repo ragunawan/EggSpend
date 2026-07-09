@@ -351,7 +351,7 @@ struct CashFlowForecastView: View {
                     assumptionRow("arrow.clockwise",
                         "Active recurring transactions are projected forward from their next due date at their scheduled frequency.")
                     assumptionRow("chart.line.flattrend.xyaxis",
-                        "A daily baseline is derived from the last 60 days of transaction history. Because recurring items may have fired in that window, the scheduled events above may overlap slightly with the baseline — so the forecast is a planning estimate, not an accounting balance.")
+                        "A daily baseline is derived from the last 60 days of transaction history, excluding auto-generated recurring transactions. Recurring bills and income are counted once, via the scheduled events above — so the forecast is a planning estimate, not an accounting balance.")
                     assumptionRow("exclamationmark.triangle",
                         "No interest, taxes, investment returns, or variable expenses beyond recent patterns are modeled.")
                     assumptionRow("calendar.badge.clock",

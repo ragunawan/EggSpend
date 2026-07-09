@@ -46,6 +46,9 @@ enum SafeSpendCalculator {
 
     // ASSUMPTION: Buffer sizing is driven by recent spending pace, with a $500 floor
     // so a thin transaction history doesn't produce an unrealistically small buffer.
+    // Unlike ForecastEngine.averageDailyNetFlow, this deliberately keeps auto-generated
+    // recurring history — there's no separate recurring add-back paired with the buffer,
+    // so excluding it would understate real recent spending pace.
     static func averageDailyExpenses(from transactions: [Transaction], lookbackDays: Int = 60) -> Double {
         let calendar = Calendar.current
         let now = Date.now

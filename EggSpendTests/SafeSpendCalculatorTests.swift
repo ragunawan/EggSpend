@@ -82,6 +82,29 @@ final class SafeSpendCalculatorTests: XCTestCase {
         XCTAssertEqual(result.safeToSpendToday, 1_500, accuracy: 0.001)
     }
 
+    func testUpcomingNetOutflowReserveIgnoresGeneratedTransactionHistory() {
+        // upcomingNetOutflowReserve is derived purely from the recurring schedule via
+        // ForecastEngine.upcomingEvents, not from `transactions`, so it must be unaffected
+        // by whether already-materialized (isGenerated) recurring history is present —
+        // unlike requiredBuffer, which deliberately does consume that history.
+        let checking = Account(name: "Checking", type: .checking, balance: 2_000)
+        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: .now)!
+        let rent = RecurringTransaction(title: "Rent", amount: 300, type: .expense,
+                                        frequency: .monthly, startDate: tomorrow)
+        rent.nextDueDate = tomorrow
+        let generated = Transaction(title: "Rent", amount: 300, date: .now, type: .expense,
+                                    isGenerated: true, recurringSourceID: rent.id)
+
+        let without = SafeSpendCalculator.calculate(
+            accounts: [checking], transactions: [], recurring: [rent], budgets: [], savingsGoals: []
+        )
+        let with = SafeSpendCalculator.calculate(
+            accounts: [checking], transactions: [generated], recurring: [rent], budgets: [], savingsGoals: []
+        )
+        XCTAssertEqual(with.upcomingNetOutflowReserve, without.upcomingNetOutflowReserve, accuracy: 0.001)
+        XCTAssertEqual(with.upcomingNetOutflowReserve, 300, accuracy: 0.001)
+    }
+
     // MARK: 5. Required buffer is reserved
 
     func testRequiredBufferScalesWithRecentSpendingAndIsReserved() {

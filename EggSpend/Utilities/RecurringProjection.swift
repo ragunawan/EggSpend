@@ -32,6 +32,12 @@ enum RecurringProjection {
             guard item.isActive else { continue }
             if let endDate = item.endDate, endDate < startOfWindow { continue }
 
+            // INVARIANT: post-launch recurring processing (see EggSpendApp) advances
+            // nextDueDate for every active item past `now` before this ever runs, so it is
+            // normally already on or after today. Same-day occurrences below still occur
+            // legitimately for items created mid-session and not yet materialized by launch
+            // processing — that's real, intentional data for calendar/upcoming views. Do not
+            // add a `<= now` drop here; it would hide genuinely pending bills.
             var cursor = item.nextDueDate
             while cursor < startOfWindow {
                 guard let next = nextDate(after: cursor, for: item, calendar: calendar), next > cursor else {

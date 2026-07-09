@@ -39,15 +39,20 @@ struct ForecastEngine {
     }
 
     // ASSUMPTION: Average daily net flow is derived from the most recent `lookbackDays`
-    // of actual transactions. Because historically-generated recurring transactions are
-    // included in this history, projecting explicit recurring events on top of this drift
-    // may cause slight double-counting. The forecast is directional, not accounting-precise.
+    // of *organic* transactions only — auto-generated recurring transactions
+    // (`isGenerated == true`) are excluded, alongside balance adjustments. Recurring flows
+    // enter the forecast solely through the explicit `upcomingEvents` schedule below, so
+    // each recurring obligation is counted exactly once (drift no longer double-counts it).
+    // Accepted side effect: a recently paused or expired recurring item's generated history
+    // no longer drags the drift — an obligation that has ended shouldn't project forward.
     static func averageDailyNetFlow(from transactions: [Transaction], lookbackDays: Int = 60) -> Double {
         let calendar = Calendar.current
         let now = Date.now
         guard let since = calendar.date(byAdding: .day, value: -lookbackDays, to: now) else { return 0 }
 
-        let recent = transactions.filter { $0.date >= since && $0.date <= now && !$0.isAdjustment }
+        let recent = transactions.filter {
+            $0.date >= since && $0.date <= now && !$0.isAdjustment && !$0.isGenerated
+        }
         guard !recent.isEmpty else { return 0 }
 
         let netTotal = recent.reduce(0.0) { $0 + $1.signedAmount }
