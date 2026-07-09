@@ -110,6 +110,7 @@ FR = {
     "TEST_BalanceSnapshot":    u(1, 0x71),
     "SubscriptionDetector":    u(1, 0x72),
     "TEST_SubscriptionDetector": u(1, 0x73),
+    "SubscriptionAuditView":   u(1, 0x74),
 }
 
 # Build files
@@ -140,6 +141,7 @@ GR = {
     "SavingsGoals": u(3, 0x15),
     "SafeSpend":  u(3, 0x16),
     "Settings":   u(3, 0x17),
+    "Subscriptions": u(3, 0x18),
 }
 
 # Targets
@@ -238,6 +240,7 @@ APP_SOURCES = [
     ("SettingsView",            "Views/Settings/SettingsView.swift"),
     ("BalanceSnapshotService",  "Utilities/BalanceSnapshotService.swift"),
     ("SubscriptionDetector",    "Utilities/SubscriptionDetector.swift"),
+    ("SubscriptionAuditView",   "Views/Subscriptions/SubscriptionAuditView.swift"),
 ]
 
 TEST_SOURCES = [
@@ -408,6 +411,7 @@ def pbxproj():
     a(f"\t\t\t\t{GR['Transactions']} /* Transactions */,")
     a(f"\t\t\t\t{GR['Budget']} /* Budget */,")
     a(f"\t\t\t\t{GR['Recurring']} /* Recurring */,")
+    a(f"\t\t\t\t{GR['Subscriptions']} /* Subscriptions */,")
     a(f"\t\t\t\t{GR['ImportViews']} /* Import */,")
     a(f"\t\t\t\t{GR['NetWorth']} /* NetWorth */,")
     a(f"\t\t\t\t{GR['Metrics']} /* Metrics */,")
@@ -440,6 +444,7 @@ def pbxproj():
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
     simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])
+    simple_group("Subscriptions", "Subscriptions", ["SubscriptionAuditView"])
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
     simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])

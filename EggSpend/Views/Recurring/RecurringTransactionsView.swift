@@ -85,6 +85,13 @@ struct RecurringTransactionsView: View {
                 }
                 .foregroundStyle(Color.yolk)
             }
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink(destination: SubscriptionAuditView()) {
+                    Image(systemName: "sparkle.magnifyingglass")
+                        .accessibilityLabel("Subscription audit")
+                }
+                .foregroundStyle(Color.yolk)
+            }
         }
         .overlay {
             if items.isEmpty {

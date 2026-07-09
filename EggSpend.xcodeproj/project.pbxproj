@@ -73,6 +73,7 @@
 		AA0200000000000000000059 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006E /* SettingsView.swift */; };
 		AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000070 /* BalanceSnapshotService.swift */; };
 		AA020000000000000000005D /* SubscriptionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000072 /* SubscriptionDetector.swift */; };
+		AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000074 /* SubscriptionAuditView.swift */; };
 		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
 		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
 		AA0200000000000000000027 /* TransactionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000030 /* TransactionModelTests.swift */; };
@@ -179,6 +180,7 @@
 		AA010000000000000000006E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000070 /* BalanceSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceSnapshotService.swift; sourceTree = "<group>"; };
 		AA0100000000000000000072 /* SubscriptionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetector.swift; sourceTree = "<group>"; };
+		AA0100000000000000000074 /* SubscriptionAuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAuditView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
 		AA0100000000000000000051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -282,6 +284,7 @@
 				AA0300000000000000000007 /* Transactions */,
 				AA030000000000000000000E /* Budget */,
 				AA030000000000000000000F /* Recurring */,
+				AA0300000000000000000018 /* Subscriptions */,
 				AA0300000000000000000011 /* Import */,
 				AA0300000000000000000008 /* NetWorth */,
 				AA0300000000000000000009 /* Metrics */,
@@ -335,6 +338,14 @@
 				AA010000000000000000001C /* AddRecurringTransactionView.swift */,
 			);
 			path = Recurring;
+			sourceTree = "<group>";
+		};
+		AA0300000000000000000018 /* Subscriptions */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000074 /* SubscriptionAuditView.swift */,
+			);
+			path = Subscriptions;
 			sourceTree = "<group>";
 		};
 		AA0300000000000000000008 /* NetWorth */ = {
@@ -668,6 +679,7 @@
 				AA0200000000000000000059 /* SettingsView.swift in Sources */,
 				AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */,
 				AA020000000000000000005D /* SubscriptionDetector.swift in Sources */,
+				AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
