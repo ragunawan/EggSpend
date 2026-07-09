@@ -72,6 +72,7 @@
 		AA0200000000000000000057 /* DataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006C /* DataExporter.swift */; };
 		AA0200000000000000000059 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006E /* SettingsView.swift */; };
 		AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000070 /* BalanceSnapshotService.swift */; };
+		AA020000000000000000005D /* SubscriptionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000072 /* SubscriptionDetector.swift */; };
 		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
 		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
 		AA0200000000000000000027 /* TransactionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000030 /* TransactionModelTests.swift */; };
@@ -96,6 +97,7 @@
 		AA0200000000000000000056 /* CurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006B /* CurrencyFormatTests.swift */; };
 		AA0200000000000000000058 /* DataExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006D /* DataExporterTests.swift */; };
 		AA020000000000000000005C /* BalanceSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000071 /* BalanceSnapshotTests.swift */; };
+		AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000073 /* SubscriptionDetectorTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -176,6 +178,7 @@
 		AA010000000000000000006C /* DataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExporter.swift; sourceTree = "<group>"; };
 		AA010000000000000000006E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000070 /* BalanceSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceSnapshotService.swift; sourceTree = "<group>"; };
+		AA0100000000000000000072 /* SubscriptionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetector.swift; sourceTree = "<group>"; };
 		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
 		AA0100000000000000000051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -201,6 +204,7 @@
 		AA010000000000000000006B /* CurrencyFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000006D /* DataExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExporterTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000071 /* BalanceSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceSnapshotTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000073 /* SubscriptionDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetectorTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -410,6 +414,7 @@
 				AA010000000000000000006A /* CurrencyFormat.swift */,
 				AA010000000000000000006C /* DataExporter.swift */,
 				AA0100000000000000000070 /* BalanceSnapshotService.swift */,
+				AA0100000000000000000072 /* SubscriptionDetector.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -491,6 +496,7 @@
 				AA010000000000000000006B /* CurrencyFormatTests.swift */,
 				AA010000000000000000006D /* DataExporterTests.swift */,
 				AA0100000000000000000071 /* BalanceSnapshotTests.swift */,
+				AA0100000000000000000073 /* SubscriptionDetectorTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -661,6 +667,7 @@
 				AA0200000000000000000057 /* DataExporter.swift in Sources */,
 				AA0200000000000000000059 /* SettingsView.swift in Sources */,
 				AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */,
+				AA020000000000000000005D /* SubscriptionDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -690,6 +697,7 @@
 				AA0200000000000000000056 /* CurrencyFormatTests.swift in Sources */,
 				AA0200000000000000000058 /* DataExporterTests.swift in Sources */,
 				AA020000000000000000005C /* BalanceSnapshotTests.swift in Sources */,
+				AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

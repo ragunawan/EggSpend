@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added subscription detection engine to identify recurring spend patterns: detects candidate recurring transactions from expense history by clustering on merchant name (normalized, digits/punctuation stripped), detecting cadence patterns (weekly/biweekly/monthly/yearly within ±3 days), and checking amount stability (within ±10% of historical median). Detected subscriptions show annualized costs and price changes, and can be converted to tracked RecurringTransaction entries with a single tap. Engine uses historical-only amounts for stability detection to admit realistic price increases (e.g., 16% Netflix-like bumps) while rejecting unrelated one-off charges.
 - Added App Store encryption compliance metadata declaring no non-exempt encryption.
 - Fixed cash-flow forecast to no longer double-count recurring transactions: baseline drift now reflects organic-transaction activity only (excluding auto-generated recurring entries), while recurring transactions are counted once via explicit upcoming-events projections; this prevents the drift baseline and scheduled occurrences from adding the same recurring charge twice within the forecast horizon.
 - Fixed a bug where net worth in the Metrics timeline and Monthly Review was computed by adding liability balances instead of subtracting them, inflating reported net worth; introduced a shared `NetWorthCalculator` now used consistently by Dashboard, Nest Egg, Metrics, and Monthly Review, and Metrics/Monthly Review now respect the "include in net worth" account setting.
