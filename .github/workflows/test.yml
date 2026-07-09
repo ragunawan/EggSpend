@@ -14,11 +14,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pin to Xcode 26 / iOS 26 SDK — required for the iPhone 17 simulator the
-      # rest of the project's tooling assumes (Xcode 16.x has no such device).
+      # Use the newest stable Xcode on the runner image. The macos-26 image only
+      # ships simulator runtimes for its default (newest) Xcode — pinning an older
+      # version (e.g. '26.0') selects an Xcode whose iOS platform is not installed,
+      # and every run dies with "iOS 26.0 is not installed" before building.
+      # latest-stable on macos-26 is still Xcode 26.x, so the iPhone 17 simulators
+      # the project's tooling assumes remain available.
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.0'
+          xcode-version: latest-stable
 
       - name: Install xcbeautify (best effort)
         run: brew install xcbeautify || true

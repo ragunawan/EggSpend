@@ -71,7 +71,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 - T11 follow-ups (CI workflow):
   1. Add `permissions: contents: read` hardening to GitHub Actions workflow.
   2. Tighter step-level timeout for simulator-boot hangs.
-  3. Confirm `macos-26` runner label validity at merge time.
+  3. ~~Confirm `macos-26` runner label validity at merge time.~~ Resolved loop 9.5 (2026-07-09): label is valid and runs execute, but every Tests run to date failed at "Run tests" — `xcode-version: '26.0'` selects an Xcode whose iOS simulator platform is absent from the image ("iOS 26.0 is not installed", from the run-14 xcresult artifact). Hotfix: pin `latest-stable`. First green run pending verification.
   4. Add `*.xcresult` to .gitignore.
 
 ## Milestone: ALL P0 TASKS (T1–T6) COMPLETE
