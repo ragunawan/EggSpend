@@ -90,3 +90,17 @@ Append-only record of each loop iteration. Maintained by the Documentation Agent
 - Follow-ups filed: (1) doc/test pinning for signed-input fallback rejection; (2) de_DE/negative round-trip test.
 - Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
 - Next task: T6.
+
+## Loop 7 — 2026-07-08 — T6: Surface save failures in critical paths
+- Planner: selected T6 (P0-6, last open P0).
+- Repo Analyst: confirmed CSVImportView advanced to .done regardless of save outcome; BudgetAlertCoordinator never saved alert-dedupe state at all; processRecurringTransactions already caught+printed (post-T4) but returned Void; recommended minimal design (do/catch + errorMessage in import; explicit save in the context overload; @discardableResult Bool; seed saves log-only).
+- Implementer round 1: implemented all four production changes + 2 tests (alert-state persists across a fresh ModelContext; recurring success-path returns true; failure branches documented as inspection-covered).
+- QA: FAIL — found a newly-reachable data-integrity gap: failed save keeps user on .preview, so retry would double-insert rows (previously unreachable since the UI always advanced to .done).
+- Implementer round 2: added modelContext.rollback() in the catch.
+- Code Review: REQUEST CHANGES — blanket rollback() on the shared main context could silently discard unrelated unsaved edits from other screens.
+- Implementer round 3: replaced rollback with targeted deletes of only this import's tracked inserts (insertedTransactions/insertedAccounts locals).
+- Code Review re-verdict: APPROVE. Confirmed full insert-path coverage and that deleting inserted-but-unsaved objects is a safe no-op. Follow-ups: (1) processRecurringTransactions Bool return still unread by both onAppear callers — recurring failures reach console only; file explicit backlog item "surface recurring-processing failures in UI" so T6 isn't overstated as fully closed; (2) optional shared logging helper instead of print (stylistic).
+- Docs: IMPLEMENTATION_PLAN.md (T6 → done; next up T7; added two follow-ups; milestone note: P0 tasks complete), AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md (B14 fixed; R1 fixed with note), CHANGELOG.md, FEATURE_BACKLOG.md.
+- Follow-ups filed: (1) surface recurring-processing failures in UI (banner/toast); (2) optional shared logging helper.
+- Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
+- Next task: T7.

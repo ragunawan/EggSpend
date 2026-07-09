@@ -29,7 +29,11 @@ enum PersistenceController {
             context.insert(category)
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("PersistenceController: failed to save default categories: \(error)")
+        }
     }
 
     static func seedPreviewTransactionsIfNeeded(modelContainer: ModelContainer) {
@@ -102,7 +106,11 @@ enum PersistenceController {
             }
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("PersistenceController: failed to save seeded preview data: \(error)")
+        }
 
         // Seed savings goals (only if none exist yet)
         let goalDescriptor = FetchDescriptor<SavingsGoal>()
@@ -142,7 +150,11 @@ enum PersistenceController {
             ))
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("PersistenceController: failed to save seeded preview data: \(error)")
+        }
     }
 
     static func previewContainer() -> ModelContainer {
@@ -187,7 +199,11 @@ enum PersistenceController {
             context.insert(Account(name: name, type: type, balance: balance))
         }
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("PersistenceController: failed to save seeded preview data: \(error)")
+        }
 
         // Seed sample budgets
         let descriptor2 = FetchDescriptor<TransactionCategory>()
@@ -258,7 +274,11 @@ enum PersistenceController {
             status: .completed
         ))
 
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("PersistenceController: failed to save seeded preview data: \(error)")
+        }
         return container
     }
 }

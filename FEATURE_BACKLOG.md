@@ -12,6 +12,7 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 ## Unprioritized inbox
 (The Documentation Agent appends here; the Planner promotes items into docs/task-backlog.md + IMPLEMENTATION_PLAN.md.)
 
+- Surface recurring-processing failures in UI (banner/toast) instead of console-only logging — T6 added Bool return tracking but both onAppear callers ignore it; address in next cycle so T6 isn't overstated as fully closed (from T6 code review).
 - Rollover budgets; overall monthly budget across categories
 - Budget suggestions from 3-month category averages
 - Transaction splitting; receipt photo attachments

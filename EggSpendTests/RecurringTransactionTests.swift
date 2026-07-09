@@ -81,6 +81,24 @@ final class RecurringTransactionTests: XCTestCase {
         XCTAssertNotNil(transactions.first?.recurringDueDate)
     }
 
+    /// `processRecurringTransactions` returns `true` on a successful save so callers
+    /// (currently none do) can react to it. Failure paths (`context.save()` throwing)
+    /// aren't reproducible with the in-memory container used here and are covered by
+    /// inspection only: the `catch` branch logs and returns `false`.
+    func testProcessRecurringTransactionsReturnsTrueOnSuccess() throws {
+        let past = Calendar.current.date(byAdding: .month, value: -3, to: .now)!
+        let item = RecurringTransaction(title: "Subscription", amount: 9.99,
+                                        type: .expense, frequency: .monthly, startDate: past)
+        item.nextDueDate = past
+        context.insert(item)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        let result = processRecurringTransactions(all, context: context)
+
+        XCTAssertTrue(result)
+    }
+
     func testProcessRecurringDoesNotDuplicateExistingGeneratedOccurrence() throws {
         let past = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
         let item = RecurringTransaction(title: "Subscription", amount: 9.99,

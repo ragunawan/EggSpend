@@ -15,7 +15,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T3 | CSV amount/type parsing fixes | P0-3 | done (2026-07-08, commit pending) | — | no |
 | T4 | Recurring end-date + infinite-loop guards | P0-4 | done (2026-07-08, commit pending) | — | no |
 | T5 | Locale-safe amount entry | P0-5 | done (2026-07-08, commit pending) | — | no |
-| T6 | Surface save failures in critical paths | P0-6 | pending | — | no |
+| T6 | Surface save failures in critical paths | P0-6 | done (2026-07-08, commit pending) | — | no |
 | T7 | Archive accounts instead of delete | P1-1 | pending | T1 | no (decision resolved: archive) |
 | T8 | CSV import: account selection + balance application | P1-2 | pending | T2, T3 | no |
 | T9 | CSV import duplicate detection | P1-3 | pending | T8 | **yes — dedupe strictness** |
@@ -35,7 +35,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 | T23 | CloudKit duplicate-sweep (generated transactions) | P3-4 | pending | T4 | **yes — deletes data, confirm before running** |
 | T24 | Accessibility & localization pass | P3-5 | pending | — | no |
 
-**Next up:** T6 (Surface save failures in critical paths).
+**Next up:** T7 (Archive accounts instead of delete) — pending.
 
 ## Completed
 
@@ -44,6 +44,7 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 - T3 — CSV amount/type parsing fixes — done 2026-07-08. Rewrote `parseAmount` with sign-first detection (paren, leading, trailing, U+2212); embedded-minus → nil rejection; thousands/decimal logic unchanged. Type inference now uses expense/income keyword lists with amount-sign fallback for unknown types. Added table-driven test cases (16 type, 13 amount). QA round 1: FAIL — caught "pos" substring-colliding inside "deposit", misclassifying Deposit as expense; loop returned to implementer per protocol. Implementer revision: whole-word token matching for short keywords (split on non-alphanumerics); tests extended with Direct Deposit/DR/CR pins. QA round 2: PASS-WITH-CI-CAVEAT — Python-oracle-verified all 16 type cases + 13 amount cases; parseAmount unchanged from earlier pass; scope clean. Code review approved with zero required fixes. Follow-up: long keywords still substring-match (e.g. "sale" in "wholesale", "payment" in "Payment Received") — pre-existing pattern, revisit if real exports misfire.
 - T4 — Recurring end-date + infinite-loop guards — done 2026-07-08. Removed item-level `endDate < now` skip in `processRecurringTransactions`; added `previousDueDate` capture + print-and-break guard when `advanceNextDueDate()` fails to strictly advance (safeguards infinite loop if Calendar.nextDate returns nil). Added 3 new tests (final-occurrence-for-ended-item, ended-item idempotent across relaunch, deep-backlog terminates with pinned 401 count). QA round 1: FAIL — test fixture off-by-one: 5-week-stale monthly item + endDate yesterday generated TWO occurrences, breaking count-1 assertion and introducing date flakiness. Loop returned to implementer per protocol. Implementer revision: fixture changed to nextDueDate = now−14 days, deterministic for all month lengths (monthly advance ≥28d overshoots now by ≥14d). QA round 2: PASS-WITH-CI-CAVEAT — fixture provably deterministic; production file byte-identical; scope surgical. Code review approved with zero required fixes. Follow-ups: (1) consider making Calendar injectable so non-advancing guard branch becomes testable (RecurringProjection already accepts a calendar); (2) UX note — long-unprocessed item (e.g. fresh CloudKit restore) can now materialize a batch of historical transactions silently; correct per spec but consider a "materialized N transactions" toast.
 - T5 — Locale-safe amount entry — done 2026-07-08. New `EggSpend/Utilities/AmountParser.swift` (fast-path `Double(text)` fallback, then position-validated grouping with single decimal separator, non-empty all-digit fraction, and grouping candidates {., comma, space U+00A0 U+202F} minus decimalSep; first group 1–3 digits, subsequent exactly 3; rejects trailing separators). Swapped all `Double(text)` parse sites and `String(format:)` pre-fill sites in 6 views (AddTransactionView, AddAccountView with four fields, TransactionFilterView). Registered new file in `generate_project.py` + regenerated pbxproj. Added `AmountParserTests.swift` with 17 test cases. QA round 1: FAIL-WITH-TWO-FINDINGS — (a) fr_FR test assumed dot grouping but real ICU uses narrow no-break space (U+202F) causing test failure in CI; (b) 100x hazard: en_US paste "12,50" with old `Double(text)` → 12.50 (safe rejection), but if grouping fallback mistakenly strips comma → 1250 (wrong). Loop returned to implementer per protocol. Implementer revision: position-validated grouping logic rejects "12,50" in en_US (no grouping separator, so trailing comma invalid; fraction would be "50" but "5" is position 4 from decimal so not exactly 3-digit group); tests re-pinned (en_US "12,50" → nil, fr_FR space/U+202F/dot-grouping cases all pass). QA round 2: PASS — full matrix machine-checked via Python port (17 cases), both defects resolved (no false-positive grouping, fr_FR test correct), no regression for negatives (fast path still handles "-12.50", fallback rejects "-12,50" same as old code). Code review approved with zero required fixes. Follow-ups: (1) doc note or test pinning that locale fallback rejects signed input ("-12,50" → nil; fail-safe, unreachable from decimal pads today); (2) optional de_DE/negative round-trip test.
+- T6 — Surface save failures in critical paths — done 2026-07-08. (1) CSVImportView: added do/catch in import logic (previously advanced to .done regardless of save outcome), now displays errorMessage on save failure and allows retry from .preview state without duplicate inserts (targeted rollback of only this import's tracked inserts on catch). (2) BudgetAlertCoordinator: explicit save after alert-dedupe state mutations (previously never persisted state). (3) processRecurringTransactions: added @discardableResult Bool return tracking success/failure (previously returned Void, failures reached console only via print). (4) PersistenceController.seedDefaultCategoriesIfNeeded: added @discardableResult Bool with explicit save (previously logged to console on error only). Added 2 tests: alert-state persists across a fresh ModelContext, and recurring success-path returns true. QA round 1: FAIL — found newly-reachable data-integrity gap: failed save keeps user on .preview state, retry would double-insert rows (previously unreachable since UI always advanced to .done). Loop returned to implementer per protocol. Implementer round 2: added modelContext.rollback() in the catch. Code Review: REQUEST CHANGES — blanket rollback() on shared main context could silently discard unrelated unsaved edits from other screens. Loop returned to implementer per protocol. Implementer round 3: replaced rollback with targeted deletes of only this import's tracked inserts (insertedTransactions/insertedAccounts locals), a safe no-op for untracked objects. Code Review re-verdict: APPROVE. Confirmed full insert-path coverage and that deleting inserted-but-unsaved objects is safe. Follow-ups: (1) processRecurringTransactions Bool return still unread by both onAppear callers — recurring failures reach console only; file explicit backlog item "surface recurring-processing failures in UI" so T6 isn't overstated as fully closed; (2) optional shared logging helper instead of print (stylistic)."
 
 ## Discovered follow-ups / new tickets
 
@@ -55,11 +56,25 @@ Owned by the Planner Agent. Detailed specs live in `docs/task-backlog.md` (T1–
 - CSV type inference: long keywords still substring-match (e.g. "sale" in "wholesale", "payment" in "Payment Received") — pre-existing pattern, revisit if real exports misfire (from T3 code review).
 - Locale-safe amount entry: doc note or test pinning that locale fallback rejects signed input ("-12,50" → nil; fail-safe, unreachable from decimal pads today) (from T5 code review).
 - Locale-safe amount entry: optional de_DE/negative round-trip test to expand coverage beyond en_US/fr_FR (from T5 code review).
+- Surface recurring-processing failures in UI instead of console-only: T6 added Bool return tracking but both onAppear callers ignore it; follow-up: display a banner/toast when recurring materialization fails (from T6 code review).
+- Optional shared logging helper in lieu of bare print() calls (from T6 code review).
 - T11 follow-ups (CI workflow):
   1. Add `permissions: contents: read` hardening to GitHub Actions workflow.
   2. Tighter step-level timeout for simulator-boot hangs.
   3. Confirm `macos-26` runner label validity at merge time.
   4. Add `*.xcresult` to .gitignore.
+
+## Milestone: ALL P0 TASKS (T1–T6) COMPLETE
+
+As of 2026-07-08, all P0-priority correctness and stability fixes have been implemented and approved:
+- T1: Net worth calculation and liability sign bugs fixed; shared NetWorthCalculator adopted app-wide.
+- T2: Historical net worth now respects account-linked filters consistently.
+- T3: CSV parsing sign detection and type inference fixed; whole-word token matching for short keywords.
+- T4: Recurring end-date and infinite-loop guards added; failed date advances log and break safely.
+- T5: Locale-safe amount entry with position-validated grouping fallback across all form fields.
+- T6: Save failures now surface instead of silently swallowing data; import rollback prevents double-inserts; alert dedupe state explicitly persisted; recurring failures logged to console (UI surfacing deferred to T7+ cycle).
+
+Next task: T7 (Archive accounts instead of delete).
 
 ## Blockers awaiting user decision
 

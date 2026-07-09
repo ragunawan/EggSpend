@@ -124,10 +124,14 @@ final class RecurringTransaction {
 /// - Parameters:
 ///   - items:   All `RecurringTransaction` instances to evaluate.
 ///   - context: The `ModelContext` used to insert generated transactions and save.
+/// - Returns: `true` if the generated transactions (if any) were saved successfully,
+///   `false` if the save failed. Launch-time failures currently surface via a console
+///   log only; a user-facing banner is a future enhancement.
+@discardableResult
 func processRecurringTransactions(
     _ items: [RecurringTransaction],
     context: ModelContext
-) {
+) -> Bool {
     let now = Date.now
     let existingGenerated = (try? context.fetch(FetchDescriptor<Transaction>()))?
         .filter { $0.isGenerated && $0.recurringSourceID != nil && $0.recurringDueDate != nil } ?? []
@@ -185,9 +189,11 @@ func processRecurringTransactions(
     do {
         try context.save()
         BudgetAlertCoordinator.checkBudgets(context: context)
+        return true
     } catch {
         // Surface the error to the console; callers can add additional
         // error-handling if required.
         print("RecurringTransaction processing failed to save: \(error)")
+        return false
     }
 }
