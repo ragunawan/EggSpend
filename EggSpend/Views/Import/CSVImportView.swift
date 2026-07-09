@@ -364,6 +364,9 @@ struct CSVImportView: View {
         importedCount = 0
         skippedCount  = 0
 
+        var insertedTransactions: [Transaction] = []
+        var insertedAccounts: [Account] = []
+
         if importType == .transactions {
             // Build category lookup (case-insensitive)
             let catMap = Dictionary(
@@ -385,6 +388,7 @@ struct CSVImportView: View {
                     notes:    result.notes
                 )
                 modelContext.insert(tx)
+                insertedTransactions.append(tx)
                 importedCount += 1
             }
         } else {
@@ -396,11 +400,24 @@ struct CSVImportView: View {
                 let account = Account(name: result.name, type: result.type,
                                       balance: balance, notes: result.notes)
                 modelContext.insert(account)
+                insertedAccounts.append(account)
                 importedCount += 1
             }
         }
 
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            // Targeted deletes rather than rollback: this call's own inserted
+            // rows are removed so a retry starts clean, while any unrelated
+            // unsaved edits elsewhere in the shared context survive (rollback
+            // would have discarded those too).
+            for tx in insertedTransactions { modelContext.delete(tx) }
+            for account in insertedAccounts { modelContext.delete(account) }
+            importedCount = 0
+            errorMessage = "Import failed to save: \(error.localizedDescription)"
+            return
+        }
         if importType == .transactions {
             BudgetAlertCoordinator.checkBudgets(context: modelContext)
         }

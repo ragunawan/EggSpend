@@ -208,4 +208,30 @@ final class NotificationSchedulerTests: XCTestCase {
 
         XCTAssertEqual(mock.addedRequests.count, 1)
     }
+
+    /// Pins the explicit `context.save()` added to the context-based overload: alert
+    /// dedupe state mutated by `evaluateAlert` must be durably persisted, not just
+    /// held in the in-memory objects, otherwise alerts would re-fire on next launch.
+    func testCheckBudgetsContextOverloadPersistsAlertStateAcrossFreshContext() throws {
+        let mock = MockNotificationCenter()
+        let budget = Budget(name: "Groceries", limitAmount: 100, period: .monthly)
+        budget.alertsEnabled = true
+        let budgetID = budget.id
+
+        context.insert(budget)
+        context.insert(Transaction(title: "Spend", amount: 90, type: .expense))
+        try context.save()
+
+        BudgetAlertCoordinator.checkBudgets(context: context, center: mock)
+        XCTAssertEqual(mock.addedRequests.count, 1)
+
+        // Re-fetch via a brand-new ModelContext on the same container to confirm the
+        // threshold/period mutations were actually saved, not just held in-memory.
+        let freshContext = ModelContext(container)
+        let refetched = try freshContext.fetch(FetchDescriptor<Budget>(
+            predicate: #Predicate { $0.id == budgetID }
+        ))
+        XCTAssertEqual(refetched.first?.lastAlertedThresholdRaw, BudgetAlertThreshold.nearLimit.rawValue)
+        XCTAssertNotNil(refetched.first?.lastAlertedPeriodStart)
+    }
 }

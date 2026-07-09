@@ -12,8 +12,8 @@ struct NetWorthView: View {
     private var liabilities: [Account] { accounts.filter { !$0.isAsset } }
     private var includedLiabilities: [Account] { liabilities.filter(\.includeInNetWorth) }
 
-    private var totalAssets: Double { assets.reduce(0) { $0 + $1.balance } }
-    private var totalLiabilities: Double { includedLiabilities.reduce(0) { $0 + abs($1.balance) } }
+    private var totalAssets: Double { NetWorthCalculator.totals(accounts: Array(accounts)).assets }
+    private var totalLiabilities: Double { NetWorthCalculator.totals(accounts: Array(accounts)).liabilities }
     private var netWorth: Double { totalAssets - totalLiabilities }
 
     var body: some View {

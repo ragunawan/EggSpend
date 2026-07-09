@@ -36,5 +36,10 @@ enum BudgetAlertCoordinator {
         guard !budgets.isEmpty else { return }
         let transactions = (try? context.fetch(FetchDescriptor<Transaction>())) ?? []
         checkBudgets(budgets, transactions: transactions, center: center)
+        do {
+            try context.save()
+        } catch {
+            print("BudgetAlertCoordinator: failed to save alert-state mutations: \(error)")
+        }
     }
 }

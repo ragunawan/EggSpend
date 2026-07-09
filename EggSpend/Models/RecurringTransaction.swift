@@ -124,18 +124,24 @@ final class RecurringTransaction {
 /// - Parameters:
 ///   - items:   All `RecurringTransaction` instances to evaluate.
 ///   - context: The `ModelContext` used to insert generated transactions and save.
+/// - Returns: `true` if the generated transactions (if any) were saved successfully,
+///   `false` if the save failed. Launch-time failures currently surface via a console
+///   log only; a user-facing banner is a future enhancement.
+@discardableResult
 func processRecurringTransactions(
     _ items: [RecurringTransaction],
     context: ModelContext
-) {
+) -> Bool {
     let now = Date.now
     let existingGenerated = (try? context.fetch(FetchDescriptor<Transaction>()))?
         .filter { $0.isGenerated && $0.recurringSourceID != nil && $0.recurringDueDate != nil } ?? []
 
     for item in items {
-        // Skip inactive items or those whose end date has passed.
+        // Skip inactive items. Items whose end date has passed are still
+        // processed below so any final un-generated occurrence on/before the
+        // end date is still materialized; the per-occurrence check below
+        // stops the loop once nextDueDate exceeds the end date.
         guard item.isActive else { continue }
-        if let end = item.endDate, end < now { continue }
 
         // Generate one Transaction for each overdue due date.
         while item.nextDueDate <= now {
@@ -166,7 +172,16 @@ func processRecurringTransactions(
                 context.insert(transaction)
                 AccountBalanceService.apply(transaction, to: item.account)
             }
+            let previousDueDate = item.nextDueDate
             item.advanceNextDueDate()
+            // Guard against a non-advancing calendar (e.g. a malformed
+            // frequency/calendar combination that fails to move nextDueDate
+            // forward), which would otherwise loop forever. This branch is
+            // not exercised by tests since Calendar isn't injectable here.
+            if item.nextDueDate <= previousDueDate {
+                print("RecurringTransaction processing: nextDueDate failed to advance for item \(item.id); stopping to avoid infinite loop.")
+                break
+            }
             NotificationScheduler.syncReminder(for: item)
         }
     }
@@ -174,9 +189,11 @@ func processRecurringTransactions(
     do {
         try context.save()
         BudgetAlertCoordinator.checkBudgets(context: context)
+        return true
     } catch {
         // Surface the error to the console; callers can add additional
         // error-handling if required.
         print("RecurringTransaction processing failed to save: \(error)")
+        return false
     }
 }

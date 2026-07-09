@@ -20,7 +20,7 @@ struct AddAccountView: View {
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingAccount != nil }
-    private var balance: Double { Double(balanceText) ?? 0 }
+    private var balance: Double { AmountParser.parse(balanceText) ?? 0 }
     private var isValid: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty }
 
     var body: some View {
@@ -115,9 +115,9 @@ struct AddAccountView: View {
             account.balance = stored
             account.notes = notes
             account.dueDate = resolvedDueDate
-            account.annualPercentageRate = selectedType.isAsset ? nil : Double(aprText)
-            account.minimumPayment = selectedType.isAsset ? nil : Double(minimumPaymentText)
-            account.plannedExtraPayment = selectedType.isAsset ? nil : Double(extraPaymentText)
+            account.annualPercentageRate = selectedType.isAsset ? nil : AmountParser.parse(aprText)
+            account.minimumPayment = selectedType.isAsset ? nil : AmountParser.parse(minimumPaymentText)
+            account.plannedExtraPayment = selectedType.isAsset ? nil : AmountParser.parse(extraPaymentText)
             account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
         } else {
             let account = Account(
@@ -127,9 +127,9 @@ struct AddAccountView: View {
                 notes: notes
             )
             account.dueDate = resolvedDueDate
-            account.annualPercentageRate = selectedType.isAsset ? nil : Double(aprText)
-            account.minimumPayment = selectedType.isAsset ? nil : Double(minimumPaymentText)
-            account.plannedExtraPayment = selectedType.isAsset ? nil : Double(extraPaymentText)
+            account.annualPercentageRate = selectedType.isAsset ? nil : AmountParser.parse(aprText)
+            account.minimumPayment = selectedType.isAsset ? nil : AmountParser.parse(minimumPaymentText)
+            account.plannedExtraPayment = selectedType.isAsset ? nil : AmountParser.parse(extraPaymentText)
             account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
             modelContext.insert(account)
         }
@@ -140,13 +140,13 @@ struct AddAccountView: View {
         guard let account = editingAccount else { return }
         name = account.name
         selectedType = account.type
-        balanceText = String(format: "%.2f", abs(account.balance))
+        balanceText = abs(account.balance).formatted(.number.precision(.fractionLength(2)).grouping(.never))
         notes = account.notes
         hasDueDate = account.dueDate != nil
         dueDate = account.dueDate ?? Date.now
-        aprText = account.annualPercentageRate.map { String(format: "%.2f", $0) } ?? ""
-        minimumPaymentText = account.minimumPayment.map { String(format: "%.2f", $0) } ?? ""
-        extraPaymentText = account.plannedExtraPayment.map { String(format: "%.2f", $0) } ?? ""
+        aprText = account.annualPercentageRate.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        minimumPaymentText = account.minimumPayment.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        extraPaymentText = account.plannedExtraPayment.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
         includeInNetWorth = account.includeInNetWorth
     }
 

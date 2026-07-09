@@ -25,7 +25,7 @@ struct AddRecurringTransactionView: View {
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingItem != nil }
-    private var amount: Double { Double(amountText) ?? 0 }
+    private var amount: Double { AmountParser.parse(amountText) ?? 0 }
     private var isValid: Bool { !title.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 }
 
     private var availableCategories: [TransactionCategory] {
@@ -177,7 +177,7 @@ struct AddRecurringTransactionView: View {
     private func populateIfEditing() {
         guard let item = editingItem else { return }
         title = item.title
-        amountText = String(format: "%.2f", item.amount)
+        amountText = item.amount.formatted(.number.precision(.fractionLength(2)).grouping(.never))
         selectedType = item.type
         frequency = item.frequency
         startDate = item.startDate

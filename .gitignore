@@ -6,4 +6,6 @@ xcuserdata/
 build/
 DerivedData/
 DerivedDataCodex/
-.claude/
+.claude/*
+!.claude/agents/
+__pycache__/

@@ -38,8 +38,8 @@ struct AddSavingsGoalView: View {
     // MARK: - Computed
 
     private var isEditing: Bool { editingGoal != nil }
-    private var targetAmount: Double { Double(targetAmountText) ?? 0 }
-    private var currentAmount: Double { Double(currentAmountText) ?? 0 }
+    private var targetAmount: Double { AmountParser.parse(targetAmountText) ?? 0 }
+    private var currentAmount: Double { AmountParser.parse(currentAmountText) ?? 0 }
     private var tracksLinkedAccount: Bool { linkedAccount != nil }
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && targetAmount > 0
@@ -248,8 +248,8 @@ struct AddSavingsGoalView: View {
     private func populateIfEditing() {
         guard let goal = editingGoal else { return }
         name = goal.name
-        targetAmountText = String(format: "%.2f", goal.targetAmount)
-        currentAmountText = String(format: "%.2f", goal.manualCurrentAmount)
+        targetAmountText = goal.targetAmount.formatted(.number.precision(.fractionLength(2)).grouping(.never))
+        currentAmountText = goal.manualCurrentAmount.formatted(.number.precision(.fractionLength(2)).grouping(.never))
         if let date = goal.targetDate {
             hasTargetDate = true
             targetDate = date

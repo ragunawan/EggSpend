@@ -93,10 +93,19 @@ extension CSVParser {
     /// Strips currency symbols and thousand separators, handles parentheses for negatives.
     static func parseAmount(_ raw: String) -> Double? {
         var s = raw.trimmingCharacters(in: .whitespaces)
-        let negative = s.hasPrefix("-") || (s.hasPrefix("(") && s.hasSuffix(")"))
-        for sym in ["$", "€", "£", "¥", "₹", "−", "-", "(", ")", " "] {
+        // Detect sign first, on the original trimmed string: parens, leading, or trailing minus.
+        let negative = (s.hasPrefix("(") && s.hasSuffix(")"))
+            || s.hasPrefix("-") || s.hasPrefix("−")
+            || s.hasSuffix("-") || s.hasSuffix("−")
+        // Strip currency symbols / parens / spaces, but not minus signs (handled separately below).
+        for sym in ["$", "€", "£", "¥", "₹", "(", ")", " "] {
             s = s.replacingOccurrences(of: sym, with: "")
         }
+        // Remove a single leading and/or trailing minus sign.
+        if s.hasPrefix("-") || s.hasPrefix("−") { s.removeFirst() }
+        if s.hasSuffix("-") || s.hasSuffix("−") { s.removeLast() }
+        // Any remaining minus sign means this isn't a valid signed number (e.g. "12-34").
+        if s.contains("-") || s.contains("−") { return nil }
         // Remove thousand-separator commas (keep decimal point)
         let parts = s.components(separatedBy: ".")
         if parts.count <= 2 {
@@ -234,12 +243,23 @@ extension CSVParser {
             let amount = parseAmount(rawAmt)
             let date   = parseDate(rawDate)
 
-            // Determine income/expense
+            // Determine income/expense. rawType is already lowercased above.
+            // Expense keywords are checked first: "payment" can misfire on statements
+            // like "Payment Received" (an income event) — accepted v1 imprecision.
+            let expenseKeywords = ["debit", "expense", "charge", "withdrawal", "purchase", "sale", "payment", "pos", "dr"]
+            let incomeKeywords  = ["income", "deposit", "refund", "credit", "cr"]
+            // "pos"/"dr"/"cr" are short enough to collide as substrings of other
+            // keywords (e.g. "pos" inside "deposit"), so they must match whole words only.
+            let shortKeywords: Set<String> = ["pos", "dr", "cr"]
+            let tokens = Set(rawType.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
+            func matches(_ keyword: String) -> Bool {
+                shortKeywords.contains(keyword) ? tokens.contains(keyword) : rawType.contains(keyword)
+            }
             let txType: TransactionType
-            if !rawType.isEmpty {
-                let isExpense = rawType.contains("debit") || rawType.contains("expense")
-                    || rawType.contains("charge") || rawType.contains("withdrawal")
-                txType = isExpense ? .expense : .income
+            if expenseKeywords.contains(where: matches) {
+                txType = .expense
+            } else if incomeKeywords.contains(where: matches) {
+                txType = .income
             } else if let a = amount {
                 txType = (a < 0) == mapping.negativeIsExpense ? .expense : .income
             } else {

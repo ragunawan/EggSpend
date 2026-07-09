@@ -81,6 +81,24 @@ final class RecurringTransactionTests: XCTestCase {
         XCTAssertNotNil(transactions.first?.recurringDueDate)
     }
 
+    /// `processRecurringTransactions` returns `true` on a successful save so callers
+    /// (currently none do) can react to it. Failure paths (`context.save()` throwing)
+    /// aren't reproducible with the in-memory container used here and are covered by
+    /// inspection only: the `catch` branch logs and returns `false`.
+    func testProcessRecurringTransactionsReturnsTrueOnSuccess() throws {
+        let past = Calendar.current.date(byAdding: .month, value: -3, to: .now)!
+        let item = RecurringTransaction(title: "Subscription", amount: 9.99,
+                                        type: .expense, frequency: .monthly, startDate: past)
+        item.nextDueDate = past
+        context.insert(item)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        let result = processRecurringTransactions(all, context: context)
+
+        XCTAssertTrue(result)
+    }
+
     func testProcessRecurringDoesNotDuplicateExistingGeneratedOccurrence() throws {
         let past = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
         let item = RecurringTransaction(title: "Subscription", amount: 9.99,
@@ -200,6 +218,83 @@ final class RecurringTransactionTests: XCTestCase {
 
         XCTAssertEqual(account.balance, 800, accuracy: 0.001)
     }
+
+    func testProcessRecurringGeneratesFinalOccurrenceForEndedItem() throws {
+        // nextDueDate is 14 days in the past, endDate is yesterday (1 day
+        // ago): the first occurrence at now-14d is <= endDate, so it's
+        // generated. Advancing one month from now-14d lands at least 28 days
+        // later (shortest month, February), i.e. at or beyond now+14d, which
+        // is always > now-1d (endDate) since 28 > 14+1. So exactly one
+        // occurrence is generated on/before endDate for every possible
+        // calendar/month length, making the fixture deterministic.
+        let calendar = Calendar.current
+        let twoWeeksAgo = calendar.date(byAdding: .day, value: -14, to: .now)!
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: .now)!
+        let item = RecurringTransaction(title: "Ended Sub", amount: 12, type: .expense,
+                                        frequency: .monthly, startDate: twoWeeksAgo)
+        item.nextDueDate = twoWeeksAgo
+        item.endDate = yesterday
+        context.insert(item)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        processRecurringTransactions(all, context: context)
+
+        let transactions = try context.fetch(FetchDescriptor<Transaction>())
+        XCTAssertEqual(transactions.count, 1, "Exactly one occurrence should have been generated before the item ended")
+        XCTAssertLessThanOrEqual(transactions.first?.date ?? .distantFuture, yesterday)
+        XCTAssertGreaterThan(item.nextDueDate, yesterday, "nextDueDate should have advanced past the end date")
+    }
+
+    func testProcessRecurringEndedItemIsIdempotentAcrossRelaunch() throws {
+        let calendar = Calendar.current
+        let fiveWeeksAgo = calendar.date(byAdding: .weekOfYear, value: -5, to: .now)!
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: .now)!
+        let item = RecurringTransaction(title: "Ended Sub", amount: 12, type: .expense,
+                                        frequency: .monthly, startDate: fiveWeeksAgo)
+        item.nextDueDate = fiveWeeksAgo
+        item.endDate = yesterday
+        context.insert(item)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        processRecurringTransactions(all, context: context)
+        let countAfterFirstRun = try context.fetch(FetchDescriptor<Transaction>()).count
+
+        // Simulate a second app launch processing the same (now ended) item.
+        processRecurringTransactions(all, context: context)
+        let countAfterSecondRun = try context.fetch(FetchDescriptor<Transaction>()).count
+
+        XCTAssertEqual(countAfterFirstRun, countAfterSecondRun,
+                       "Re-processing an ended item should not create duplicate transactions")
+    }
+
+    func testProcessRecurringTerminatesForDeepBacklog() throws {
+        // Daily item, nextDueDate 400 days in the past, no endDate.
+        // The while loop runs for every k in 0...400 where
+        // nextDueDate = now - (400 - k) days, since at k = 400 the due date
+        // equals `now` exactly and `<=` still admits it. That is 401
+        // occurrences (day -400 through day 0 inclusive); advancing past k=400
+        // yields now + 1 day, which exceeds `now` and stops the loop.
+        let calendar = Calendar.current
+        let past = calendar.date(byAdding: .day, value: -400, to: .now)!
+        let item = RecurringTransaction(title: "Daily Thing", amount: 1, type: .expense,
+                                        frequency: .daily, startDate: past)
+        item.nextDueDate = past
+        context.insert(item)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        processRecurringTransactions(all, context: context)
+
+        let transactions = try context.fetch(FetchDescriptor<Transaction>())
+        XCTAssertEqual(transactions.count, 401, "Loop should terminate after generating exactly 401 daily occurrences")
+    }
+
+    // Note: the non-advancing-calendar guard in processRecurringTransactions
+    // (breaking when nextDueDate fails to move forward) is not covered by a
+    // test here since Calendar isn't injectable into RecurringTransaction;
+    // this is a documented gap rather than an oversight.
 
     func testRecurringProjectionIncludesNext30DaysAndExcludesEndedItems() {
         let calendar = Calendar.current
