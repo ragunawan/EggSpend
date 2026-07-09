@@ -59,7 +59,7 @@ struct AddTransactionView: View {
         budgets.sorted { $0.name < $1.name }
     }
 
-    private var amount: Double { Double(amountText) ?? 0 }
+    private var amount: Double { AmountParser.parse(amountText) ?? 0 }
 
     private var isValid: Bool {
         guard amount > 0 else { return false }
@@ -359,7 +359,7 @@ struct AddTransactionView: View {
     private func populateIfEditing() {
         if let tx = editingTransaction {
             title = tx.title
-            amountText = String(format: "%.2f", tx.amount)
+            amountText = tx.amount.formatted(.number.precision(.fractionLength(2)).grouping(.never))
             date = tx.date
             selectedEntryKind = tx.type == .income ? .income : .expense
             selectedCategory = tx.category
@@ -370,7 +370,7 @@ struct AddTransactionView: View {
             notes = tx.notes
         } else if let transfer = editingTransfer {
             selectedEntryKind = .transfer
-            amountText = String(format: "%.2f", transfer.amount)
+            amountText = transfer.amount.formatted(.number.precision(.fractionLength(2)).grouping(.never))
             date = transfer.date
             fromAccount = transfer.fromAccount
             toAccount = transfer.toAccount

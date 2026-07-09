@@ -77,3 +77,16 @@ Append-only record of each loop iteration. Maintained by the Documentation Agent
 - Follow-ups filed: (1) Calendar injectability for testable non-advancing branch; (2) materialization-toast UX feature.
 - Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
 - Next task: T5.
+
+## Loop 6 — 2026-07-08 — T5: Locale-safe amount entry
+- Planner: selected T5 (P0-5, no dependencies).
+- Repo Analyst: enumerated every `Double(text)` parse site (AddTransactionView:62, AddAccountView's four fields across two save branches, TransactionFilterView) and every `String(format: "%.2f")` pre-fill site; recommended manual normalization over NumberFormatter; documented literal-dot ambiguity rule; flagged TransactionFilterView as same bug class; orchestrator approved inclusion in scope.
+- Implementer round 1: new `EggSpend/Utilities/AmountParser.swift` (fast-path `Double(text)`, then strip-grouping fallback); swapped all parse/pre-fill sites in 6 views (AddTransactionView, AddAccountView, TransactionFilterView); registered files in `generate_project.py` (FR 0x68/0x69) + regenerated pbxproj.
+- QA round 1: PASS-WITH-CI-CAVEAT but two must-fix findings: (a) fr_FR test assumed dot grouping but real ICU uses narrow no-break space (U+202F), test would fail CI; (b) 100x hazard: en_US paste "12,50" with naive comma-strip fallback would yield 1250 where old code safely rejected it. Loop returned to implementer per protocol.
+- Implementer round 2: replaced fallback with position-validated grouping (single decimal separator; non-empty all-digit fraction; grouping candidates {. , space U+00A0 U+202F} minus decimalSep; first group 1–3 digits, subsequent exactly 3); trailing-separator leniency removed ("12," → nil); tests re-pinned (en_US "12,50" → nil, fr_FR space/U+202F/dot-grouping cases all pass).
+- QA round 2: PASS — full matrix machine-checked via Python port (17 cases); both defects resolved (no false-positive grouping, fr_FR test correct); no regression for negatives (fast path still handles "-12.50", fallback rejects "-12,50" same as old code).
+- Code Review: APPROVE, zero required fixes. Follow-ups: (1) doc note or test pinning that locale fallback rejects signed input ("-12,50" → nil; fail-safe, unreachable from decimal pads today); (2) optional de_DE/negative round-trip test to expand locale coverage.
+- Docs: IMPLEMENTATION_PLAN.md, AGENT_LOOP_LOG.md, BUGS_AND_RISKS.md, CHANGELOG.md.
+- Follow-ups filed: (1) doc/test pinning for signed-input fallback rejection; (2) de_DE/negative round-trip test.
+- Commit: this loop's commit on branch `claude/finance-app-audit-roadmap-t8y2p4`.
+- Next task: T6.

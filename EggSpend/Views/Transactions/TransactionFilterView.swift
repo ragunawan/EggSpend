@@ -23,8 +23,8 @@ struct TransactionFilterView: View {
         let initial = filter.wrappedValue
         _draft = State(initialValue: initial)
         _draftHideTransfers = State(initialValue: hideTransfers.wrappedValue)
-        _minAmountText = State(initialValue: initial.minAmount.map { String(format: "%.2f", $0) } ?? "")
-        _maxAmountText = State(initialValue: initial.maxAmount.map { String(format: "%.2f", $0) } ?? "")
+        _minAmountText = State(initialValue: initial.minAmount.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? "")
+        _maxAmountText = State(initialValue: initial.maxAmount.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? "")
     }
 
     private var activeCategories: [TransactionCategory] {
@@ -281,8 +281,8 @@ struct TransactionFilterView: View {
     }
 
     private func apply() {
-        draft.minAmount = Double(minAmountText)
-        draft.maxAmount = Double(maxAmountText)
+        draft.minAmount = AmountParser.parse(minAmountText)
+        draft.maxAmount = AmountParser.parse(maxAmountText)
         filter = draft
         hideTransfers = draftHideTransfers
         dismiss()

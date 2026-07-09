@@ -17,7 +17,7 @@ struct AddBudgetView: View {
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingBudget != nil }
-    private var amount: Double { Double(amountText) ?? 0 }
+    private var amount: Double { AmountParser.parse(amountText) ?? 0 }
     private var isValid: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && amount > 0 }
 
     var body: some View {
@@ -110,7 +110,7 @@ struct AddBudgetView: View {
     private func populateIfEditing() {
         guard let b = editingBudget else { return }
         name = b.name
-        amountText = String(format: "%.2f", b.limitAmount)
+        amountText = b.limitAmount.formatted(.number.precision(.fractionLength(2)).grouping(.never))
         period = b.period
         selectedCategory = b.category
         isActive = b.isActive
