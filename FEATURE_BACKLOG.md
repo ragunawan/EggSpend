@@ -29,6 +29,10 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 - UX: "Materialized N historical transactions" toast notification when a long-unprocessed recurring item (e.g. fresh CloudKit restore) generates a batch of backlogged occurrences on launch; correct per spec but silent bulk creation could surprise users (from T4 code review).
 - UX: CSV import net-effect display (T8) when preview shows "Will increase X by $0.00" — consider suppressing the sentence entirely when the effect rounds to zero to reduce visual clutter (from T8 code review).
 - Product decision needed: liability account balance wording in CSV import net-effect display — "Will increase" / "Will decrease" refers to the signed balance (negative = owed), which may read debt-inverted for users (e.g. "increasing" a negative $500 credit-card debt means paying off, decreasing it); verify product intent and consider debt-oriented wording (from T8 code review).
+- T9 follow-ups (CSV import duplicate detection):
+  - Nil-account dedupe bucket clarification — doc-comment noting that unassigned transactions (account = nil) form their own dedupe bucket and only match other unassigned transactions (not all transactions); the current phrase "same account when set" could be misread as ignore-account-when-none.
+  - Double exact-equality in dedupe key — backlog note for Decimal migration (T12+) that the TransactionDuplicateKey will need to be updated to use Decimal instead of Double.
+  - Optimization: unfiltered full-table transaction fetch at buildPreview is O(n) per preview render — fine for v1 and consistent with repo precedent, but consider a date-bounded #Predicate if transaction volumes grow to tens of thousands.
 
 ### From TODO.md (user-ranked P0–P3 roadmap, committed to `main` 2026-07-08; see IMPLEMENTATION_PLAN.md "TODO.md reconciliation" for the full mapping — these are the items with no existing task ID)
 

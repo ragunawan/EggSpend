@@ -55,6 +55,7 @@ struct CSVImportView: View {
     @State private var importComplete = false
     @State private var importedCount  = 0
     @State private var skippedCount   = 0
+    @State private var duplicateSkippedCount = 0
 
     enum Step { case pick, map, preview, done }
 
@@ -290,7 +291,7 @@ struct CSVImportView: View {
             // Import button
             Button(action: performImport) {
                 let validCount = importType == .transactions
-                    ? txResults.filter(\.isValid).count
+                    ? txResults.filter(\.willImport).count
                     : acctResults.filter(\.isValid).count
                 Label("Import \(validCount) \(importType == .transactions ? "Transactions" : "Accounts")",
                       systemImage: "square.and.arrow.down.fill")
@@ -305,14 +306,27 @@ struct CSVImportView: View {
     }
 
     private var summaryBar: some View {
-        let (valid, invalid) = importType == .transactions
-            ? (txResults.filter(\.isValid).count, txResults.filter { !$0.isValid }.count)
-            : (acctResults.filter(\.isValid).count, acctResults.filter { !$0.isValid }.count)
+        let ready: Int
+        let invalid: Int
+        let duplicates: Int
+        if importType == .transactions {
+            ready = txResults.filter(\.willImport).count
+            invalid = txResults.filter { !$0.isValid }.count
+            duplicates = txResults.filter { $0.isValid && $0.isDuplicate }.count
+        } else {
+            ready = acctResults.filter(\.isValid).count
+            invalid = acctResults.filter { !$0.isValid }.count
+            duplicates = 0
+        }
 
         return HStack {
-            Label("\(valid) ready", systemImage: "checkmark.circle.fill")
+            Label("\(ready) ready", systemImage: "checkmark.circle.fill")
                 .foregroundStyle(Color.nestLeafGreen)
             Spacer()
+            if duplicates > 0 {
+                Label("\(duplicates) duplicates", systemImage: "doc.on.doc.fill")
+                    .foregroundStyle(.orange)
+            }
             if invalid > 0 {
                 Label("\(invalid) skipped", systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
@@ -340,6 +354,10 @@ struct CSVImportView: View {
                     .foregroundStyle(.secondary)
                 if skippedCount > 0 {
                     Text("\(skippedCount) rows skipped (invalid data)")
+                        .font(.caption).foregroundStyle(.orange)
+                }
+                if duplicateSkippedCount > 0 {
+                    Text("\(duplicateSkippedCount) duplicates skipped")
                         .font(.caption).foregroundStyle(.orange)
                 }
             }
@@ -389,7 +407,16 @@ struct CSVImportView: View {
 
     private func buildPreview() {
         if importType == .transactions {
-            txResults = CSVParser.parseTransactionRows(rows: rawRows, headers: headers, mapping: mapping)
+            let parsed = CSVParser.parseTransactionRows(rows: rawRows, headers: headers, mapping: mapping)
+            // Unfiltered fetch + in-Swift filter (repo precedent: RecurringTransaction.swift,
+            // BudgetAlertCoordinator.swift) rather than a #Predicate date range.
+            // Includes isGenerated (recurring-materialized) transactions deliberately: a bank
+            // row that collides with an already-materialized recurring charge is a real duplicate.
+            let existingTransactions = (try? modelContext.fetch(FetchDescriptor<Transaction>())) ?? []
+            let existingKeys = Set(existingTransactions.map {
+                duplicateKey(date: $0.date, amount: $0.amount, title: $0.title, accountID: $0.account?.id)
+            })
+            txResults = markDuplicates(in: parsed, existingKeys: existingKeys, accountID: selectedImportAccount?.id)
         } else {
             acctResults = CSVParser.parseAccountRows(rows: rawRows, headers: headers, mapping: mapping)
         }
@@ -399,6 +426,7 @@ struct CSVImportView: View {
     private func performImport() {
         importedCount = 0
         skippedCount  = 0
+        duplicateSkippedCount = 0
 
         var insertedTransactions: [Transaction] = []
         var insertedAccounts: [Account] = []
@@ -412,6 +440,12 @@ struct CSVImportView: View {
             for result in txResults {
                 guard result.isValid, let date = result.date, let amount = result.amount else {
                     skippedCount += 1
+                    continue
+                }
+                // Trust the isDuplicate flag baked in by buildPreview()'s markDuplicates()
+                // call — do not re-derive here, so there's a single source of truth.
+                if result.isDuplicate {
+                    duplicateSkippedCount += 1
                     continue
                 }
                 let category = result.categoryName.flatMap { catMap[$0.lowercased()] }
@@ -474,9 +508,55 @@ struct CSVImportView: View {
 
 /// Net signed effect that importing the given rows would have on an account's
 /// balance — income adds, expense subtracts. Mirrors `performImport()`'s own
-/// `isValid` filter so the preview sentence matches what actually gets applied.
+/// `willImport` filter so the preview sentence matches what actually gets applied.
 func netBalanceEffect(of results: [ParsedTransactionResult]) -> Double {
-    results.filter(\.isValid).reduce(0) { $0 + $1.type.sign * ($1.amount ?? 0) }
+    results.filter(\.willImport).reduce(0) { $0 + $1.type.sign * ($1.amount ?? 0) }
+}
+
+// MARK: – Duplicate detection
+
+/// Same calendar day + same amount + case/whitespace-normalized title + same
+/// account when set. Intentionally has no type/sign dimension: a same-day,
+/// same-amount, same-title refund and purchase in the same account collide as
+/// duplicates — accepted v1 imprecision per the resolved product decision.
+struct TransactionDuplicateKey: Hashable {
+    let day: Date
+    let amount: Double
+    let normalizedTitle: String
+    let accountID: UUID?
+}
+
+func duplicateKey(date: Date, amount: Double, title: String, accountID: UUID?) -> TransactionDuplicateKey {
+    TransactionDuplicateKey(
+        day: Calendar.current.startOfDay(for: date),
+        amount: amount,
+        normalizedTitle: CSVParser.normalizedTitle(title),
+        accountID: accountID
+    )
+}
+
+/// Marks structurally valid rows whose duplicate key already exists (either in
+/// `existingKeys` — persisted transactions — or earlier in this same file) as
+/// `isDuplicate`. The first occurrence of a key imports; later identical rows
+/// within the file are marked so within-file duplicates are also caught.
+/// Structurally invalid rows (no date/amount) pass through unmarked.
+func markDuplicates(
+    in results: [ParsedTransactionResult],
+    existingKeys: Set<TransactionDuplicateKey>,
+    accountID: UUID?
+) -> [ParsedTransactionResult] {
+    var seen = existingKeys
+    return results.map { result in
+        var result = result
+        guard result.isValid, let date = result.date, let amount = result.amount else { return result }
+        let key = duplicateKey(date: date, amount: amount, title: result.title, accountID: accountID)
+        if seen.contains(key) {
+            result.isDuplicate = true
+        } else {
+            seen.insert(key)
+        }
+        return result
+    }
 }
 
 // MARK: – Preview rows
@@ -486,17 +566,23 @@ private struct TransactionPreviewRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: result.isValid
-                  ? (result.type == .income ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
-                  : "exclamationmark.triangle.fill")
-                .foregroundStyle(result.isValid
-                                 ? (result.type == .income ? Color.nestLeafGreen : .red)
-                                 : .orange)
+            Image(systemName: !result.isValid
+                  ? "exclamationmark.triangle.fill"
+                  : (result.isDuplicate
+                     ? "doc.on.doc.fill"
+                     : (result.type == .income ? "arrow.down.circle.fill" : "arrow.up.circle.fill")))
+                .foregroundStyle(!result.isValid
+                                 ? .orange
+                                 : (result.isDuplicate
+                                    ? .orange
+                                    : (result.type == .income ? Color.nestLeafGreen : .red)))
                 .frame(width: 22)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(result.title).font(.body).lineLimit(1)
-                if let err = result.validationError {
+                if result.isValid && result.isDuplicate {
+                    Text("Duplicate — will skip").font(.caption).foregroundStyle(.orange)
+                } else if let err = result.validationError {
                     Text(err).font(.caption).foregroundStyle(.orange)
                 } else {
                     HStack(spacing: 6) {
@@ -518,7 +604,7 @@ private struct TransactionPreviewRow: View {
                 Text("—").foregroundStyle(.secondary)
             }
         }
-        .opacity(result.isValid ? 1 : 0.5)
+        .opacity(result.willImport ? 1 : 0.5)
     }
 }
 

@@ -116,6 +116,13 @@ extension CSVParser {
         return negative ? -value : value
     }
 
+    /// Normalizes a title for duplicate-detection comparisons: lowercased, trimmed,
+    /// and internal whitespace runs collapsed to a single space.
+    static func normalizedTitle(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return trimmed.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+    }
+
     static func inferAccountType(from raw: String) -> AccountType {
         let s = raw.lowercased()
         if s.contains("checking") || s.contains("current")         { return .checking }
@@ -189,10 +196,15 @@ struct ParsedTransactionResult: Identifiable {
     var type:   TransactionType
     var categoryName: String?
     var notes:  String
+    // Set by `markDuplicates(in:existingKeys:accountID:)` after structural parsing.
+    // Defaulted so existing 7-arg initializer call sites keep compiling.
+    var isDuplicate: Bool = false
 
     var isValid: Bool {
         date != nil && amount != nil && !title.trimmingCharacters(in: .whitespaces).isEmpty
     }
+    /// Whether this row will actually be inserted on import: structurally valid and not a duplicate.
+    var willImport: Bool { isValid && !isDuplicate }
     var validationError: String? {
         if title.trimmingCharacters(in: .whitespaces).isEmpty { return "Missing title" }
         if date   == nil { return "Invalid date" }

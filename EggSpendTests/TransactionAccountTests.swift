@@ -279,4 +279,120 @@ final class TransactionAccountTests: XCTestCase {
 
         XCTAssertEqual(account.balance, startingBalance, accuracy: 0.001)
     }
+
+    // MARK: - CSV import: duplicate detection
+
+    func testMarkDuplicatesSkipsRowMatchingExistingTransaction() {
+        let account = Account(name: "Checking", type: .checking, balance: 1000)
+        context.insert(account)
+        let day = Date(timeIntervalSince1970: 1_700_000_000)
+        let existingKeys: Set<TransactionDuplicateKey> = [
+            duplicateKey(date: day, amount: 42.50, title: "Coffee Shop", accountID: account.id)
+        ]
+        let rows = [
+            ParsedTransactionResult(rowIndex: 0, title: "  COFFEE   Shop  ", date: day, amount: 42.50,
+                                     type: .expense, categoryName: nil, notes: "")
+        ]
+
+        let marked = markDuplicates(in: rows, existingKeys: existingKeys, accountID: account.id)
+
+        XCTAssertTrue(marked[0].isDuplicate)
+        XCTAssertFalse(marked[0].willImport)
+    }
+
+    func testMarkDuplicatesCatchesWithinFileDuplicateOnSecondOccurrence() {
+        let day = Date(timeIntervalSince1970: 1_700_000_000)
+        let rows = [
+            ParsedTransactionResult(rowIndex: 0, title: "Coffee Shop", date: day, amount: 4.50,
+                                     type: .expense, categoryName: nil, notes: ""),
+            ParsedTransactionResult(rowIndex: 1, title: "Coffee Shop", date: day, amount: 4.50,
+                                     type: .expense, categoryName: nil, notes: "")
+        ]
+
+        let marked = markDuplicates(in: rows, existingKeys: [], accountID: nil)
+
+        XCTAssertFalse(marked[0].isDuplicate)
+        XCTAssertTrue(marked[0].willImport)
+        XCTAssertTrue(marked[1].isDuplicate)
+        XCTAssertFalse(marked[1].willImport)
+    }
+
+    func testMarkDuplicatesTreatsDifferentDayAsDistinct() {
+        let day1 = Date(timeIntervalSince1970: 1_700_000_000)
+        let day2 = day1.addingTimeInterval(86_400)
+        let existingKeys: Set<TransactionDuplicateKey> = [
+            duplicateKey(date: day1, amount: 4.50, title: "Coffee Shop", accountID: nil)
+        ]
+        let rows = [
+            ParsedTransactionResult(rowIndex: 0, title: "Coffee Shop", date: day2, amount: 4.50,
+                                     type: .expense, categoryName: nil, notes: "")
+        ]
+
+        let marked = markDuplicates(in: rows, existingKeys: existingKeys, accountID: nil)
+
+        XCTAssertFalse(marked[0].isDuplicate)
+    }
+
+    func testMarkDuplicatesTreatsDifferentAmountAsDistinct() {
+        let day = Date(timeIntervalSince1970: 1_700_000_000)
+        let existingKeys: Set<TransactionDuplicateKey> = [
+            duplicateKey(date: day, amount: 4.50, title: "Coffee Shop", accountID: nil)
+        ]
+        let rows = [
+            ParsedTransactionResult(rowIndex: 0, title: "Coffee Shop", date: day, amount: 4.75,
+                                     type: .expense, categoryName: nil, notes: "")
+        ]
+
+        let marked = markDuplicates(in: rows, existingKeys: existingKeys, accountID: nil)
+
+        XCTAssertFalse(marked[0].isDuplicate)
+    }
+
+    func testMarkDuplicatesTreatsDifferentAccountAsDistinct() {
+        let accountA = Account(name: "Checking", type: .checking, balance: 1000)
+        let accountB = Account(name: "Savings", type: .savings, balance: 500)
+        context.insert(accountA)
+        context.insert(accountB)
+        let day = Date(timeIntervalSince1970: 1_700_000_000)
+        let existingKeys: Set<TransactionDuplicateKey> = [
+            duplicateKey(date: day, amount: 4.50, title: "Coffee Shop", accountID: accountA.id)
+        ]
+        let rows = [
+            ParsedTransactionResult(rowIndex: 0, title: "Coffee Shop", date: day, amount: 4.50,
+                                     type: .expense, categoryName: nil, notes: "")
+        ]
+
+        let marked = markDuplicates(in: rows, existingKeys: existingKeys, accountID: accountB.id)
+
+        XCTAssertFalse(marked[0].isDuplicate)
+    }
+
+    func testMarkDuplicatesLeavesStructurallyInvalidRowsUnmarked() {
+        let existingKeys: Set<TransactionDuplicateKey> = []
+        // Missing date makes this row structurally invalid; markDuplicates should pass it through untouched.
+        let rows = [
+            ParsedTransactionResult(rowIndex: 0, title: "Bad Row", date: nil, amount: 4.50,
+                                     type: .expense, categoryName: nil, notes: "")
+        ]
+
+        let marked = markDuplicates(in: rows, existingKeys: existingKeys, accountID: nil)
+
+        XCTAssertFalse(marked[0].isDuplicate)
+        XCTAssertFalse(marked[0].isValid)
+        XCTAssertFalse(marked[0].willImport)
+    }
+
+    func testNetBalanceEffectExcludesDuplicateRows() {
+        var duplicateRow = ParsedTransactionResult(rowIndex: 0, title: "Coffee", date: .now, amount: 50,
+                                                     type: .expense, categoryName: nil, notes: "")
+        duplicateRow.isDuplicate = true
+        let rows: [ParsedTransactionResult] = [
+            duplicateRow,
+            // valid, non-duplicate income: +200
+            ParsedTransactionResult(rowIndex: 1, title: "Refund", date: .now, amount: 200, type: .income, categoryName: nil, notes: ""),
+        ]
+
+        // Duplicate row is excluded even though it's structurally valid: only +200 counts.
+        XCTAssertEqual(netBalanceEffect(of: rows), 200, accuracy: 0.001)
+    }
 }

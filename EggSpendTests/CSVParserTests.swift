@@ -163,6 +163,15 @@ final class CSVParserTests: XCTestCase {
         }
     }
 
+    // MARK: - Title normalization (duplicate detection)
+
+    func testNormalizedTitleCaseAndWhitespace() {
+        XCTAssertEqual(CSVParser.normalizedTitle("  Coffee   Shop  "), "coffee shop")
+        XCTAssertEqual(CSVParser.normalizedTitle("COFFEE SHOP"), "coffee shop")
+        XCTAssertEqual(CSVParser.normalizedTitle("Coffee\tShop\nDowntown"), "coffee shop downtown")
+        XCTAssertEqual(CSVParser.normalizedTitle("Coffee Shop"), CSVParser.normalizedTitle("coffee   shop"))
+    }
+
     // MARK: - Account type inference
 
     func testInferAccountTypeChecking() {
