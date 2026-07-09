@@ -64,6 +64,21 @@ enum DataExporter {
         return csvText(from: rows)
     }
 
+    // MARK: - Export filenames
+
+    /// Builds `"EggSpend-<prefix>-yyyy-MM-dd.<ext>"`, e.g.
+    /// `"EggSpend-Transactions-2026-07-09.csv"`. Uses the same
+    /// `en_US_POSIX` yyyy-MM-dd pattern as `csvDateString` deliberately: a
+    /// locale-current formatter can render the date with a "/" separator
+    /// (a path separator) for some calendars/locales, which would corrupt
+    /// the filename.
+    static func exportFilename(prefix: String, ext: String, date: Date = .now) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return "EggSpend-\(prefix)-\(formatter.string(from: date)).\(ext)"
+    }
+
     // MARK: - CSV formatting helpers
 
     /// yyyy-MM-dd, locale-independent (`en_US_POSIX`). Time zone is

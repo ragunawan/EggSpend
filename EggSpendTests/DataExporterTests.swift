@@ -212,6 +212,15 @@ final class DataExporterTests: XCTestCase {
         XCTAssertFalse(marked[1].isDuplicate)  // originally Savings — treated as new
     }
 
+    // MARK: - exportFilename
+
+    func testExportFilenameIsLocaleIndependentAndSlashFree() {
+        let date = fixtureDate(2024, 3, 5)
+        let filename = DataExporter.exportFilename(prefix: "Transactions", ext: "csv", date: date)
+        XCTAssertEqual(filename, "EggSpend-Transactions-2024-03-05.csv")
+        XCTAssertFalse(filename.contains("/"))
+    }
+
     // MARK: - accountsCSV
 
     func testAccountsCSVRowCountAndHeaders() {

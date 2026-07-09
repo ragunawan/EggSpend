@@ -13,6 +13,7 @@ struct DashboardView: View {
     @State private var netWorthVisible = false
     @State private var headerVisible = false
     @State private var showAddTransaction = false
+    @State private var showSettings = false
 
     @State private var savingsContentWidth: CGFloat = 0
     @State private var savingsVisibleWidth: CGFloat = 0
@@ -81,6 +82,13 @@ struct DashboardView: View {
                             .help("iCloud sync unavailable — data is stored locally only")
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.title2).foregroundStyle(Color.twig)
+                    }
+                    .accessibilityLabel("Settings")
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button { showAddTransaction = true } label: {
                         Image(systemName: "plus.circle.fill")
@@ -89,6 +97,7 @@ struct DashboardView: View {
                 }
             }
             .sheet(isPresented: $showAddTransaction) { AddTransactionView() }
+            .sheet(isPresented: $showSettings) { SettingsView() }
         }
     }
 

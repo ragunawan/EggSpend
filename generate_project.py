@@ -104,6 +104,7 @@ FR = {
     "TEST_CurrencyFormat":     u(1, 0x6B),
     "DataExporter":            u(1, 0x6C),
     "TEST_DataExporter":       u(1, 0x6D),
+    "SettingsView":            u(1, 0x6E),
 }
 
 # Build files
@@ -133,6 +134,7 @@ GR = {
     "MonthlyReview": u(3, 0x14),
     "SavingsGoals": u(3, 0x15),
     "SafeSpend":  u(3, 0x16),
+    "Settings":   u(3, 0x17),
 }
 
 # Targets
@@ -227,6 +229,7 @@ APP_SOURCES = [
     ("AmountParser",            "Utilities/AmountParser.swift"),
     ("CurrencyFormat",          "Utilities/CurrencyFormat.swift"),
     ("DataExporter",            "Utilities/DataExporter.swift"),
+    ("SettingsView",            "Views/Settings/SettingsView.swift"),
 ]
 
 TEST_SOURCES = [
@@ -404,6 +407,7 @@ def pbxproj():
     a(f"\t\t\t\t{GR['MonthlyReview']} /* MonthlyReview */,")
     a(f"\t\t\t\t{GR['SavingsGoals']} /* SavingsGoals */,")
     a(f"\t\t\t\t{GR['SafeSpend']} /* SafeSpend */,")
+    a(f"\t\t\t\t{GR['Settings']} /* Settings */,")
     a(f"\t\t\t);")
     a(f"\t\t\tpath = Views;")
     a(f"\t\t\tsourceTree = \"<group>\";")
@@ -436,6 +440,7 @@ def pbxproj():
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])
     simple_group("SafeSpend",   "SafeSpend",    ["SafeToSpendView"])
+    simple_group("Settings",   "Settings",     ["SettingsView"])
     simple_group("Persistence",  "Persistence",  ["PersistenceController", "SyncStatus"])
 
     # Tests group
