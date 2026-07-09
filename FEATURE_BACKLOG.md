@@ -33,6 +33,11 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
   - Nil-account dedupe bucket clarification — doc-comment noting that unassigned transactions (account = nil) form their own dedupe bucket and only match other unassigned transactions (not all transactions); the current phrase "same account when set" could be misread as ignore-account-when-none.
   - Double exact-equality in dedupe key — backlog note for Decimal migration (T12+) that the TransactionDuplicateKey will need to be updated to use Decimal instead of Double.
   - Optimization: unfiltered full-table transaction fetch at buildPreview is O(n) per preview render — fine for v1 and consistent with repo precedent, but consider a date-bounded #Predicate if transaction volumes grow to tens of thousands.
+- T10 follow-ups (Balance edits as explicit adjustments):
+  - Nil-category matchingTransactions realignment test — add a test case pinning that a categorized real expense is excluded from a nil-category budget's matchingTransactions result (current new test uses a categorized budget, so the nil-category edge case isn't covered).
+  - AccountBalanceService.applyBalanceEdit single-caller safety note — currently has only one caller (AddAccountView save path); future second callers must capture oldBalance before any state mutation to avoid double-application of the delta.
+  - Unparseable balance text UX hardening — AmountParser.parse ?? 0 previously silent-zeroed the balance on parse failure, now creates a visible full-delta adjustment (improvement in auditability, but new surface for user input errors); consider adding form validation to guard against empty/unparseable balance field and prevent accidental full-balance corrections from typos.
+  - Account type-flip ledger entries — product-copy consideration for asset↔liability type changes during edit (e.g. changing a checking account to credit card creates a historical balance-correction transaction); numerically correct but may confuse users; verify desired behavior and update guidance/help text if needed.
 
 ### From TODO.md (user-ranked P0–P3 roadmap, committed to `main` 2026-07-08; see IMPLEMENTATION_PLAN.md "TODO.md reconciliation" for the full mapping — these are the items with no existing task ID)
 

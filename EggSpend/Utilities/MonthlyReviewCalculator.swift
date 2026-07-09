@@ -50,12 +50,12 @@ enum MonthlyReviewCalculator {
 
     /// Sum of income transaction amounts.
     static func income(from transactions: [Transaction]) -> Double {
-        transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
+        transactions.filter { $0.type == .income && !$0.isAdjustment }.reduce(0) { $0 + $1.amount }
     }
 
     /// Sum of expense transaction amounts.
     static func expenses(from transactions: [Transaction]) -> Double {
-        transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
+        transactions.filter { $0.type == .expense && !$0.isAdjustment }.reduce(0) { $0 + $1.amount }
     }
 
     /// (income − expenses) / income. Returns nil when income is zero.
@@ -67,7 +67,7 @@ enum MonthlyReviewCalculator {
     /// Top expense categories by total spend, capped at `limit` entries.
     static func topCategories(from transactions: [Transaction], limit: Int = 5) -> [CategorySpend] {
         var dict: [String: (icon: String, amount: Double)] = [:]
-        for tx in transactions where tx.type == .expense {
+        for tx in transactions where tx.type == .expense && !tx.isAdjustment {
             let key  = tx.category?.name ?? "Uncategorized"
             let icon = tx.category?.icon ?? "questionmark.circle"
             dict[key] = (icon, (dict[key]?.amount ?? 0) + tx.amount)
@@ -93,6 +93,7 @@ enum MonthlyReviewCalculator {
                 let spent = transactions
                     .filter { tx in
                         guard tx.type == .expense else { return false }
+                        guard !tx.isAdjustment else { return false }
                         guard tx.date >= start && tx.date < end else { return false }
                         if let cat = budget.category {
                             return tx.category?.id == cat.id

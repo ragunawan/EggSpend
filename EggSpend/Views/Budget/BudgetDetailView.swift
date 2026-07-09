@@ -49,11 +49,9 @@ struct BudgetDetailView: View {
     // MARK: – Transaction filtering
 
     private var periodTransactions: [Transaction] {
-        allTransactions.filter { tx in
-            guard tx.type == .expense, tx.date >= periodStart, tx.date < periodEnd else { return false }
-            if let cat = budget.category { return tx.category?.id == cat.id }
-            return true
-        }
+        // Delegates to Budget's shared predicate so this list can never drift from
+        // the hero spent/progress/remaining figures (also `Budget.spent(from:)`-derived).
+        budget.matchingTransactions(from: allTransactions, start: periodStart, end: periodEnd)
     }
 
     // MARK: – Computed metrics

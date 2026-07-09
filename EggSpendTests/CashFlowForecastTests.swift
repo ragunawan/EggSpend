@@ -91,6 +91,17 @@ final class CashFlowForecastTests: XCTestCase {
         XCTAssertEqual(result, 1.0, accuracy: 0.001)
     }
 
+    func testAverageDailyNetFlowExcludesAdjustments() {
+        let date = Calendar.current.date(byAdding: .day, value: -1, to: .now)!
+        let income = Transaction(title: "Income", amount: 100, date: date, type: .income)
+        let adjustment = Transaction(title: "Balance adjustment", amount: 500, date: date,
+                                     type: .expense, isAdjustment: true)
+
+        let result = ForecastEngine.averageDailyNetFlow(from: [income, adjustment], lookbackDays: 60)
+        // Only the real income counts: 100 / 60
+        XCTAssertEqual(result, 100.0 / 60.0, accuracy: 0.001)
+    }
+
     // MARK: - upcomingEvents
 
     func testUpcomingEventsReturnsActiveRecurringWithinHorizon() {

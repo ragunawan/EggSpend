@@ -47,7 +47,7 @@ struct ForecastEngine {
         let now = Date.now
         guard let since = calendar.date(byAdding: .day, value: -lookbackDays, to: now) else { return 0 }
 
-        let recent = transactions.filter { $0.date >= since && $0.date <= now }
+        let recent = transactions.filter { $0.date >= since && $0.date <= now && !$0.isAdjustment }
         guard !recent.isEmpty else { return 0 }
 
         let netTotal = recent.reduce(0.0) { $0 + $1.signedAmount }

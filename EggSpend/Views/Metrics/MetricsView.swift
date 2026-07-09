@@ -70,12 +70,12 @@ struct MetricsView: View {
         transactions.filter { $0.date >= selectedPeriod.dateStart }
     }
 
-    private var totalIncome:   Double { filtered.filter { $0.type == .income  }.reduce(0) { $0 + $1.amount } }
-    private var totalExpenses: Double { filtered.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount } }
+    private var totalIncome:   Double { filtered.filter { $0.type == .income  && !$0.isAdjustment }.reduce(0) { $0 + $1.amount } }
+    private var totalExpenses: Double { filtered.filter { $0.type == .expense && !$0.isAdjustment }.reduce(0) { $0 + $1.amount } }
 
     private var expensesByCategory: [(String, Double, String)] {
         var dict: [String: (Double, String)] = [:]
-        for tx in filtered where tx.type == .expense {
+        for tx in filtered where tx.type == .expense && !tx.isAdjustment {
             let key  = tx.category?.name ?? "Uncategorized"
             let icon = tx.category?.icon ?? "questionmark.circle"
             dict[key] = ((dict[key]?.0 ?? 0) + tx.amount, icon)
@@ -110,7 +110,7 @@ struct MetricsView: View {
         let cal  = Calendar.current
         let unit = selectedPeriod.bucketUnit
         var dict: [Date: (Double, Double)] = [:]
-        for tx in filtered {
+        for tx in filtered where !tx.isAdjustment {
             let key = cal.dateInterval(of: unit, for: tx.date)?.start ?? tx.date
             var pair = dict[key] ?? (0, 0)
             if tx.type == .income  { pair.0 += tx.amount }

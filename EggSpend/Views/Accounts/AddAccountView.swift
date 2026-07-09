@@ -18,6 +18,8 @@ struct AddAccountView: View {
     @State private var extraPaymentText = ""
     @State private var includeInNetWorth = true
     @State private var showValidationError = false
+    @State private var loadedBalance: Double = 0
+    @State private var hasPopulated = false
 
     private var isEditing: Bool { editingAccount != nil }
     private var balance: Double { AmountParser.parse(balanceText) ?? 0 }
@@ -98,7 +100,11 @@ struct AddAccountView: View {
             } message: {
                 Text("Please enter an account name.")
             }
-            .onAppear { populateIfEditing() }
+            .onAppear {
+                guard !hasPopulated else { return }
+                populateIfEditing()
+                hasPopulated = true
+            }
         }
     }
 
@@ -112,7 +118,7 @@ struct AddAccountView: View {
         if let account = editingAccount {
             account.name = name.trimmingCharacters(in: .whitespaces)
             account.type = selectedType
-            account.balance = stored
+            AccountBalanceService.applyBalanceEdit(oldBalance: loadedBalance, newBalance: stored, to: account, context: modelContext)
             account.notes = notes
             account.dueDate = resolvedDueDate
             account.annualPercentageRate = selectedType.isAsset ? nil : AmountParser.parse(aprText)
@@ -141,6 +147,7 @@ struct AddAccountView: View {
         name = account.name
         selectedType = account.type
         balanceText = abs(account.balance).formatted(.number.precision(.fractionLength(2)).grouping(.never))
+        loadedBalance = account.balance
         notes = account.notes
         hasDueDate = account.dueDate != nil
         dueDate = account.dueDate ?? Date.now

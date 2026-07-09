@@ -21,6 +21,7 @@ final class Transaction {
     var isGenerated: Bool = false
     var recurringSourceID: UUID?
     var recurringDueDate: Date?
+    var isAdjustment: Bool = false
 
     @Relationship(deleteRule: .nullify)
     var category: TransactionCategory?
@@ -45,7 +46,8 @@ final class Transaction {
         notes: String = "",
         isGenerated: Bool = false,
         recurringSourceID: UUID? = nil,
-        recurringDueDate: Date? = nil
+        recurringDueDate: Date? = nil,
+        isAdjustment: Bool = false
     ) {
         self.id = UUID()
         self.title = title
@@ -59,5 +61,6 @@ final class Transaction {
         self.isGenerated = isGenerated
         self.recurringSourceID = recurringSourceID
         self.recurringDueDate = recurringDueDate
+        self.isAdjustment = isAdjustment
     }
 }

@@ -25,11 +25,11 @@ struct DashboardView: View {
         NetWorthCalculator.current(accounts: Array(accounts))
     }
     private var monthlyIncome: Double {
-        transactions.filter { $0.type == .income && Calendar.current.isDateInCurrentMonth($0.date) }
+        transactions.filter { $0.type == .income && !$0.isAdjustment && Calendar.current.isDateInCurrentMonth($0.date) }
             .reduce(0) { $0 + $1.amount }
     }
     private var monthlyExpenses: Double {
-        transactions.filter { $0.type == .expense && Calendar.current.isDateInCurrentMonth($0.date) }
+        transactions.filter { $0.type == .expense && !$0.isAdjustment && Calendar.current.isDateInCurrentMonth($0.date) }
             .reduce(0) { $0 + $1.amount }
     }
     private var recentTransactions: [Transaction] { Array(transactions.prefix(5)) }

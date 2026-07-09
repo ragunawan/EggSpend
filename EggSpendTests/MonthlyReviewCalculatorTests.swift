@@ -56,6 +56,17 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
         XCTAssertEqual(MonthlyReviewCalculator.expenses(from: txs), 1500, accuracy: 0.001)
     }
 
+    func testMonthlyReviewExcludesAdjustmentFromIncomeExpenses() {
+        let txs = [
+            Transaction(title: "Salary", amount: 3000, type: .income),
+            Transaction(title: "Rent",   amount: 1200, type: .expense),
+            Transaction(title: "Balance adjustment", amount: 200, type: .expense, isAdjustment: true),
+            Transaction(title: "Balance adjustment", amount: 400, type: .income, isAdjustment: true)
+        ]
+        XCTAssertEqual(MonthlyReviewCalculator.income(from: txs), 3000, accuracy: 0.001)
+        XCTAssertEqual(MonthlyReviewCalculator.expenses(from: txs), 1200, accuracy: 0.001)
+    }
+
     func testSavingsRatePositive() {
         let rate = MonthlyReviewCalculator.savingsRate(income: 4000, expenses: 3000)
         XCTAssertEqual(rate ?? 0, 0.25, accuracy: 0.001)

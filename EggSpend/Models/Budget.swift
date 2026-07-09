@@ -116,25 +116,35 @@ final class Budget {
 
     // MARK: Spending Calculations
 
+    /// Transactions from `transactions` that count as spending against this budget within
+    /// `start`..<`end`: expenses only, excluding balance adjustments, matching this budget's
+    /// category (nil category covers uncategorised spend). Shared by `spent(from:)` and by
+    /// views (e.g. `BudgetDetailView`) that need the matching transactions themselves, not
+    /// just their sum — keeping a single source of truth for "does this budget cover this
+    /// transaction?" so the two can't drift apart.
+    func matchingTransactions(from transactions: [Transaction], start: Date, end: Date) -> [Transaction] {
+        transactions.filter { tx in
+            // Must be an expense
+            guard tx.type == .expense else { return false }
+            // Balance adjustments are corrections, not spending
+            guard !tx.isAdjustment else { return false }
+            // Must fall within the requested period
+            guard tx.date >= start && tx.date < end else { return false }
+            // Category filter: if this budget has a category, match it;
+            // if no category is set, this budget covers uncategorised spend.
+            if let budgetCategory = category {
+                return tx.category?.id == budgetCategory.id
+            } else {
+                return tx.category == nil
+            }
+        }
+    }
+
     /// Total amount spent (expenses only) from `transactions` that fall within
     /// the current period and match this budget's category (if set).
     func spent(from transactions: [Transaction]) -> Double {
         let (start, end) = currentPeriodRange()
-
-        return transactions
-            .filter { tx in
-                // Must be an expense
-                guard tx.type == .expense else { return false }
-                // Must fall within the current period
-                guard tx.date >= start && tx.date < end else { return false }
-                // Category filter: if this budget has a category, match it;
-                // if no category is set, this budget covers uncategorised spend.
-                if let budgetCategory = category {
-                    return tx.category?.id == budgetCategory.id
-                } else {
-                    return tx.category == nil
-                }
-            }
+        return matchingTransactions(from: transactions, start: start, end: end)
             .reduce(0) { $0 + $1.amount }
     }
 

@@ -52,7 +52,7 @@ enum SafeSpendCalculator {
         guard let since = calendar.date(byAdding: .day, value: -lookbackDays, to: now) else { return 0 }
 
         let recentExpenses = transactions.filter {
-            $0.type == .expense && $0.date >= since && $0.date <= now
+            $0.type == .expense && !$0.isAdjustment && $0.date >= since && $0.date <= now
         }
         guard !recentExpenses.isEmpty else { return 0 }
 

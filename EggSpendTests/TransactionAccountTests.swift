@@ -156,6 +156,70 @@ final class TransactionAccountTests: XCTestCase {
         XCTAssertEqual(account.balance, 1000, accuracy: 0.001) // restored
     }
 
+    // MARK: - Account edit: balance adjustment
+
+    func testEditAccountNameOnlyLeavesBalanceAndHistoryUntouched() throws {
+        let account = Account(name: "Checking", type: .checking, balance: 4200)
+        context.insert(account)
+
+        let adjustment = AccountBalanceService.applyBalanceEdit(
+            oldBalance: 4200, newBalance: 4200, to: account, context: context
+        )
+
+        XCTAssertNil(adjustment)
+        XCTAssertEqual(account.balance, 4200, accuracy: 0.001)
+        let fetched = try context.fetch(FetchDescriptor<Transaction>())
+        XCTAssertEqual(fetched.count, 0)
+    }
+
+    func testEditAccountBalanceCreatesAdjustmentTransactionYieldingNewBalance() throws {
+        let account = Account(name: "Checking", type: .checking, balance: 4200)
+        context.insert(account)
+
+        let adjustment = AccountBalanceService.applyBalanceEdit(
+            oldBalance: 4200, newBalance: 4000, to: account, context: context
+        )
+
+        let tx = try XCTUnwrap(adjustment)
+        XCTAssertTrue(tx.isAdjustment)
+        XCTAssertEqual(tx.type, .expense)
+        XCTAssertEqual(tx.amount, 200, accuracy: 0.001)
+        XCTAssertEqual(tx.title, "Balance adjustment")
+        XCTAssertEqual(account.balance, 4000, accuracy: 0.001)
+    }
+
+    func testBalanceIncreaseCreatesIncomeTypedAdjustment() throws {
+        let account = Account(name: "Savings", type: .savings, balance: 1000)
+        context.insert(account)
+
+        let adjustment = AccountBalanceService.applyBalanceEdit(
+            oldBalance: 1000, newBalance: 1250, to: account, context: context
+        )
+
+        let tx = try XCTUnwrap(adjustment)
+        XCTAssertTrue(tx.isAdjustment)
+        XCTAssertEqual(tx.type, .income)
+        XCTAssertEqual(tx.amount, 250, accuracy: 0.001)
+        XCTAssertEqual(account.balance, 1250, accuracy: 0.001)
+    }
+
+    func testLiabilityBalanceEditCreatesIncomeTypedAdjustmentWhenOwedAmountDecreases() throws {
+        // Credit card: balance stored as negative (-500 = $500 owed); paying down to -400
+        // reduces what's owed, which is an income-typed adjustment (like a payment).
+        let account = Account(name: "Visa", type: .credit, balance: -500)
+        context.insert(account)
+
+        let adjustment = AccountBalanceService.applyBalanceEdit(
+            oldBalance: -500, newBalance: -400, to: account, context: context
+        )
+
+        let tx = try XCTUnwrap(adjustment)
+        XCTAssertTrue(tx.isAdjustment)
+        XCTAssertEqual(tx.type, .income)
+        XCTAssertEqual(tx.amount, 100, accuracy: 0.001)
+        XCTAssertEqual(account.balance, -400, accuracy: 0.001)
+    }
+
     // MARK: - No-account transactions remain valid
 
     func testTransactionWithNoAccountIsValidAndPersists() throws {

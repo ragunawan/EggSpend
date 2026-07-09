@@ -59,6 +59,47 @@ final class BudgetTests: XCTestCase {
         XCTAssertEqual(spent, 60, accuracy: 0.001, "Only in-period, same-category transactions should count")
     }
 
+    func testBudgetSpentExcludesAdjustmentTransactions() throws {
+        // nil-category budget matches nil-category transactions (catch-uncategorized semantics),
+        // so an expense-typed balance adjustment (also nil-category) must not count against it.
+        let budget = Budget(name: "Uncategorized", limitAmount: 300, period: .monthly,
+                            category: nil, colorHex: "E67E22")
+        context.insert(budget)
+
+        let adjustment = Transaction(title: "Balance adjustment", amount: 200, type: .expense,
+                                     category: nil, isAdjustment: true)
+        context.insert(adjustment)
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<Transaction>())
+        XCTAssertEqual(budget.spent(from: all), 0, accuracy: 0.001)
+    }
+
+    /// Pins the shared predicate BudgetDetailView.periodTransactions delegates to
+    /// (Budget.matchingTransactions), so its transaction list/chart/count can never drift
+    /// from spent(from:)'s figures by excluding balance adjustments differently.
+    func testMatchingTransactionsExcludesAdjustments() throws {
+        let cat = TransactionCategory(name: "Food", icon: "fork.knife", colorHex: "E67E22", typeFilter: .expense)
+        context.insert(cat)
+        let budget = Budget(name: "Food Budget", limitAmount: 300, period: .monthly,
+                            category: cat, colorHex: "E67E22")
+        context.insert(budget)
+
+        let now = Date.now
+        let realExpense = Transaction(title: "Lunch", amount: 15, date: now, type: .expense, category: cat)
+        let adjustment  = Transaction(title: "Balance adjustment", amount: 200, date: now,
+                                      type: .expense, category: cat, isAdjustment: true)
+        [realExpense, adjustment].forEach { context.insert($0) }
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<Transaction>())
+        let start = Calendar.current.startOfMonth(for: now)
+        let end = Calendar.current.date(byAdding: .month, value: 1, to: start)!
+        let matched = budget.matchingTransactions(from: all, start: start, end: end)
+
+        XCTAssertEqual(matched.map(\.title), ["Lunch"])
+    }
+
     func testBudgetProgress() throws {
         let budget = Budget(name: "Transport", limitAmount: 200, period: .monthly,
                             category: nil, colorHex: "3498DB")
