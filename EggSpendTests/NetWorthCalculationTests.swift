@@ -8,7 +8,7 @@ final class NetWorthCalculationTests: XCTestCase {
 
     override func setUpWithError() throws {
         let schema = Schema([Transaction.self, TransactionCategory.self, Account.self,
-                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self])
+                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self, BalanceSnapshot.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)
@@ -241,5 +241,152 @@ final class NetWorthCalculationTests: XCTestCase {
             context.insert(Account(name: name, type: type, balance: balance))
         }
         try? context.save()
+    }
+
+    // MARK: - at(date:) with BalanceSnapshot (T14)
+
+    // Acceptance criterion: with a snapshot recorded for a day, .at() for that day
+    // returns the recorded balance exactly, even if an unlinked transaction dated
+    // that same day would otherwise skew a reconstruction-based total.
+    func testAtDateUsesSnapshotWhenAvailableRegardlessOfUnlinkedTransactions() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        context.insert(checking)
+        try context.save()
+
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: Date.now)
+        let snapshot = BalanceSnapshot()
+        snapshot.accountID = checking.id
+        snapshot.date = day
+        snapshot.balance = 1000
+        context.insert(snapshot)
+
+        // Unlinked transaction (no account) dated the same day — must not affect
+        // the snapshot-backed total at all.
+        let unlinked = Transaction(title: "Cash gift", amount: 500, date: day, type: .income, category: nil, account: nil)
+        context.insert(unlinked)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let transactions = try context.fetch(FetchDescriptor<Transaction>())
+        let snapshots = try context.fetch(FetchDescriptor<BalanceSnapshot>())
+
+        let netWorth = NetWorthCalculator.at(date: day, accounts: accounts, transactions: transactions, snapshots: snapshots)
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    func testAtDateFallsBackToReconstructionWithoutSnapshot() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        context.insert(checking)
+        try context.save()
+
+        let calendar = Calendar.current
+        let past = calendar.date(byAdding: .day, value: -5, to: Date.now)!
+        let recent = calendar.date(byAdding: .day, value: -1, to: Date.now)!
+        let tx = Transaction(title: "Deposit", amount: 200, date: recent, type: .income, category: nil, account: checking)
+        context.insert(tx)
+        AccountBalanceService.apply(tx, to: checking)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let transactions = try context.fetch(FetchDescriptor<Transaction>())
+
+        // No snapshots at all — should reconstruct: current (1200) - delta after `past` (200) = 1000.
+        let netWorth = NetWorthCalculator.at(date: past, accounts: accounts, transactions: transactions, snapshots: [])
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    // Cross-device CloudKit sync can produce more than one snapshot row for the
+    // same account/day; the latest createdAt must win, with no double-counting.
+    func testAtDatePicksLatestSnapshotPerAccountDay() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1500)
+        context.insert(checking)
+        try context.save()
+
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: Date.now)
+
+        let older = BalanceSnapshot()
+        older.accountID = checking.id
+        older.date = day
+        older.balance = 1000
+        older.createdAt = Date.now.addingTimeInterval(-3600)
+        context.insert(older)
+
+        let newer = BalanceSnapshot()
+        newer.accountID = checking.id
+        newer.date = day
+        newer.balance = 1500
+        newer.createdAt = Date.now
+        context.insert(newer)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let snapshots = try context.fetch(FetchDescriptor<BalanceSnapshot>())
+
+        let netWorth = NetWorthCalculator.at(date: day, accounts: accounts, transactions: [], snapshots: snapshots)
+        XCTAssertEqual(netWorth, 1500, accuracy: 0.001)
+    }
+
+    func testAtDateExcludesArchivedAccountSnapshots() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let oldSavings = Account(name: "Old Savings", type: .savings, balance: 2000)
+        oldSavings.isArchived = true
+        context.insert(checking)
+        context.insert(oldSavings)
+        try context.save()
+
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: Date.now)
+
+        let checkingSnap = BalanceSnapshot()
+        checkingSnap.accountID = checking.id
+        checkingSnap.date = day
+        checkingSnap.balance = 1000
+        context.insert(checkingSnap)
+
+        let archivedSnap = BalanceSnapshot()
+        archivedSnap.accountID = oldSavings.id
+        archivedSnap.date = day
+        archivedSnap.balance = 2000
+        context.insert(archivedSnap)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let snapshots = try context.fetch(FetchDescriptor<BalanceSnapshot>())
+
+        let netWorth = NetWorthCalculator.at(date: day, accounts: accounts, transactions: [], snapshots: snapshots)
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    func testAtDateExcludesExcludedLiabilitySnapshots() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let loan = Account(name: "Loan", type: .loan, balance: -5000)
+        loan.includeInNetWorth = false
+        context.insert(checking)
+        context.insert(loan)
+        try context.save()
+
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: Date.now)
+
+        let checkingSnap = BalanceSnapshot()
+        checkingSnap.accountID = checking.id
+        checkingSnap.date = day
+        checkingSnap.balance = 1000
+        context.insert(checkingSnap)
+
+        let loanSnap = BalanceSnapshot()
+        loanSnap.accountID = loan.id
+        loanSnap.date = day
+        loanSnap.balance = -5000
+        context.insert(loanSnap)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let snapshots = try context.fetch(FetchDescriptor<BalanceSnapshot>())
+
+        let netWorth = NetWorthCalculator.at(date: day, accounts: accounts, transactions: [], snapshots: snapshots)
+        XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
     }
 }

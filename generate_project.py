@@ -105,6 +105,9 @@ FR = {
     "DataExporter":            u(1, 0x6C),
     "TEST_DataExporter":       u(1, 0x6D),
     "SettingsView":            u(1, 0x6E),
+    "BalanceSnapshot":         u(1, 0x6F),
+    "BalanceSnapshotService":  u(1, 0x70),
+    "TEST_BalanceSnapshot":    u(1, 0x71),
 }
 
 # Build files
@@ -177,6 +180,7 @@ APP_SOURCES = [
     ("RecurringTransaction", "Models/RecurringTransaction.swift"),
     ("SavingsGoal",          "Models/SavingsGoal.swift"),
     ("Transfer",             "Models/Transfer.swift"),
+    ("BalanceSnapshot",      "Models/BalanceSnapshot.swift"),
     ("RecurringProjection",  "Utilities/RecurringProjection.swift"),
     ("DashboardView",        "Views/Dashboard/DashboardView.swift"),
     ("TransactionsListView", "Views/Transactions/TransactionsListView.swift"),
@@ -230,6 +234,7 @@ APP_SOURCES = [
     ("CurrencyFormat",          "Utilities/CurrencyFormat.swift"),
     ("DataExporter",            "Utilities/DataExporter.swift"),
     ("SettingsView",            "Views/Settings/SettingsView.swift"),
+    ("BalanceSnapshotService",  "Utilities/BalanceSnapshotService.swift"),
 ]
 
 TEST_SOURCES = [
@@ -254,6 +259,7 @@ TEST_SOURCES = [
     ("TEST_AmountParser",       "EggSpendTests/AmountParserTests.swift"),
     ("TEST_CurrencyFormat",     "EggSpendTests/CurrencyFormatTests.swift"),
     ("TEST_DataExporter",       "EggSpendTests/DataExporterTests.swift"),
+    ("TEST_BalanceSnapshot",    "EggSpendTests/BalanceSnapshotTests.swift"),
 ]
 
 def pbxproj():
@@ -384,6 +390,7 @@ def pbxproj():
     a(f"\t\t\t\t{FR['RecurringTransaction']} /* RecurringTransaction.swift */,")
     a(f"\t\t\t\t{FR['SavingsGoal']} /* SavingsGoal.swift */,")
     a(f"\t\t\t\t{FR['Transfer']} /* Transfer.swift */,")
+    a(f"\t\t\t\t{FR['BalanceSnapshot']} /* BalanceSnapshot.swift */,")
     a(f"\t\t\t);")
     a(f"\t\t\tpath = Models;")
     a(f"\t\t\tsourceTree = \"<group>\";")
@@ -435,7 +442,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])

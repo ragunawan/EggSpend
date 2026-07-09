@@ -38,6 +38,7 @@ enum CompactCurrencyAxisFormatter {
 struct MetricsView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var accounts: [Account]
+    @Query private var snapshots: [BalanceSnapshot]
 
     @State private var selectedPeriod: Period = .month
     @State private var selectedNetWorthDate: Date? = nil
@@ -105,7 +106,7 @@ struct MetricsView: View {
         if buckets.last.map({ $0 < now }) ?? true { buckets.append(now) }
 
         return buckets.map { bucket in
-            (bucket, NetWorthCalculator.at(date: bucket, accounts: accounts, transactions: transactions))
+            (bucket, NetWorthCalculator.at(date: bucket, accounts: accounts, transactions: transactions, snapshots: snapshots))
         }
     }
 

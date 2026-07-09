@@ -9,7 +9,7 @@ final class DataExporterTests: XCTestCase {
     override func setUpWithError() throws {
         // Same 7-model schema as TransferTests.swift:9-20.
         let schema = Schema([Transaction.self, TransactionCategory.self, Account.self,
-                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self])
+                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self, BalanceSnapshot.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)

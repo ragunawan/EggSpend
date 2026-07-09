@@ -49,6 +49,9 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
   - Optional: cache fullBackupJSON Bundle.main.infoDictionary per call — currently read fresh each invocation (negligible cost), but if profiling identifies this as a hot-path, consider caching the result to avoid repeated info-dictionary lookups.
 - T13b follow-ups (Settings screen + export entry point):
   - Minor consistency nit: three CSV computed properties (transactionsCSV, accountsCSV, transfersCSV in SettingsView) are referenced twice per row (evaluation runs twice per body render) — bind via local let/if-let pattern like the JSON row for clarity and consistency (deterministic/side-effect-free, low priority).
+- T14 follow-ups (BalanceSnapshot history model):
+  - Add direct test pinning snapshot-path liability sign math for an INCLUDED liability — currently no test verifies that a liability account with balance -5000 yields a snapshot that contributes -5000 to net worth (via -abs() sign logic); this is a second independent implementation of the sign-ternary pattern in money code and deserves explicit coverage for balance-adjustment correctness verification.
+  - Add one-line comment at the scenePhase/.active handler in EggSpendApp documenting that onAppear and .onChange(.active) can both fire on foreground transition, and why update-in-place same-day snapshot deduplication is safe (last-launch-wins idempotence self-heals the double-capture race).
 
 ### From TODO.md (user-ranked P0–P3 roadmap, committed to `main` 2026-07-08; see IMPLEMENTATION_PLAN.md "TODO.md reconciliation" for the full mapping — these are the items with no existing task ID)
 
