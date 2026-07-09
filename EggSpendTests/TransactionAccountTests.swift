@@ -197,4 +197,86 @@ final class TransactionAccountTests: XCTestCase {
         let account = Account(name: "Loan", type: .loan, balance: -10000)
         XCTAssertNil(account.dueDate)
     }
+
+    // MARK: - CSV import: net balance effect helper
+
+    func testNetBalanceEffectSumsOnlyValidRowsWithSign() {
+        let rows: [ParsedTransactionResult] = [
+            // valid expense: -50
+            ParsedTransactionResult(rowIndex: 0, title: "Coffee", date: .now, amount: 50, type: .expense, categoryName: nil, notes: ""),
+            // valid income: +200
+            ParsedTransactionResult(rowIndex: 1, title: "Refund", date: .now, amount: 200, type: .income, categoryName: nil, notes: ""),
+            // invalid row (no date) should be excluded from the sum
+            ParsedTransactionResult(rowIndex: 2, title: "Bad Row", date: nil, amount: 999, type: .expense, categoryName: nil, notes: ""),
+        ]
+
+        // Only the two valid rows count: -50 + 200 = 150
+        XCTAssertEqual(netBalanceEffect(of: rows), 150, accuracy: 0.001)
+    }
+
+    // MARK: - CSV import: account balance application (acceptance criteria)
+
+    func testImportingExpensesWithToggleOnReducesAccountBalance() throws {
+        let account = Account(name: "Chase Checking", type: .checking, balance: 1000)
+        context.insert(account)
+
+        let expenses = [42.50, 18.25, 63.40]
+        var transactions: [Transaction] = []
+        for amount in expenses {
+            let tx = Transaction(title: "Expense", amount: amount, type: .expense, account: account)
+            context.insert(tx)
+            transactions.append(tx)
+            AccountBalanceService.apply(tx, to: account) // toggle ON
+        }
+        try context.save()
+
+        let total = expenses.reduce(0, +)
+        XCTAssertEqual(account.balance, 1000 - total, accuracy: 0.001)
+        XCTAssertEqual(transactions.compactMap(\.account?.id), Array(repeating: account.id, count: 3))
+    }
+
+    func testImportingExpensesWithToggleOffLeavesBalanceUnchangedButLinksAccount() throws {
+        let account = Account(name: "Chase Checking", type: .checking, balance: 1000)
+        context.insert(account)
+
+        let expenses = [42.50, 18.25, 63.40]
+        var transactions: [Transaction] = []
+        for amount in expenses {
+            let tx = Transaction(title: "Expense", amount: amount, type: .expense, account: account)
+            context.insert(tx)
+            transactions.append(tx)
+            // toggle OFF: AccountBalanceService.apply intentionally not called
+        }
+        try context.save()
+
+        XCTAssertEqual(account.balance, 1000, accuracy: 0.001)
+        for tx in transactions {
+            XCTAssertEqual(tx.account?.id, account.id)
+        }
+    }
+
+    // MARK: - CSV import: failure-path reversal symmetry
+
+    func testReversingAllImportedTransactionsRestoresOriginalBalance() throws {
+        let account = Account(name: "Chase Checking", type: .checking, balance: 1000)
+        context.insert(account)
+        let startingBalance = account.balance
+
+        let expenses = [42.50, 18.25, 63.40]
+        var transactions: [Transaction] = []
+        for amount in expenses {
+            let tx = Transaction(title: "Expense", amount: amount, type: .expense, account: account)
+            context.insert(tx)
+            transactions.append(tx)
+            AccountBalanceService.apply(tx, to: account)
+        }
+        XCTAssertLessThan(account.balance, startingBalance)
+
+        // Simulate the import catch-block rollback: reverse every applied transaction.
+        for tx in transactions {
+            AccountBalanceService.reverse(tx, from: account)
+        }
+
+        XCTAssertEqual(account.balance, startingBalance, accuracy: 0.001)
+    }
 }

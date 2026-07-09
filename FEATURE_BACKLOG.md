@@ -27,6 +27,8 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 - Configurable budget week anchor (see B19)
 - Product decision needed: how should a positive-balance liability account (e.g. an overpaid credit card) be treated in net worth — still counted as debt today, pre-existing behavior surfaced during T1 code review
 - UX: "Materialized N historical transactions" toast notification when a long-unprocessed recurring item (e.g. fresh CloudKit restore) generates a batch of backlogged occurrences on launch; correct per spec but silent bulk creation could surprise users (from T4 code review).
+- UX: CSV import net-effect display (T8) when preview shows "Will increase X by $0.00" — consider suppressing the sentence entirely when the effect rounds to zero to reduce visual clutter (from T8 code review).
+- Product decision needed: liability account balance wording in CSV import net-effect display — "Will increase" / "Will decrease" refers to the signed balance (negative = owed), which may read debt-inverted for users (e.g. "increasing" a negative $500 credit-card debt means paying off, decreasing it); verify product intent and consider debt-oriented wording (from T8 code review).
 
 ### From TODO.md (user-ranked P0–P3 roadmap, committed to `main` 2026-07-08; see IMPLEMENTATION_PLAN.md "TODO.md reconciliation" for the full mapping — these are the items with no existing task ID)
 

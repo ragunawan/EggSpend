@@ -28,6 +28,7 @@ struct CSVImportView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query private var categories: [TransactionCategory]
+    @Query(sort: \Account.name) private var accounts: [Account]
 
     let importType: CSVImportType
 
@@ -43,6 +44,10 @@ struct CSVImportView: View {
     // Results
     @State private var txResults:   [ParsedTransactionResult] = []
     @State private var acctResults: [ParsedAccountResult]     = []
+
+    // Account linking (transactions import only)
+    @State private var selectedImportAccount: Account? = nil
+    @State private var applyBalanceToggle = true
 
     // UI state
     @State private var step: Step = .pick
@@ -178,6 +183,25 @@ struct CSVImportView: View {
                 } header: { Text("Amount Interpretation") }
                   footer: { Text("When no Type column is mapped, sign of amount determines income vs. expense.") }
 
+                Section {
+                    Picker("Import into account", selection: $selectedImportAccount) {
+                        Text("None").tag(Optional<Account>.none)
+                        ForEach(availableAccounts) { account in
+                            Label(account.name, systemImage: account.type.icon)
+                                .tag(Optional(account))
+                        }
+                    }
+                    if selectedImportAccount != nil {
+                        Toggle("Adjust account balance by imported transactions", isOn: $applyBalanceToggle)
+                    }
+                } header: { Text("Account") }
+                  footer: { Text("Linking an account lets each imported transaction update its balance.") }
+                  .onChange(of: selectedImportAccount) { oldValue, newValue in
+                      if oldValue == nil && newValue != nil {
+                          applyBalanceToggle = true
+                      }
+                  }
+
             } else {
                 Section {
                     columnPicker("Account Name *", selection: $mapping.nameColumn)
@@ -207,6 +231,10 @@ struct CSVImportView: View {
         } else {
             return mapping.nameColumn != nil && mapping.balanceColumn != nil
         }
+    }
+
+    private var availableAccounts: [Account] {
+        accounts.filter { !$0.isArchived }
     }
 
     @ViewBuilder
@@ -250,6 +278,14 @@ struct CSVImportView: View {
                 }
             }
             .listStyle(.insetGrouped)
+
+            if importType == .transactions, let account = selectedImportAccount, applyBalanceToggle {
+                let effect = netBalanceEffect(of: txResults)
+                Text("Will \(effect < 0 ? "decrease" : "increase") \(account.name) by \(abs(effect), format: .currency(code: "USD"))")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .padding(.horizontal)
+                    .padding(.top, 6)
+            }
 
             // Import button
             Button(action: performImport) {
@@ -385,10 +421,14 @@ struct CSVImportView: View {
                     date:     date,
                     type:     result.type,
                     category: category,
+                    account:  selectedImportAccount,
                     notes:    result.notes
                 )
                 modelContext.insert(tx)
                 insertedTransactions.append(tx)
+                if applyBalanceToggle {
+                    AccountBalanceService.apply(tx, to: selectedImportAccount)
+                }
                 importedCount += 1
             }
         } else {
@@ -411,7 +451,14 @@ struct CSVImportView: View {
             // Targeted deletes rather than rollback: this call's own inserted
             // rows are removed so a retry starts clean, while any unrelated
             // unsaved edits elsewhere in the shared context survive (rollback
-            // would have discarded those too).
+            // would have discarded those too). selectedImportAccount is a
+            // pre-existing object outside that set, so its balance mutations
+            // must be undone explicitly before the transactions are deleted.
+            if applyBalanceToggle {
+                for tx in insertedTransactions {
+                    AccountBalanceService.reverse(tx, from: selectedImportAccount)
+                }
+            }
             for tx in insertedTransactions { modelContext.delete(tx) }
             for account in insertedAccounts { modelContext.delete(account) }
             importedCount = 0
@@ -423,6 +470,13 @@ struct CSVImportView: View {
         }
         step = .done
     }
+}
+
+/// Net signed effect that importing the given rows would have on an account's
+/// balance — income adds, expense subtracts. Mirrors `performImport()`'s own
+/// `isValid` filter so the preview sentence matches what actually gets applied.
+func netBalanceEffect(of results: [ParsedTransactionResult]) -> Double {
+    results.filter(\.isValid).reduce(0) { $0 + $1.type.sign * ($1.amount ?? 0) }
 }
 
 // MARK: – Preview rows
