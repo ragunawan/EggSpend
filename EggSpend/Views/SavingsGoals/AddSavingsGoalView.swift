@@ -60,7 +60,7 @@ struct AddSavingsGoalView: View {
                     HStack {
                         Text("Target").foregroundStyle(.secondary)
                         Spacer()
-                        Text("$").foregroundStyle(.secondary)
+                        Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
                         TextField("0.00", text: $targetAmountText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
@@ -79,14 +79,14 @@ struct AddSavingsGoalView: View {
                         HStack {
                             Text("Current Balance").foregroundStyle(.secondary)
                             Spacer()
-                            Text(linkedAccount?.balance ?? 0, format: .currency(code: "USD"))
+                            Text(linkedAccount?.balance ?? 0, format: .currency(code: CurrencyFormat.code))
                                 .foregroundStyle(.primary)
                         }
                     } else {
                         HStack {
                             Text("Current Amount").foregroundStyle(.secondary)
                             Spacer()
-                            Text("$").foregroundStyle(.secondary)
+                            Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
                             TextField("0.00", text: $currentAmountText)
                                 .keyboardType(.decimalPad)
                                 .multilineTextAlignment(.trailing)

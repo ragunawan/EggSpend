@@ -110,7 +110,7 @@ struct MonthlyReviewView: View {
         VStack(alignment: .leading, spacing: 5) {
             Label(title, systemImage: icon)
                 .font(.caption2).foregroundStyle(color)
-            Text(value, format: .currency(code: "USD"))
+            Text(value, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.caption, design: .rounded, weight: .semibold))
                 .foregroundStyle(Color.nestBrown)
                 .minimumScaleFactor(0.6).lineLimit(1)
@@ -165,7 +165,7 @@ struct MonthlyReviewView: View {
                     Text(entry.name)
                         .font(.subheadline)
                     Spacer()
-                    Text(entry.amount, format: .currency(code: "USD"))
+                    Text(entry.amount, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .medium))
                         .foregroundStyle(Color.nestBrown)
                     if review.expenses > 0 {
@@ -192,16 +192,16 @@ struct MonthlyReviewView: View {
                         Text(overrun.name)
                             .font(.subheadline).foregroundStyle(.primary)
                         Spacer()
-                        Text("+\(overrun.overage, format: .currency(code: "USD"))")
+                        Text("+\(overrun.overage, format: .currency(code: CurrencyFormat.code))")
                             .font(.system(.caption, design: .rounded, weight: .semibold))
                             .foregroundStyle(.red)
                     }
                     ProgressView(value: min(overrun.progress, 1.5), total: 1.5)
                         .tint(.red)
                     HStack {
-                        Text("Spent \(overrun.spent, format: .currency(code: "USD"))")
+                        Text("Spent \(overrun.spent, format: .currency(code: CurrencyFormat.code))")
                         Spacer()
-                        Text("Limit \(overrun.limit, format: .currency(code: "USD"))")
+                        Text("Limit \(overrun.limit, format: .currency(code: CurrencyFormat.code))")
                     }
                     .font(.caption2).foregroundStyle(.secondary)
                 }
@@ -221,7 +221,7 @@ struct MonthlyReviewView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Start of Month").font(.caption).foregroundStyle(.secondary)
-                    Text(review.netWorthAtStart, format: .currency(code: "USD"))
+                    Text(review.netWorthAtStart, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                         .foregroundStyle(Color.nestBrown)
                 }
@@ -231,7 +231,7 @@ struct MonthlyReviewView: View {
                     HStack(spacing: 3) {
                         Image(systemName: review.netWorthChange >= 0 ? "arrow.up.right" : "arrow.down.right")
                             .font(.caption2)
-                        Text(abs(review.netWorthChange), format: .currency(code: "USD"))
+                        Text(abs(review.netWorthChange), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                     }
                     .foregroundStyle(review.netWorthChange >= 0 ? Color.nestLeafGreen : .red)
@@ -239,7 +239,7 @@ struct MonthlyReviewView: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("End of Month").font(.caption).foregroundStyle(.secondary)
-                    Text(review.netWorthAtEnd, format: .currency(code: "USD"))
+                    Text(review.netWorthAtEnd, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                         .foregroundStyle(Color.nestBrown)
                 }

@@ -74,14 +74,14 @@ struct SavingsGoalsView: View {
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Saved").font(.caption).foregroundStyle(.secondary)
-                        Text(totalSaved, format: .currency(code: "USD"))
+                        Text(totalSaved, format: .currency(code: CurrencyFormat.code))
                             .font(.system(.title2, design: .rounded, weight: .bold))
                             .foregroundStyle(Color.nestBrown)
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 2) {
                         Text("Target").font(.caption).foregroundStyle(.secondary)
-                        Text(totalTarget, format: .currency(code: "USD"))
+                        Text(totalTarget, format: .currency(code: CurrencyFormat.code))
                             .font(.system(.title2, design: .rounded, weight: .bold))
                             .foregroundStyle(Color.nestBrown.opacity(0.6))
                     }
@@ -225,11 +225,11 @@ struct SavingsGoalRowView: View {
                     }
 
                     HStack(spacing: 4) {
-                        Text(goal.currentAmount, format: .currency(code: "USD"))
+                        Text(goal.currentAmount, format: .currency(code: CurrencyFormat.code))
                             .font(.system(.subheadline, design: .rounded, weight: .medium))
                             .foregroundStyle(.primary)
                         Text("of").font(.caption).foregroundStyle(.secondary)
-                        Text(goal.targetAmount, format: .currency(code: "USD"))
+                        Text(goal.targetAmount, format: .currency(code: CurrencyFormat.code))
                             .font(.system(.subheadline, design: .rounded, weight: .medium))
                             .foregroundStyle(.secondary)
                     }

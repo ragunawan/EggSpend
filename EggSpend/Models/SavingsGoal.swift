@@ -122,7 +122,7 @@ final class SavingsGoal {
         if isGoalMet { return "Target reached" }
         guard targetDate != nil else { return "No target date" }
         guard let needed = monthlySavingsNeeded() else { return "Target date passed" }
-        return "Save \(needed.formatted(.currency(code: "USD")))/mo"
+        return "Save \(needed.formatted(.currency(code: CurrencyFormat.code)))/mo"
     }
 
     var isGoalMet: Bool {

@@ -241,7 +241,7 @@ struct TransactionFilterView: View {
 
     private func amountField(_ placeholder: String, text: Binding<String>) -> some View {
         HStack(spacing: 4) {
-            Text("$").foregroundStyle(.secondary)
+            Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
             TextField(placeholder, text: text)
                 .keyboardType(.decimalPad)
         }

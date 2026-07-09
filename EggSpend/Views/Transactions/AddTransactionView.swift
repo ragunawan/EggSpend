@@ -156,7 +156,7 @@ struct AddTransactionView: View {
         Section("Details") {
             TextField("Title", text: $title)
             HStack {
-                Text("$")
+                Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
                 TextField("0.00", text: $amountText)
                     .keyboardType(.decimalPad)
@@ -168,7 +168,7 @@ struct AddTransactionView: View {
     private var transferDetailsSection: some View {
         Section("Details") {
             HStack {
-                Text("$")
+                Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
                 TextField("0.00", text: $amountText)
                     .keyboardType(.decimalPad)
@@ -212,7 +212,7 @@ struct AddTransactionView: View {
     }
 
     private func accountSelectionTitle(for account: Account) -> String {
-        "\(account.name) (\(account.balance.formatted(.currency(code: "USD"))))"
+        "\(account.name) (\(account.balance.formatted(.currency(code: CurrencyFormat.code))))"
     }
 
     private var transferAccountsSection: some View {

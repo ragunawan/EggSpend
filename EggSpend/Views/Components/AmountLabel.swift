@@ -9,7 +9,7 @@ struct AmountLabel: View {
     private var prefix: String { type == .income ? "+" : "-" }
 
     var body: some View {
-        Text("\(prefix)\(amount, format: .currency(code: "USD"))")
+        Text("\(prefix)\(amount, format: .currency(code: CurrencyFormat.code))")
             .font(font)
             .fontDesign(.rounded)
             .fontWeight(.semibold)

@@ -111,14 +111,14 @@ struct BudgetView: View {
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Spent").font(.caption).foregroundStyle(.secondary)
-                    Text(totalSpent, format: .currency(code: "USD"))
+                    Text(totalSpent, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.title2, design: .rounded, weight: .bold))
                         .foregroundStyle(totalSpent > totalBudgeted ? .red : Color.nestBrown)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("Budgeted").font(.caption).foregroundStyle(.secondary)
-                    Text(totalBudgeted, format: .currency(code: "USD"))
+                    Text(totalBudgeted, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.title2, design: .rounded, weight: .bold))
                         .foregroundStyle(Color.nestBrown.opacity(0.6))
                 }
@@ -134,8 +134,8 @@ struct BudgetView: View {
                 Spacer()
                 let rem = totalBudgeted - totalSpent
                 Text(rem >= 0
-                     ? "\(rem.formatted(.currency(code: "USD"))) remaining"
-                     : "\(abs(rem).formatted(.currency(code: "USD"))) over")
+                     ? "\(rem.formatted(.currency(code: CurrencyFormat.code))) remaining"
+                     : "\(abs(rem).formatted(.currency(code: CurrencyFormat.code))) over")
                     .font(.caption2)
                     .foregroundStyle(rem >= 0 ? Color.nestLeafGreen : .red)
             }
@@ -378,11 +378,11 @@ struct BudgetRowView: View {
                 }
 
                 HStack(spacing: 4) {
-                    Text(spent, format: .currency(code: "USD"))
+                    Text(spent, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.subheadline, design: .rounded, weight: .medium))
                         .foregroundStyle(.primary)
                     Text("of").font(.caption).foregroundStyle(.secondary)
-                    Text(budget.limitAmount, format: .currency(code: "USD"))
+                    Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.subheadline, design: .rounded, weight: .medium))
                         .foregroundStyle(.secondary)
                 }
@@ -393,8 +393,8 @@ struct BudgetRowView: View {
                     Image(systemName: remaining >= 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
                         .font(.caption2).foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
                     Text(remaining >= 0
-                         ? "\(remaining, format: .currency(code: "USD")) left"
-                         : "\(abs(remaining), format: .currency(code: "USD")) over")
+                         ? "\(remaining, format: .currency(code: CurrencyFormat.code)) left"
+                         : "\(abs(remaining), format: .currency(code: CurrencyFormat.code)) over")
                         .font(.caption)
                         .foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
                 }

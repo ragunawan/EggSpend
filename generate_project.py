@@ -100,6 +100,8 @@ FR = {
     "NetWorthCalculator":      u(1, 0x67),
     "AmountParser":            u(1, 0x68),
     "TEST_AmountParser":       u(1, 0x69),
+    "CurrencyFormat":          u(1, 0x6A),
+    "TEST_CurrencyFormat":     u(1, 0x6B),
 }
 
 # Build files
@@ -221,6 +223,7 @@ APP_SOURCES = [
     ("NotificationScheduler",   "Utilities/NotificationScheduler.swift"),
     ("BudgetAlertCoordinator",  "Utilities/BudgetAlertCoordinator.swift"),
     ("AmountParser",            "Utilities/AmountParser.swift"),
+    ("CurrencyFormat",          "Utilities/CurrencyFormat.swift"),
 ]
 
 TEST_SOURCES = [
@@ -243,6 +246,7 @@ TEST_SOURCES = [
     ("TEST_Transfer",           "EggSpendTests/TransferTests.swift"),
     ("TEST_DebtPayoff",         "EggSpendTests/DebtPayoffCalculatorTests.swift"),
     ("TEST_AmountParser",       "EggSpendTests/AmountParserTests.swift"),
+    ("TEST_CurrencyFormat",     "EggSpendTests/CurrencyFormatTests.swift"),
 ]
 
 def pbxproj():
@@ -423,7 +427,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])

@@ -75,7 +75,7 @@ struct RecurringNext30DaysView: View {
             Label(title, systemImage: icon)
                 .font(.caption2)
                 .foregroundStyle(color)
-            Text(abs(amount), format: .currency(code: "USD"))
+            Text(abs(amount), format: .currency(code: CurrencyFormat.code))
                 .font(.system(.caption, design: .rounded, weight: .semibold))
                 .foregroundStyle(Color.nestBrown)
                 .lineLimit(1)

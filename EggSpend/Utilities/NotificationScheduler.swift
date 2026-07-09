@@ -75,7 +75,7 @@ enum NotificationScheduler {
     static func billReminderRequest(for item: RecurringTransaction, fireDate: Date) -> UNNotificationRequest {
         let content = UNMutableNotificationContent()
         content.title = "Upcoming: \(item.title)"
-        content.body = "\(item.amount.formatted(.currency(code: "USD"))) due \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))"
+        content.body = "\(item.amount.formatted(.currency(code: CurrencyFormat.code))) due \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))"
         content.sound = .default
         content.userInfo = ["recurringTransactionID": item.id.uuidString]
 

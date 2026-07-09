@@ -72,7 +72,7 @@ struct AccountsView: View {
                 }
             }
             Spacer()
-            Text(abs(account.balance), format: .currency(code: "USD"))
+            Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
                 .foregroundStyle(account.isAsset ? .green : .red)
                 .font(.system(.callout, design: .rounded, weight: .medium))
         }

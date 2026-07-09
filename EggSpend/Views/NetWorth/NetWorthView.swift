@@ -108,7 +108,7 @@ struct NetWorthView: View {
                     Text("Net Worth")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                    Text(netWorth, format: .currency(code: "USD"))
+                    Text(netWorth, format: .currency(code: CurrencyFormat.code))
                         .font(.system(size: 38, weight: .bold, design: .rounded))
                         .foregroundStyle(netWorth >= 0 ? Color.primary : Color.red)
                 }
@@ -117,7 +117,7 @@ struct NetWorthView: View {
                         Text("Assets")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Text(totalAssets, format: .currency(code: "USD"))
+                        Text(totalAssets, format: .currency(code: CurrencyFormat.code))
                             .font(.headline)
                             .foregroundStyle(Color.nestLeafGreen)
                     }
@@ -126,7 +126,7 @@ struct NetWorthView: View {
                         Text("Liabilities")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Text(totalLiabilities, format: .currency(code: "USD"))
+                        Text(totalLiabilities, format: .currency(code: CurrencyFormat.code))
                             .font(.headline)
                             .foregroundStyle(.red)
                     }
@@ -286,7 +286,7 @@ private struct AccountRowView: View {
                 }
             }
             Spacer()
-            Text(abs(account.balance), format: .currency(code: "USD"))
+            Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .medium))
                 .foregroundStyle(account.isAsset ? Color.nestLeafGreen : .red)
         }

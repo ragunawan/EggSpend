@@ -166,10 +166,10 @@ struct BudgetDetailView: View {
 
                 // Spent / limit
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(spent, format: .currency(code: "USD"))
+                    Text(spent, format: .currency(code: CurrencyFormat.code))
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundStyle(Color.nestBrown)
-                    Text("/ \(budget.limitAmount, format: .currency(code: "USD"))")
+                    Text("/ \(budget.limitAmount, format: .currency(code: CurrencyFormat.code))")
                         .font(.system(.title3, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
@@ -211,18 +211,18 @@ struct BudgetDetailView: View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             StatCard(title: "Remaining",
                      value: remaining >= 0
-                        ? remaining.formatted(.currency(code: "USD"))
-                        : abs(remaining).formatted(.currency(code: "USD")) + " over",
+                        ? remaining.formatted(.currency(code: CurrencyFormat.code))
+                        : abs(remaining).formatted(.currency(code: CurrencyFormat.code)) + " over",
                      icon: "banknote",
                      color: remaining >= 0 ? .nestLeafGreen : .red)
 
             StatCard(title: "Daily Avg",
-                     value: dailyAverage.formatted(.currency(code: "USD")),
+                     value: dailyAverage.formatted(.currency(code: CurrencyFormat.code)),
                      icon: "chart.line.uptrend.xyaxis",
                      color: .eggBlue)
 
             StatCard(title: "Projected",
-                     value: projectedTotal.formatted(.currency(code: "USD")),
+                     value: projectedTotal.formatted(.currency(code: CurrencyFormat.code)),
                      icon: isOnTrack ? "arrow.up.right.circle.fill" : "exclamationmark.arrow.up.right.circle.fill",
                      color: isOnTrack ? .nestLeafGreen : .yolk,
                      subtitle: isOnTrack ? "Under limit" : "Exceeds limit")
@@ -299,12 +299,12 @@ struct BudgetDetailView: View {
                     .foregroundStyle(Color.red.opacity(0.4))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [6, 4]))
                     .annotation(position: .top, alignment: .trailing) {
-                        Text(budget.limitAmount, format: .currency(code: "USD").precision(.fractionLength(0)))
+                        Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                             .font(.caption2).foregroundStyle(.red.opacity(0.7))
                     }
             }
             .chartYAxis {
-                AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+                AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
             }
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) {

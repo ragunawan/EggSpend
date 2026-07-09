@@ -47,7 +47,7 @@ struct TransactionDetailView: View {
                     Image(systemName: transaction.type.systemImage)
                         .font(.largeTitle)
                         .foregroundStyle(transaction.type == .income ? .green : .red)
-                    Text(transaction.amount, format: .currency(code: "USD"))
+                    Text(transaction.amount, format: .currency(code: CurrencyFormat.code))
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                     Text(transaction.type.rawValue)
                         .font(.subheadline)

@@ -21,7 +21,7 @@ struct TransferRowView: View {
                 }
             }
             Spacer(minLength: 8)
-            Text(transfer.amount, format: .currency(code: "USD"))
+            Text(transfer.amount, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .medium))
                 .foregroundStyle(Color.twig)
         }

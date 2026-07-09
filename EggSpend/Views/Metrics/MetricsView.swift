@@ -3,6 +3,10 @@ import SwiftData
 import Charts
 
 enum CompactCurrencyAxisFormatter {
+    // Symbol-prefix layout ("$1.2K") and English K/M/B/T suffixes are accepted v1
+    // imprecision for locales that place the symbol after the number or use
+    // different magnitude abbreviations — this is a compact chart axis label, not
+    // a currency-accurate display.
     static func string(from value: Double, currencySymbol: String = "$") -> String {
         guard value.isFinite else { return "\(currencySymbol)0" }
 
@@ -239,7 +243,7 @@ struct MetricsView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let worth = value.as(Double.self) {
-                            Text(CompactCurrencyAxisFormatter.string(from: worth))
+                            Text(CompactCurrencyAxisFormatter.string(from: worth, currencySymbol: CurrencyFormat.symbol))
                         }
                     }
                 }
@@ -258,7 +262,7 @@ struct MetricsView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Current").font(.caption).foregroundStyle(.secondary)
-                        Text(last.worth, format: .currency(code: "USD"))
+                        Text(last.worth, format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                             .foregroundStyle(Color.nestBrown)
                     }
@@ -268,7 +272,7 @@ struct MetricsView: View {
                         HStack(spacing: 3) {
                             Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
-                            Text(abs(change), format: .currency(code: "USD"))
+                            Text(abs(change), format: .currency(code: CurrencyFormat.code))
                                 .font(.system(.callout, design: .rounded, weight: .semibold))
                         }
                         .foregroundStyle(change >= 0 ? Color.nestLeafGreen : .red)
@@ -283,7 +287,7 @@ struct MetricsView: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
                 .font(.caption2).foregroundStyle(.secondary)
-            Text(worth, format: .currency(code: "USD"))
+            Text(worth, format: .currency(code: CurrencyFormat.code))
                 .font(.caption).fontWeight(.semibold).foregroundStyle(Color.nestBrown)
         }
         .padding(.horizontal, 8).padding(.vertical, 5)
@@ -346,7 +350,7 @@ struct MetricsView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(abs(v), format: .currency(code: "USD").precision(.fractionLength(0)))
+                            Text(abs(v), format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                                 .font(.caption2)
                                 .foregroundStyle(v >= 0 ? Color.nestLeafGreen : .red)
                         }
@@ -375,10 +379,10 @@ struct MetricsView: View {
             Text(date, format: calloutDateFormat)
                 .font(.caption2).foregroundStyle(.secondary)
             HStack(spacing: 8) {
-                Label(income.formatted(.currency(code: "USD").precision(.fractionLength(0))),
+                Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                       systemImage: "arrow.down.circle.fill")
                     .font(.caption).foregroundStyle(Color.nestLeafGreen)
-                Label(expenses.formatted(.currency(code: "USD").precision(.fractionLength(0))),
+                Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                       systemImage: "arrow.up.circle.fill")
                     .font(.caption).foregroundStyle(.red)
             }
@@ -418,7 +422,7 @@ struct MetricsView: View {
                         .foregroundStyle(Color.red.opacity(0.8).gradient)
                 }
                 .chartYAxis {
-                    AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+                    AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                 }
                 .frame(height: 160)
                 .padding(.vertical, 8)
@@ -426,7 +430,7 @@ struct MetricsView: View {
                 HStack {
                     VStack(alignment: .leading) {
                         Text("Net").font(.caption).foregroundStyle(.secondary)
-                        Text(totalIncome - totalExpenses, format: .currency(code: "USD"))
+                        Text(totalIncome - totalExpenses, format: .currency(code: CurrencyFormat.code))
                             .font(.headline)
                             .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : .red)
                     }
@@ -468,7 +472,7 @@ struct MetricsView: View {
                         Image(systemName: icon).frame(width: 24).foregroundStyle(.secondary)
                         Text(name)
                         Spacer()
-                        Text(amount, format: .currency(code: "USD")).foregroundStyle(.secondary)
+                        Text(amount, format: .currency(code: CurrencyFormat.code)).foregroundStyle(.secondary)
                         if totalExpenses > 0 {
                             Text("(\(Int(amount / totalExpenses * 100))%)")
                                 .font(.caption).foregroundStyle(.tertiary)

@@ -282,7 +282,7 @@ struct CSVImportView: View {
 
             if importType == .transactions, let account = selectedImportAccount, applyBalanceToggle {
                 let effect = netBalanceEffect(of: txResults)
-                Text("Will \(effect < 0 ? "decrease" : "increase") \(account.name) by \(abs(effect), format: .currency(code: "USD"))")
+                Text("Will \(effect < 0 ? "decrease" : "increase") \(account.name) by \(abs(effect), format: .currency(code: CurrencyFormat.code))")
                     .font(.caption).foregroundStyle(.secondary)
                     .padding(.horizontal)
                     .padding(.top, 6)
@@ -631,7 +631,7 @@ private struct AccountPreviewRow: View {
             Spacer()
 
             if let balance = result.balance {
-                Text(abs(balance), format: .currency(code: "USD"))
+                Text(abs(balance), format: .currency(code: CurrencyFormat.code))
                     .font(.system(.callout, design: .rounded, weight: .medium))
                     .foregroundStyle(result.type.isAsset ? Color.nestLeafGreen : .red)
             } else {

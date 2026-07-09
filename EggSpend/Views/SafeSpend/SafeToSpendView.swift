@@ -50,7 +50,7 @@ struct SafeToSpendView: View {
             VStack(spacing: 8) {
                 Text("Safe to Spend Today")
                     .font(.subheadline).foregroundStyle(Color.twig)
-                Text(result.safeToSpendToday, format: .currency(code: "USD"))
+                Text(result.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
                     .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundStyle(statusColor)
                 Label(statusLabel, systemImage: statusIcon)
@@ -149,7 +149,7 @@ struct SafeToSpendView: View {
                 .font(isTotal ? .subheadline.weight(.semibold) : .subheadline)
                 .foregroundStyle(isTotal ? Color.nestBrown : .primary)
             Spacer()
-            Text(value, format: .currency(code: "USD"))
+            Text(value, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: isTotal ? .bold : .medium))
                 .foregroundStyle(color)
         }
@@ -164,7 +164,7 @@ struct SafeToSpendView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("30-Day Projected Balance").font(.caption).foregroundStyle(.secondary)
-                    Text(result.projectedThirtyDayBalance, format: .currency(code: "USD"))
+                    Text(result.projectedThirtyDayBalance, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                         .foregroundStyle(Color.nestBrown)
                 }
@@ -174,7 +174,7 @@ struct SafeToSpendView: View {
                     HStack(spacing: 3) {
                         Image(systemName: result.thirtyDayNetWorthDelta >= 0 ? "arrow.up.right" : "arrow.down.right")
                             .font(.caption2)
-                        Text(abs(result.thirtyDayNetWorthDelta), format: .currency(code: "USD"))
+                        Text(abs(result.thirtyDayNetWorthDelta), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                     }
                     .foregroundStyle(result.thirtyDayNetWorthDelta >= 0 ? Color.nestLeafGreen : .red)

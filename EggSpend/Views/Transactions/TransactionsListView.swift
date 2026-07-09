@@ -220,7 +220,7 @@ struct TransactionsListView: View {
                         Spacer()
                         if !groupable.isEmpty {
                             let total = dailyNetTotal(groupable)
-                            Text(total, format: .currency(code: "USD").sign(strategy: .always()))
+                            Text(total, format: .currency(code: CurrencyFormat.code).sign(strategy: .always()))
                                 .font(.caption.weight(.semibold))
                                 .fontDesign(.rounded)
                                 .foregroundStyle(total >= 0 ? Color.green : Color.red)

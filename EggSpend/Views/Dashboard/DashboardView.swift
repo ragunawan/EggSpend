@@ -117,7 +117,7 @@ struct DashboardView: View {
         VStack(spacing: 6) {
             Text("Nest Egg Total")
                 .font(.subheadline).foregroundStyle(Color.twig)
-            Text(netWorthVisible ? netWorth : 0, format: .currency(code: "USD"))
+            Text(netWorthVisible ? netWorth : 0, format: .currency(code: CurrencyFormat.code))
                 .font(.system(size: 42, weight: .bold, design: .rounded))
                 .foregroundStyle(netWorth >= 0 ? Color.nestBrown : Color.red)
                 .contentTransition(.numericText())
@@ -146,7 +146,7 @@ struct DashboardView: View {
                 }
 
                 HStack(alignment: .firstTextBaseline) {
-                    Text(safeSpendResult.safeToSpendToday, format: .currency(code: "USD"))
+                    Text(safeSpendResult.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
                         .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundStyle(safeSpendStatusColor)
                     Spacer()
@@ -156,7 +156,7 @@ struct DashboardView: View {
                 }
 
                 HStack {
-                    Text("Keeps \(safeSpendResult.requiredBuffer, format: .currency(code: "USD")) cash buffer")
+                    Text("Keeps \(safeSpendResult.requiredBuffer, format: .currency(code: CurrencyFormat.code)) cash buffer")
                     Spacer()
                     Text("Based on next 30 days")
                 }
@@ -424,7 +424,7 @@ private struct NestMetricCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Label(title, systemImage: icon).font(.caption).foregroundStyle(color)
-            Text(amount, format: .currency(code: "USD"))
+            Text(amount, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .semibold))
                 .foregroundStyle(amount < 0 ? .red : Color.nestBrown)
                 .minimumScaleFactor(0.7).lineLimit(1)
@@ -581,11 +581,11 @@ private struct HorizontalScrollProgressBar: View {
 private func formattedTileCurrency(_ amount: Double) -> String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .currency
-    formatter.currencyCode = "USD"
+    formatter.currencyCode = CurrencyFormat.code
     formatter.usesSignificantDigits = true
     formatter.minimumSignificantDigits = 1
     formatter.maximumSignificantDigits = 3
-    return formatter.string(from: NSNumber(value: amount)) ?? amount.formatted(.currency(code: "USD"))
+    return formatter.string(from: NSNumber(value: amount)) ?? amount.formatted(.currency(code: CurrencyFormat.code))
 }
 
 #Preview {

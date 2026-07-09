@@ -62,7 +62,7 @@ struct CashFlowCalendarView: View {
                             Text("Starting Liquid Balance")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text(ForecastEngine.liquidBalance(from: accounts), format: .currency(code: "USD"))
+                            Text(ForecastEngine.liquidBalance(from: accounts), format: .currency(code: CurrencyFormat.code))
                                 .font(.system(.title3, design: .rounded, weight: .bold))
                                 .foregroundStyle(Color.nestBrown)
                         }
@@ -109,10 +109,10 @@ struct CashFlowCalendarView: View {
                 .font(.caption)
                 .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : .red)
             Spacer()
-            Text(day.netFlow, format: .currency(code: "USD"))
+            Text(day.netFlow, format: .currency(code: CurrencyFormat.code))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : .red)
-            Text("Balance \(day.projectedBalance, format: .currency(code: "USD"))")
+            Text("Balance \(day.projectedBalance, format: .currency(code: CurrencyFormat.code))")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -164,7 +164,7 @@ struct CashFlowCalendarView: View {
             }
             Spacer()
             if amount != 0 {
-                Text(abs(amount), format: .currency(code: "USD"))
+                Text(abs(amount), format: .currency(code: CurrencyFormat.code))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(color)
             }

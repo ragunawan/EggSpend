@@ -174,7 +174,7 @@ struct CashFlowForecastView: View {
                 }
                 .chartXSelection(value: $selectedDate)
                 .chartYAxis {
-                    AxisMarks(format: .currency(code: "USD").precision(.fractionLength(0)))
+                    AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                 }
                 .chartXAxis {
                     AxisMarks(values: .automatic(desiredCount: 5)) { _ in
@@ -193,7 +193,7 @@ struct CashFlowForecastView: View {
                         HStack(spacing: 3) {
                             Image(systemName: balanceDelta >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
-                            Text(abs(balanceDelta), format: .currency(code: "USD"))
+                            Text(abs(balanceDelta), format: .currency(code: CurrencyFormat.code))
                                 .font(.system(.callout, design: .rounded, weight: .semibold))
                         }
                         .foregroundStyle(balanceDelta >= 0 ? Color.nestLeafGreen : .red)
@@ -219,7 +219,7 @@ struct CashFlowForecastView: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: .dateTime.month(.abbreviated).day())
                 .font(.caption2).foregroundStyle(.secondary)
-            Text(balance, format: .currency(code: "USD"))
+            Text(balance, format: .currency(code: CurrencyFormat.code))
                 .font(.caption).fontWeight(.semibold)
                 .foregroundStyle(balance >= 0 ? Color.nestBrown : .red)
         }
@@ -231,7 +231,7 @@ struct CashFlowForecastView: View {
     private func labeledAmount(label: String, value: Double, alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 2) {
             Text(label).font(.caption).foregroundStyle(.secondary)
-            Text(value, format: .currency(code: "USD"))
+            Text(value, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .semibold))
                 .foregroundStyle(value >= 0 ? Color.nestBrown : .red)
         }
@@ -270,7 +270,7 @@ struct CashFlowForecastView: View {
         VStack(alignment: .leading, spacing: 5) {
             Label(title, systemImage: icon)
                 .font(.caption2).foregroundStyle(color)
-            Text(value, format: .currency(code: "USD"))
+            Text(value, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.caption, design: .rounded, weight: .semibold))
                 .foregroundStyle(Color.nestBrown)
                 .minimumScaleFactor(0.6).lineLimit(1)
@@ -327,7 +327,7 @@ struct CashFlowForecastView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Text(abs(event.amount), format: .currency(code: "USD"))
+            Text(abs(event.amount), format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .medium))
                 .foregroundStyle(event.amount > 0 ? Color.nestLeafGreen : .primary)
         }

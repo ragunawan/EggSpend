@@ -47,7 +47,7 @@ struct TransferDetailView: View {
                     Image(systemName: "arrow.left.arrow.right.circle.fill")
                         .font(.largeTitle)
                         .foregroundStyle(Color.twig)
-                    Text(transfer.amount, format: .currency(code: "USD"))
+                    Text(transfer.amount, format: .currency(code: CurrencyFormat.code))
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                     Text("Transfer")
                         .font(.subheadline)

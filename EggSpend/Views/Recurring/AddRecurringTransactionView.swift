@@ -57,7 +57,7 @@ struct AddRecurringTransactionView: View {
                 Section("Details") {
                     TextField("Title", text: $title)
                     HStack {
-                        Text("$").foregroundStyle(.secondary)
+                        Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
                         TextField("0.00", text: $amountText).keyboardType(.decimalPad)
                     }
                 }

@@ -26,7 +26,7 @@ struct AddBudgetView: View {
                 Section("Budget Details") {
                     TextField("Name (e.g. Groceries)", text: $name)
                     HStack {
-                        Text("$").foregroundStyle(.secondary)
+                        Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
                         TextField("0.00", text: $amountText).keyboardType(.decimalPad)
                     }
                     Picker("Period", selection: $period) {

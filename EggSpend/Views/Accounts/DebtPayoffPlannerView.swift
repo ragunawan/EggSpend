@@ -22,7 +22,7 @@ struct DebtPayoffPlannerView: View {
                         Label(account.name, systemImage: account.type.icon)
                             .font(.headline)
                             .foregroundStyle(Color.nestBrown)
-                        Text(abs(account.balance), format: .currency(code: "USD"))
+                        Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
                             .font(.system(size: 34, weight: .bold, design: .rounded))
                             .foregroundStyle(.red)
                     }
@@ -31,8 +31,8 @@ struct DebtPayoffPlannerView: View {
 
                 Section("Payment Plan") {
                     valueRow("APR", account.annualPercentageRate.map { String(format: "%.2f%%", $0) } ?? "Not set")
-                    valueRow("Minimum payment", account.minimumPayment?.formatted(.currency(code: "USD")) ?? "Not set")
-                    valueRow("Extra payment", (account.plannedExtraPayment ?? 0).formatted(.currency(code: "USD")))
+                    valueRow("Minimum payment", account.minimumPayment?.formatted(.currency(code: CurrencyFormat.code)) ?? "Not set")
+                    valueRow("Extra payment", (account.plannedExtraPayment ?? 0).formatted(.currency(code: CurrencyFormat.code)))
                 }
 
                 Section("Estimate") {
@@ -48,7 +48,7 @@ struct DebtPayoffPlannerView: View {
                             .foregroundStyle(.red)
                     case .projected:
                         valueRow("Months to payoff", "\(result.months)")
-                        valueRow("Total interest", result.totalInterest.formatted(.currency(code: "USD")))
+                        valueRow("Total interest", result.totalInterest.formatted(.currency(code: CurrencyFormat.code)))
                         if let payoffDate = result.payoffDate {
                             valueRow("Payoff date", payoffDate.formatted(date: .abbreviated, time: .omitted))
                         }
