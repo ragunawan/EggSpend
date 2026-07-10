@@ -8,7 +8,7 @@ final class TransferTests: XCTestCase {
 
     override func setUpWithError() throws {
         let schema = Schema([Transaction.self, TransactionCategory.self, Account.self,
-                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self, BalanceSnapshot.self])
+                             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self, BalanceSnapshot.self, CategoryRule.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: schema, configurations: [config])
         context = ModelContext(container)

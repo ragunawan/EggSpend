@@ -111,6 +111,9 @@ FR = {
     "SubscriptionDetector":    u(1, 0x72),
     "TEST_SubscriptionDetector": u(1, 0x73),
     "SubscriptionAuditView":   u(1, 0x74),
+    "CategoryRule":            u(1, 0x75),
+    "CategoryRuleEngine":      u(1, 0x76),
+    "TEST_CategoryRule":       u(1, 0x77),
 }
 
 # Build files
@@ -185,6 +188,7 @@ APP_SOURCES = [
     ("SavingsGoal",          "Models/SavingsGoal.swift"),
     ("Transfer",             "Models/Transfer.swift"),
     ("BalanceSnapshot",      "Models/BalanceSnapshot.swift"),
+    ("CategoryRule",         "Models/CategoryRule.swift"),
     ("RecurringProjection",  "Utilities/RecurringProjection.swift"),
     ("DashboardView",        "Views/Dashboard/DashboardView.swift"),
     ("TransactionsListView", "Views/Transactions/TransactionsListView.swift"),
@@ -240,6 +244,7 @@ APP_SOURCES = [
     ("SettingsView",            "Views/Settings/SettingsView.swift"),
     ("BalanceSnapshotService",  "Utilities/BalanceSnapshotService.swift"),
     ("SubscriptionDetector",    "Utilities/SubscriptionDetector.swift"),
+    ("CategoryRuleEngine",      "Utilities/CategoryRuleEngine.swift"),
     ("SubscriptionAuditView",   "Views/Subscriptions/SubscriptionAuditView.swift"),
 ]
 
@@ -267,6 +272,7 @@ TEST_SOURCES = [
     ("TEST_DataExporter",       "EggSpendTests/DataExporterTests.swift"),
     ("TEST_BalanceSnapshot",    "EggSpendTests/BalanceSnapshotTests.swift"),
     ("TEST_SubscriptionDetector", "EggSpendTests/SubscriptionDetectorTests.swift"),
+    ("TEST_CategoryRule",       "EggSpendTests/CategoryRuleEngineTests.swift"),
 ]
 
 def pbxproj():
@@ -398,6 +404,7 @@ def pbxproj():
     a(f"\t\t\t\t{FR['SavingsGoal']} /* SavingsGoal.swift */,")
     a(f"\t\t\t\t{FR['Transfer']} /* Transfer.swift */,")
     a(f"\t\t\t\t{FR['BalanceSnapshot']} /* BalanceSnapshot.swift */,")
+    a(f"\t\t\t\t{FR['CategoryRule']} /* CategoryRule.swift */,")
     a(f"\t\t\t);")
     a(f"\t\t\tpath = Models;")
     a(f"\t\t\tsourceTree = \"<group>\";")
@@ -451,7 +458,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])

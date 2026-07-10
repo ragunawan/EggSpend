@@ -13,7 +13,8 @@ struct EggSpendApp: App {
             RecurringTransaction.self,
             SavingsGoal.self,
             Transfer.self,
-            BalanceSnapshot.self
+            BalanceSnapshot.self,
+            CategoryRule.self
         ])
         // Attempt CloudKit sync; fall back to local on failure (e.g. no iCloud sign-in)
         do {

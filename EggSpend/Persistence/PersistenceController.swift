@@ -161,7 +161,7 @@ enum PersistenceController {
         let schema = Schema([
             Transaction.self, TransactionCategory.self, Account.self,
             Budget.self, RecurringTransaction.self, SavingsGoal.self, Transfer.self,
-            BalanceSnapshot.self
+            BalanceSnapshot.self, CategoryRule.self
         ])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: schema, configurations: [config])
