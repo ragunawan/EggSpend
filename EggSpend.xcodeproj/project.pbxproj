@@ -75,6 +75,7 @@
 		AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000070 /* BalanceSnapshotService.swift */; };
 		AA020000000000000000005D /* SubscriptionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000072 /* SubscriptionDetector.swift */; };
 		AA0200000000000000000061 /* CategoryRuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000076 /* CategoryRuleEngine.swift */; };
+		AA0200000000000000000063 /* SpendingDeltaCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000078 /* SpendingDeltaCalculator.swift */; };
 		AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000074 /* SubscriptionAuditView.swift */; };
 		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
 		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
@@ -102,6 +103,7 @@
 		AA020000000000000000005C /* BalanceSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000071 /* BalanceSnapshotTests.swift */; };
 		AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000073 /* SubscriptionDetectorTests.swift */; };
 		AA0200000000000000000062 /* CategoryRuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000077 /* CategoryRuleEngineTests.swift */; };
+		AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -185,6 +187,7 @@
 		AA0100000000000000000070 /* BalanceSnapshotService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceSnapshotService.swift; sourceTree = "<group>"; };
 		AA0100000000000000000072 /* SubscriptionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetector.swift; sourceTree = "<group>"; };
 		AA0100000000000000000076 /* CategoryRuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRuleEngine.swift; sourceTree = "<group>"; };
+		AA0100000000000000000078 /* SpendingDeltaCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingDeltaCalculator.swift; sourceTree = "<group>"; };
 		AA0100000000000000000074 /* SubscriptionAuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAuditView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
@@ -213,6 +216,7 @@
 		AA0100000000000000000071 /* BalanceSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceSnapshotTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000073 /* SubscriptionDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetectorTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000077 /* CategoryRuleEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRuleEngineTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingDeltaCalculatorTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -434,6 +438,7 @@
 				AA0100000000000000000070 /* BalanceSnapshotService.swift */,
 				AA0100000000000000000072 /* SubscriptionDetector.swift */,
 				AA0100000000000000000076 /* CategoryRuleEngine.swift */,
+				AA0100000000000000000078 /* SpendingDeltaCalculator.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -517,6 +522,7 @@
 				AA0100000000000000000071 /* BalanceSnapshotTests.swift */,
 				AA0100000000000000000073 /* SubscriptionDetectorTests.swift */,
 				AA0100000000000000000077 /* CategoryRuleEngineTests.swift */,
+				AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -690,6 +696,7 @@
 				AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */,
 				AA020000000000000000005D /* SubscriptionDetector.swift in Sources */,
 				AA0200000000000000000061 /* CategoryRuleEngine.swift in Sources */,
+				AA0200000000000000000063 /* SpendingDeltaCalculator.swift in Sources */,
 				AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -722,6 +729,7 @@
 				AA020000000000000000005C /* BalanceSnapshotTests.swift in Sources */,
 				AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */,
 				AA0200000000000000000062 /* CategoryRuleEngineTests.swift in Sources */,
+				AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

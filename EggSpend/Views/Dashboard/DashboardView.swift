@@ -33,6 +33,9 @@ struct DashboardView: View {
         transactions.filter { $0.type == .expense && !$0.isAdjustment && Calendar.current.isDateInCurrentMonth($0.date) }
             .reduce(0) { $0 + $1.amount }
     }
+    private var spendingDeltas: [SpendingDeltaCalculator.CategoryDelta] {
+        SpendingDeltaCalculator.calculate(transactions: transactions)
+    }
     private var recentTransactions: [Transaction] { Array(transactions.prefix(5)) }
     private var topBudgets: [Budget] { budgets.sorted { $0.name < $1.name } }
     private var topGoals: [SavingsGoal] { activeGoals.sorted { $0.createdAt < $1.createdAt } }
@@ -64,6 +67,7 @@ struct DashboardView: View {
                         savingsGoalsPreviewSection.appearRise(delay: 0.25)
                         if !topBudgets.isEmpty { budgetPreviewSection.appearRise(delay: 0.3) }
                         recentTransactionsSection.appearRise(delay: 0.35)
+                        if !spendingDeltas.isEmpty { spendingDeltaCard.appearRise(delay: 0.4) }
                     }
                     .padding()
                     .padding(.bottom, 20)
@@ -262,6 +266,38 @@ struct DashboardView: View {
                         .font(.headline).foregroundStyle(Color.nestBrown)
                     Text("Income, savings rate & budget recap")
                         .font(.caption).foregroundStyle(Color.twig)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption).foregroundStyle(Color.twig)
+            }
+            .padding(14)
+            .nestCard()
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Spending Delta card
+
+    private var spendingDeltaCard: some View {
+        NavigationLink(destination: MonthlyReviewView()) {
+            HStack(alignment: .top, spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Color.eggBlue.opacity(0.15))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "arrow.up.arrow.down.circle.fill")
+                        .foregroundStyle(Color.eggBlue)
+                        .font(.system(size: 18))
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("What changed this month?")
+                        .font(.headline).foregroundStyle(Color.nestBrown)
+                    ForEach(spendingDeltas) { delta in
+                        Text(delta.sentence)
+                            .font(.caption)
+                            .foregroundStyle(Color.twig)
+                    }
                 }
                 Spacer()
                 Image(systemName: "chevron.right")

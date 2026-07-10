@@ -71,6 +71,25 @@ enum PersistenceController {
             context.insert(tx)
         }
 
+        // Older transactions (35-75 days back) so the seed spans at least one full
+        // prior calendar month — without these, "What changed this month?" (T18)
+        // would always hide (its <1-month-of-history gate needs a full prior month).
+        let olderTransactions: [(Int, String, Double, TransactionType, TransactionCategory?, String)] = [
+            (75, "April Paycheck",      4200, .income,  salary,        ""),
+            (68, "Trader Joe's",         62.10, .expense, food,          "Groceries"),
+            (58, "Blue Bottle Coffee",    6.75, .expense, food,          "Morning latte"),
+            (50, "Lyft",                 11.20, .expense, transport,     ""),
+            (44, "Movie tickets",        28.00, .expense, entertainment, "Weekend movie"),
+            (38, "Dinner w/ friends",    45.00, .expense, food,          "Ramen spot"),
+            (35, "BART",                  4.70, .expense, transport,     ""),
+        ]
+        for (daysAgo, title, amount, type, category, notes) in olderTransactions {
+            let date = calendar.date(byAdding: .day, value: -daysAgo, to: now) ?? now
+            let tx = Transaction(title: title, amount: amount, date: date,
+                                 type: type, category: category, notes: notes)
+            context.insert(tx)
+        }
+
         let accounts: [(String, AccountType, Double)] = [
             ("Chase Checking",    .checking,   4_200),
             ("High Yield Savings",.savings,   18_500),
