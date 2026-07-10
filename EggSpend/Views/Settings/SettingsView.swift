@@ -1,18 +1,30 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import LocalAuthentication
 
 /// Data export entry point. Presented as a sheet from `DashboardView`'s
 /// toolbar gear button. Scope for this task is export only — no sync
-/// status, currency, or restore controls here (those are separate tasks).
+/// status, restore, or currency controls here (those are separate tasks).
 struct SettingsView: View {
     /// Shared UserDefaults key for the on-device AI narrative toggle. Read by
     /// both this view's Toggle and `DashboardView`'s narrative enrichment via
     /// `@AppStorage` — defined once here so the key string can't drift.
     static let aiNarrativeStorageKey = "aiNarrativeEnabled"
 
+    /// Shared UserDefaults key for the app-lock toggle. Read here via
+    /// `@AppStorage` and by `AppLockController`'s default `lockEnabled`
+    /// closure via plain `UserDefaults` — defined once here so the key
+    /// string can't drift between the two. `nonisolated` because
+    /// `AppLockController`'s default `lockEnabled` closure (a nonisolated
+    /// context) reads it directly; `SettingsView` itself infers `@MainActor`
+    /// isolation from `View`, which a plain `static let` would otherwise inherit.
+    nonisolated static let appLockStorageKey = "appLockEnabled"
+
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppLockController.self) private var appLockController: AppLockController?
     @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
+    @AppStorage(SettingsView.appLockStorageKey) private var appLockEnabled = false
 
     @Query private var transactions: [Transaction]
     @Query private var categories: [TransactionCategory]
@@ -67,6 +79,22 @@ struct SettingsView: View {
         return JSONExportFile(filename: DataExporter.exportFilename(prefix: "Backup", ext: "json"), data: data)
     }
 
+    /// Biometry-adaptive toggle label ("Face ID"/"Touch ID") when the
+    /// device can name its own enrolled biometry type; a generic fallback
+    /// otherwise. Purely cosmetic — `canEvaluate()` above already gates
+    /// whether the section renders at all.
+    private var biometricToggleLabel: String {
+        let context = LAContext()
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: nil) else {
+            return "Require biometrics to unlock"
+        }
+        switch context.biometryType {
+        case .faceID: return "Require Face ID to unlock"
+        case .touchID: return "Require Touch ID to unlock"
+        default: return "Require biometrics to unlock"
+        }
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -87,6 +115,25 @@ struct SettingsView: View {
                         ShareLink(item: backupFile, preview: SharePreview(backupFile.filename)) {
                             Label("Full Backup (JSON)", systemImage: "externaldrive.fill")
                         }
+                    }
+                }
+
+                // Only rendered when this device can actually evaluate
+                // device-owner authentication at all (e.g. hidden on a
+                // Simulator with no Face ID/Touch ID enrolled) — mirrors the
+                // Intelligence section's availability-gating precedent below.
+                if LiveBiometricAuthenticator().canEvaluate() {
+                    Section {
+                        Toggle(biometricToggleLabel, isOn: $appLockEnabled)
+                            .onChange(of: appLockEnabled) { _, newValue in
+                                if !newValue {
+                                    appLockController?.refreshForLockSettingChange()
+                                }
+                            }
+                    } header: {
+                        Text("Privacy")
+                    } footer: {
+                        Text("Locks EggSpend's screens behind your device's biometrics or passcode when you reopen the app. This protects who can view your data on this device — it does not encrypt the underlying data.")
                     }
                 }
 

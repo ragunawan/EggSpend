@@ -118,6 +118,8 @@ FR = {
     "TEST_SpendingDelta":      u(1, 0x79),
     "NarrativeGenerator":      u(1, 0x7A),
     "TEST_NarrativeGenerator": u(1, 0x7B),
+    "AppLockController":       u(1, 0x7C),
+    "TEST_AppLockController":  u(1, 0x7D),
 }
 
 # Build files
@@ -252,6 +254,7 @@ APP_SOURCES = [
     ("SpendingDeltaCalculator", "Utilities/SpendingDeltaCalculator.swift"),
     ("NarrativeGenerator",      "Utilities/NarrativeGenerator.swift"),
     ("SubscriptionAuditView",   "Views/Subscriptions/SubscriptionAuditView.swift"),
+    ("AppLockController",       "Utilities/AppLockController.swift"),
 ]
 
 TEST_SOURCES = [
@@ -281,6 +284,7 @@ TEST_SOURCES = [
     ("TEST_CategoryRule",       "EggSpendTests/CategoryRuleEngineTests.swift"),
     ("TEST_SpendingDelta",      "EggSpendTests/SpendingDeltaCalculatorTests.swift"),
     ("TEST_NarrativeGenerator", "EggSpendTests/NarrativeGeneratorTests.swift"),
+    ("TEST_AppLockController",  "EggSpendTests/AppLockControllerTests.swift"),
 ]
 
 def pbxproj():
@@ -466,7 +470,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])
@@ -718,6 +722,7 @@ def pbxproj():
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_CFBundleDisplayName = EggSpend;")
         a(f"\t\t\t\tINFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;")
+        a(f"\t\t\t\tINFOPLIST_KEY_NSFaceIDUsageDescription = \"EggSpend uses Face ID to unlock the app.\";")
         a(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;")

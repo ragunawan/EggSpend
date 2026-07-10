@@ -12,6 +12,10 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 ## Unprioritized inbox
 (The Documentation Agent appends here; the Planner promotes items into docs/task-backlog.md + IMPLEMENTATION_PLAN.md.)
 
+- T20 follow-ups (Face ID / Touch ID app lock):
+  - Generic lock-screen copy could name the biometry type adaptively — display "Face ID" or "Touch ID" based on available device authentication method (currently generic "Use biometrics").
+  - Consolidate duplicate LAContext/canEvaluatePolicy calls in SettingsView — currently evaluates canEvaluate twice per body render (once for Section gating, once for label adaptation), same calls can be shared via local variable.
+  - App-switcher snapshot full fix — see B26 register item; UIKit overlay window required to overlay system compositor (fullScreenCover is SwiftUI-native only, does not reach app-switcher layer); full fix deferred to backlog, v1 limitation documented.
 - Surface recurring-processing failures in UI (banner/toast) instead of console-only logging — T6 added Bool return tracking but both onAppear callers ignore it; address in next cycle so T6 isn't overstated as fully closed (from T6 code review).
 - AccountsView.swift is dead code — unreachable from ContentView, only self-referenced in its own #Preview; candidate for deletion (with generate_project.py/pbxproj update) or wiring up (from T7 repo analysis).
 - UX: consider pausing or surfacing recurring transactions on archived accounts (ties to B22 — recurring transactions on archived accounts continue materializing silently, needs product decision or follow-up task) (from T7 code review).
