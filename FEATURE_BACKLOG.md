@@ -60,7 +60,7 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
   - Manual VoiceOver smoke test of the corrected element tree: Track button is now a sibling to the .combine wrapper (not inside it), ensuring the button retains independent actionable trait for assistive technology.
   - Lightweight test asserting one RecurringTransaction insert per track() call: current test coverage pins view-layer wiring and SubscriptionDetector round-trip, but doesn't directly verify insertion cardinality (e.g. guard against accidental double-insert or silent failure-to-insert scenarios). Recommend a simple test that calls track() and asserts context changes count or uses a Mock to verify exactly one insert(_:) call.
 - T17a follow-ups (Auto-categorization rule engine):
-  - Empty-pattern defensive guard for T17b: CategoryRuleEngine.recordRule and categoryFor should handle empty/whitespace-only patterns gracefully (currently unreachable — AddTransactionView validates non-empty transaction titles; CSV blank titles get "Row N" fallback — but defensive guard is good practice in case future callers bypass these invariants).
+  - ~~Empty-pattern defensive guard for T17b~~ — **DONE (loop 20, T17b, 2026-07-09):** `recordRule` now returns `CategoryRule?` and no-ops on empty-normalized patterns; `categoryFor` returns nil for them; both pinned by tests in `CategoryRuleEngineTests.swift`.
 
 ### From TODO.md (user-ranked P0–P3 roadmap, committed to `main` 2026-07-08; see IMPLEMENTATION_PLAN.md "TODO.md reconciliation" for the full mapping — these are the items with no existing task ID)
 

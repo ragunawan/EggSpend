@@ -16,16 +16,18 @@ import SwiftData
 /// punctuation) is a plausible v2 if false negatives prove too common in
 /// practice, but is deliberately out of scope here.
 ///
-/// Forward notes for the T17b management/UI layer:
-/// - The "delete rule" management action must delete ALL rows for a pattern
-///   (not just the latest), since duplicate rows per pattern are tolerated by
-///   design (see `CategoryRule`'s doc comment) and a partial delete would
-///   leave a stale row that could resurface as the "latest" later.
-/// - Import auto-assignment should apply only to rows that are currently
-///   UNCATEGORIZED (never overwrite an explicit category the import already
-///   inferred/set), and should be visually distinguished with its own preview
-///   badge so the user can tell "the rule engine guessed this" apart from
-///   "the CSV/column mapping said this".
+/// The management UI (`CategoryManagementView`) lists the latest row per
+/// normalized pattern and deletes via `deleteAllRules(matching:in:)`, which
+/// removes every row for a pattern — not just the latest — since duplicate
+/// rows per pattern are tolerated by design (see `CategoryRule`'s doc
+/// comment) and a partial delete would leave a stale row that could
+/// resurface as the "latest" later.
+///
+/// Import auto-assignment (`CSVImportView.applyCategoryRules`) applies only
+/// to rows that are currently UNCATEGORIZED (never overwrites an explicit
+/// category the import already inferred/set), and is visually distinguished
+/// with its own preview badge so the user can tell "the rule engine guessed
+/// this" apart from "the CSV/column mapping said this".
 enum CategoryRuleEngine {
     /// Records (or updates) the rule that `title` should map to `category`.
     /// This is an upsert *attempt*: existing rows for the normalized pattern
@@ -39,15 +41,17 @@ enum CategoryRuleEngine {
     ///   - category: The category the user assigned.
     ///   - context: The `ModelContext` used to fetch existing rules, insert/update, and save.
     ///   - now: Injectable "now" for deterministic tests.
-    /// - Returns: The `CategoryRule` row that was updated or inserted.
+    /// - Returns: The `CategoryRule` row that was updated or inserted, or
+    ///   `nil` if `title` normalizes to an empty pattern (nothing to learn from).
     @discardableResult
     static func recordRule(
         title: String,
         category: TransactionCategory,
         context: ModelContext,
         now: Date = .now
-    ) -> CategoryRule {
+    ) -> CategoryRule? {
         let pattern = CSVParser.normalizedTitle(title)
+        guard !pattern.isEmpty else { return nil }
         // A fetch failure here (nil-coalesced to []) is itself a second, rarer
         // duplication source beyond the CloudKit sync race documented above:
         // it makes an existing rule for this pattern invisible, so a new row
@@ -94,10 +98,27 @@ enum CategoryRuleEngine {
         categories: [TransactionCategory]
     ) -> TransactionCategory? {
         let pattern = CSVParser.normalizedTitle(title)
+        guard !pattern.isEmpty else { return nil }
         guard let latest = rules
             .filter({ $0.normalizedPattern == pattern })
             .max(by: { $0.createdAt < $1.createdAt })
         else { return nil }
         return categories.first { $0.id == latest.categoryID }
+    }
+
+    /// Deletes EVERY `CategoryRule` row whose `normalizedPattern == pattern`.
+    /// Cross-device CloudKit sync races can leave duplicate rows for the same
+    /// pattern (see `recordRule`); a partial delete would let a stale
+    /// duplicate resurface as the "latest" rule on the next read.
+    static func deleteAllRules(matching pattern: String, in context: ModelContext) {
+        let allRules = (try? context.fetch(FetchDescriptor<CategoryRule>())) ?? []
+        for rule in allRules where rule.normalizedPattern == pattern {
+            context.delete(rule)
+        }
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save after deleting category rules: \(error)")
+        }
     }
 }

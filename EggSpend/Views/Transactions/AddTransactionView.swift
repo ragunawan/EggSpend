@@ -328,6 +328,9 @@ struct AddTransactionView: View {
             tx.notes = notes
 
             AccountBalanceService.apply(tx, to: selectedAccount)
+            if let selectedCategory {
+                CategoryRuleEngine.recordRule(title: title.trimmingCharacters(in: .whitespaces), category: selectedCategory, context: modelContext)
+            }
             BudgetAlertCoordinator.checkBudgets(context: modelContext)
         } else {
             let tx = Transaction(
@@ -341,6 +344,9 @@ struct AddTransactionView: View {
             )
             modelContext.insert(tx)
             AccountBalanceService.apply(tx, to: selectedAccount)
+            if let selectedCategory {
+                CategoryRuleEngine.recordRule(title: title.trimmingCharacters(in: .whitespaces), category: selectedCategory, context: modelContext)
+            }
             BudgetAlertCoordinator.checkBudgets(context: modelContext)
         }
     }

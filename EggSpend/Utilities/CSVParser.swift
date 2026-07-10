@@ -199,6 +199,9 @@ struct ParsedTransactionResult: Identifiable {
     // Set by `markDuplicates(in:existingKeys:accountID:)` after structural parsing.
     // Defaulted so existing 7-arg initializer call sites keep compiling.
     var isDuplicate: Bool = false
+    // Set post-parse by the import preview's rule application. Defaulted so
+    // existing initializer call sites keep compiling.
+    var isAutoAssignedCategory: Bool = false
 
     var isValid: Bool {
         date != nil && amount != nil && !title.trimmingCharacters(in: .whitespaces).isEmpty

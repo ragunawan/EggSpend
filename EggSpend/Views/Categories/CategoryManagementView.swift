@@ -6,11 +6,14 @@ struct CategoryManagementView: View {
 
     @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Query(sort: \Transaction.date) private var transactions: [Transaction]
+    @Query private var categoryRules: [CategoryRule]
 
     @State private var showAddCategory = false
     @State private var editingCategory: TransactionCategory? = nil
     @State private var categoryToDelete: TransactionCategory? = nil
     @State private var showDeleteConfirmation = false
+    @State private var rulePatternToDelete: String? = nil
+    @State private var showDeleteRuleConfirmation = false
 
     // MARK: - Sections
 
@@ -30,6 +33,15 @@ struct CategoryManagementView: View {
 
     private func transactionCount(for category: TransactionCategory) -> Int {
         transactions.filter { $0.category?.id == category.id }.count
+    }
+
+    /// One row per distinct normalized pattern, showing only the most
+    /// recently recorded rule (duplicate rows per pattern are tolerated by
+    /// design — see `CategoryRule`'s doc comment).
+    private var groupedRules: [(pattern: String, latest: CategoryRule)] {
+        Dictionary(grouping: categoryRules, by: \.normalizedPattern)
+            .compactMap { pattern, rows in rows.max(by: { $0.createdAt < $1.createdAt }).map { (pattern, $0) } }
+            .sorted { $0.pattern < $1.pattern }
     }
 
     // MARK: - Body
@@ -77,6 +89,19 @@ struct CategoryManagementView: View {
                                 }
                             }
                         }
+
+                        if !groupedRules.isEmpty {
+                            Section {
+                                ForEach(groupedRules, id: \.pattern) { entry in
+                                    ruleRow(entry)
+                                        .listRowBackground(Color.clear)
+                                }
+                            } header: {
+                                Text("Auto-Categorization Rules")
+                            } footer: {
+                                Text("Rules are learned automatically when you categorize a transaction. Deleting a rule stops future auto-assignment for that title.")
+                            }
+                        }
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)
@@ -122,6 +147,23 @@ struct CategoryManagementView: View {
             if let name = categoryToDelete?.name {
                 Text("Delete \"\(name)\"? Transactions in this category will not be deleted, but will lose their category assignment.")
             }
+        }
+        .confirmationDialog(
+            "Delete Rule",
+            isPresented: $showDeleteRuleConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let pattern = rulePatternToDelete {
+                    CategoryRuleEngine.deleteAllRules(matching: pattern, in: modelContext)
+                    rulePatternToDelete = nil
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                rulePatternToDelete = nil
+            }
+        } message: {
+            Text("This title will no longer be auto-categorized. Future transactions with this title will start uncategorized again.")
         }
     }
 
@@ -208,6 +250,48 @@ struct CategoryManagementView: View {
                 Label("Edit", systemImage: "pencil")
             }
             .tint(.blue)
+        }
+    }
+
+    // MARK: - Rule row
+
+    @ViewBuilder
+    private func ruleRow(_ entry: (pattern: String, latest: CategoryRule)) -> some View {
+        let resolvedCategory = categories.first { $0.id == entry.latest.categoryID }
+
+        HStack(spacing: 12) {
+            if let resolvedCategory {
+                CategoryBadgeView(category: resolvedCategory, compact: true)
+            } else {
+                Image(systemName: "questionmark.circle")
+                    .foregroundStyle(Color.twig)
+                    .frame(width: 22)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.pattern)
+                    .font(.body)
+                    .foregroundStyle(.primary)
+                Text(resolvedCategory?.name ?? "No category")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                rulePatternToDelete = entry.pattern
+                showDeleteRuleConfirmation = true
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            .tint(.red)
         }
     }
 }

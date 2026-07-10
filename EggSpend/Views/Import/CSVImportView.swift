@@ -29,6 +29,7 @@ struct CSVImportView: View {
     @Environment(\.dismiss) private var dismiss
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
+    @Query private var categoryRules: [CategoryRule]
 
     let importType: CSVImportType
 
@@ -416,7 +417,8 @@ struct CSVImportView: View {
             let existingKeys = Set(existingTransactions.map {
                 duplicateKey(date: $0.date, amount: $0.amount, title: $0.title, accountID: $0.account?.id)
             })
-            txResults = markDuplicates(in: parsed, existingKeys: existingKeys, accountID: selectedImportAccount?.id)
+            let marked = markDuplicates(in: parsed, existingKeys: existingKeys, accountID: selectedImportAccount?.id)
+            txResults = applyCategoryRules(in: marked, rules: categoryRules, categories: categories)
         } else {
             acctResults = CSVParser.parseAccountRows(rows: rawRows, headers: headers, mapping: mapping)
         }
@@ -559,6 +561,26 @@ func markDuplicates(
     }
 }
 
+/// Auto-assigns a category to rows that don't already have one, using rules
+/// learned from the user's own prior manual categorization
+/// (`CategoryRuleEngine`). Rows with a CSV-specified category are always left
+/// untouched — never overwrite an explicit signal with a guess.
+func applyCategoryRules(
+    in results: [ParsedTransactionResult],
+    rules: [CategoryRule],
+    categories: [TransactionCategory]
+) -> [ParsedTransactionResult] {
+    results.map { result in
+        var result = result
+        guard result.categoryName == nil else { return result }
+        if let match = CategoryRuleEngine.categoryFor(title: result.title, rules: rules, categories: categories) {
+            result.categoryName = match.name
+            result.isAutoAssignedCategory = true
+        }
+        return result
+    }
+}
+
 // MARK: – Preview rows
 
 private struct TransactionPreviewRow: View {
@@ -591,6 +613,14 @@ private struct TransactionPreviewRow: View {
                         }
                         if let cat = result.categoryName {
                             Text(cat).font(.caption).foregroundStyle(.secondary)
+                        }
+                        if result.isAutoAssignedCategory {
+                            Label("Auto", systemImage: "wand.and.stars")
+                                .font(.caption2)
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Color.yolk.opacity(0.15), in: Capsule())
+                                .foregroundStyle(Color.yolk)
+                                .accessibilityLabel("Category auto-assigned")
                         }
                     }
                 }
