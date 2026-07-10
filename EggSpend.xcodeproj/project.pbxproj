@@ -76,6 +76,7 @@
 		AA020000000000000000005D /* SubscriptionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000072 /* SubscriptionDetector.swift */; };
 		AA0200000000000000000061 /* CategoryRuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000076 /* CategoryRuleEngine.swift */; };
 		AA0200000000000000000063 /* SpendingDeltaCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000078 /* SpendingDeltaCalculator.swift */; };
+		AA0200000000000000000065 /* NarrativeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007A /* NarrativeGenerator.swift */; };
 		AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000074 /* SubscriptionAuditView.swift */; };
 		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
 		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
@@ -104,6 +105,7 @@
 		AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000073 /* SubscriptionDetectorTests.swift */; };
 		AA0200000000000000000062 /* CategoryRuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000077 /* CategoryRuleEngineTests.swift */; };
 		AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */; };
+		AA0200000000000000000066 /* NarrativeGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007B /* NarrativeGeneratorTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -188,6 +190,7 @@
 		AA0100000000000000000072 /* SubscriptionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetector.swift; sourceTree = "<group>"; };
 		AA0100000000000000000076 /* CategoryRuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRuleEngine.swift; sourceTree = "<group>"; };
 		AA0100000000000000000078 /* SpendingDeltaCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingDeltaCalculator.swift; sourceTree = "<group>"; };
+		AA010000000000000000007A /* NarrativeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrativeGenerator.swift; sourceTree = "<group>"; };
 		AA0100000000000000000074 /* SubscriptionAuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAuditView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
@@ -217,6 +220,7 @@
 		AA0100000000000000000073 /* SubscriptionDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionDetectorTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000077 /* CategoryRuleEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRuleEngineTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingDeltaCalculatorTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000007B /* NarrativeGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrativeGeneratorTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -439,6 +443,7 @@
 				AA0100000000000000000072 /* SubscriptionDetector.swift */,
 				AA0100000000000000000076 /* CategoryRuleEngine.swift */,
 				AA0100000000000000000078 /* SpendingDeltaCalculator.swift */,
+				AA010000000000000000007A /* NarrativeGenerator.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -523,6 +528,7 @@
 				AA0100000000000000000073 /* SubscriptionDetectorTests.swift */,
 				AA0100000000000000000077 /* CategoryRuleEngineTests.swift */,
 				AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */,
+				AA010000000000000000007B /* NarrativeGeneratorTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -697,6 +703,7 @@
 				AA020000000000000000005D /* SubscriptionDetector.swift in Sources */,
 				AA0200000000000000000061 /* CategoryRuleEngine.swift in Sources */,
 				AA0200000000000000000063 /* SpendingDeltaCalculator.swift in Sources */,
+				AA0200000000000000000065 /* NarrativeGenerator.swift in Sources */,
 				AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -730,6 +737,7 @@
 				AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */,
 				AA0200000000000000000062 /* CategoryRuleEngineTests.swift in Sources */,
 				AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */,
+				AA0200000000000000000066 /* NarrativeGeneratorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -794,7 +802,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -853,7 +861,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
@@ -885,7 +893,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpend;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -919,7 +927,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpend;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -939,7 +947,7 @@
 				DEVELOPMENT_TEAM = 5T5444U7W2;
 				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpendTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -959,7 +967,7 @@
 				DEVELOPMENT_TEAM = 5T5444U7W2;
 				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpendTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

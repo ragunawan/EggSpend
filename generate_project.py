@@ -116,6 +116,8 @@ FR = {
     "TEST_CategoryRule":       u(1, 0x77),
     "SpendingDeltaCalculator": u(1, 0x78),
     "TEST_SpendingDelta":      u(1, 0x79),
+    "NarrativeGenerator":      u(1, 0x7A),
+    "TEST_NarrativeGenerator": u(1, 0x7B),
 }
 
 # Build files
@@ -248,6 +250,7 @@ APP_SOURCES = [
     ("SubscriptionDetector",    "Utilities/SubscriptionDetector.swift"),
     ("CategoryRuleEngine",      "Utilities/CategoryRuleEngine.swift"),
     ("SpendingDeltaCalculator", "Utilities/SpendingDeltaCalculator.swift"),
+    ("NarrativeGenerator",      "Utilities/NarrativeGenerator.swift"),
     ("SubscriptionAuditView",   "Views/Subscriptions/SubscriptionAuditView.swift"),
 ]
 
@@ -277,6 +280,7 @@ TEST_SOURCES = [
     ("TEST_SubscriptionDetector", "EggSpendTests/SubscriptionDetectorTests.swift"),
     ("TEST_CategoryRule",       "EggSpendTests/CategoryRuleEngineTests.swift"),
     ("TEST_SpendingDelta",      "EggSpendTests/SpendingDeltaCalculatorTests.swift"),
+    ("TEST_NarrativeGenerator", "EggSpendTests/NarrativeGeneratorTests.swift"),
 ]
 
 def pbxproj():
@@ -462,7 +466,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])
@@ -676,7 +680,7 @@ def pbxproj():
         a(f"\t\t\t\tGCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;")
         a(f"\t\t\t\tGCC_WARN_UNUSED_FUNCTION = YES;")
         a(f"\t\t\t\tGCC_WARN_UNUSED_VARIABLE = YES;")
-        a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 17.0;")
+        a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 26.0;")
         a(f"\t\t\t\tMTL_ENABLE_DEBUG_INFO = {'INCLUDE_SOURCE' if debug_only else 'NO'};")
         a(f"\t\t\t\tMTL_FAST_MATH = YES;")
         a(f"\t\t\t\tONLY_ACTIVE_ARCH = {'YES' if debug_only else 'NO'};")
@@ -719,7 +723,7 @@ def pbxproj():
         a(f"\t\t\t\tINFOPLIST_KEY_UILaunchScreen_Generation = YES;")
         a(f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = \"UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown\";")
         a(f"\t\t\t\tINFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = \"UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait\";")
-        a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 17.0;")
+        a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 26.0;")
         a(f"\t\t\t\tMARKETING_VERSION = 1.1;")
         a(f"\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpend;")
         a(f"\t\t\t\tPRODUCT_NAME = \"$(TARGET_NAME)\";")
@@ -744,7 +748,7 @@ def pbxproj():
         a(f"\t\t\t\tDEVELOPMENT_TEAM = 5T5444U7W2;")
         a(f"\t\t\t\tCURRENT_PROJECT_VERSION = 5;")
         a(f"\t\t\t\tGENERATE_INFOPLIST_FILE = YES;")
-        a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 17.0;")
+        a(f"\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = 26.0;")
         a(f"\t\t\t\tMARKETING_VERSION = 1.1;")
         a(f"\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = dev.gnwn.EggSpendTests;")
         a(f"\t\t\t\tPRODUCT_NAME = \"$(TARGET_NAME)\";")
