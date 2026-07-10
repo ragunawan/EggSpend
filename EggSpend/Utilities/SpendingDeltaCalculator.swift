@@ -27,6 +27,12 @@ enum SpendingDeltaCalculator {
         /// are always rendered as an absolute value via `CurrencyFormat` (never a
         /// raw minus sign) — direction is conveyed in words instead.
         let sentence: String
+        /// Exactly the currency strings interpolated into `sentence`, in order —
+        /// the `expectedFigures` a `NarrativeGenerator` caller must pass so the
+        /// figure-preservation validator can hold an AI rewrite to these values.
+        /// Kept in lockstep with the sentence templates below; never derived
+        /// separately in view code.
+        let figures: [String]
 
         init(categoryName: String, icon: String, currentAmount: Double, trailingAverage: Double, locale: Locale) {
             self.categoryName = categoryName
@@ -35,12 +41,18 @@ enum SpendingDeltaCalculator {
             self.trailingAverage = trailingAverage
             let delta = currentAmount - trailingAverage
             if delta > 0 {
-                sentence = "\(categoryName) is \(CurrencyFormat.money(abs(delta), locale: locale)) above your usual pace."
+                let figure = CurrencyFormat.money(abs(delta), locale: locale)
+                sentence = "\(categoryName) is \(figure) above your usual pace."
+                figures = [figure]
             } else if currentAmount > 0 {
-                sentence = "\(categoryName) is \(CurrencyFormat.money(abs(delta), locale: locale)) below your usual pace."
+                let figure = CurrencyFormat.money(abs(delta), locale: locale)
+                sentence = "\(categoryName) is \(figure) below your usual pace."
+                figures = [figure]
             } else {
                 // currentAmount == 0 and trailingAverage > 0 (spend stopped entirely).
-                sentence = "You haven't spent on \(categoryName) this month, down from your usual \(CurrencyFormat.money(trailingAverage, locale: locale))."
+                let figure = CurrencyFormat.money(trailingAverage, locale: locale)
+                sentence = "You haven't spent on \(categoryName) this month, down from your usual \(figure)."
+                figures = [figure]
             }
         }
     }

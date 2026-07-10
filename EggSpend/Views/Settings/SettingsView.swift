@@ -6,7 +6,13 @@ import UniformTypeIdentifiers
 /// toolbar gear button. Scope for this task is export only — no sync
 /// status, currency, or restore controls here (those are separate tasks).
 struct SettingsView: View {
+    /// Shared UserDefaults key for the on-device AI narrative toggle. Read by
+    /// both this view's Toggle and `DashboardView`'s narrative enrichment via
+    /// `@AppStorage` — defined once here so the key string can't drift.
+    static let aiNarrativeStorageKey = "aiNarrativeEnabled"
+
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
 
     @Query private var transactions: [Transaction]
     @Query private var categories: [TransactionCategory]
@@ -81,6 +87,19 @@ struct SettingsView: View {
                         ShareLink(item: backupFile, preview: SharePreview(backupFile.filename)) {
                             Label("Full Backup (JSON)", systemImage: "externaldrive.fill")
                         }
+                    }
+                }
+
+                // Only rendered when the on-device model is actually usable on
+                // this device (Apple Intelligence enabled and ready) — on any
+                // other device the toggle is absent entirely, per the T19 spec.
+                if NarrativeGenerator.isAvailable() {
+                    Section {
+                        Toggle("Enrich summaries with on-device AI", isOn: $aiNarrativeEnabled)
+                    } header: {
+                        Text("Intelligence")
+                    } footer: {
+                        Text("Rewrites the \"What changed this month?\" summary in a more natural tone. Processing happens entirely on this device — nothing is ever sent anywhere — and every number always comes from your actual data.")
                     }
                 }
             }

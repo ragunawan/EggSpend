@@ -73,6 +73,9 @@ final class SpendingDeltaCalculatorTests: XCTestCase {
         XCTAssertEqual(result[0].sentence, "Entertainment is $150.00 above your usual pace.")
         XCTAssertEqual(result[1].sentence, "Dining is $120.00 above your usual pace.")
         XCTAssertEqual(result[2].sentence, "Transport is $30.00 below your usual pace.")
+        // figures carry exactly the embedded currency strings (above-pace and below-pace branches).
+        XCTAssertEqual(result[0].figures, ["$150.00"])
+        XCTAssertEqual(result[2].figures, ["$30.00"])
     }
 
     func testZeroDeltaCategoryIsDropped() {
@@ -109,6 +112,8 @@ final class SpendingDeltaCalculatorTests: XCTestCase {
         XCTAssertEqual(entry.trailingAverage, 0, accuracy: 0.001)
         XCTAssertEqual(entry.currentAmount, 60, accuracy: 0.001)
         XCTAssertEqual(entry.sentence, "Subscriptions is $60.00 above your usual pace.")
+        // figures must be exactly the currency string embedded in the sentence (above-pace branch).
+        XCTAssertEqual(entry.figures, ["$60.00"])
     }
 
     func testZeroFillStoppedSpendDownFromUsual() {
@@ -131,6 +136,8 @@ final class SpendingDeltaCalculatorTests: XCTestCase {
         XCTAssertEqual(entry.currentAmount, 0, accuracy: 0.001)
         XCTAssertEqual(entry.trailingAverage, 45, accuracy: 0.001)
         XCTAssertEqual(entry.sentence, "You haven't spent on Gym this month, down from your usual $45.00.")
+        // Stopped-spend branch embeds the trailing average, not the delta.
+        XCTAssertEqual(entry.figures, ["$45.00"])
     }
 
     // MARK: - isAdjustment exclusion

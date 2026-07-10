@@ -15,6 +15,17 @@ struct DashboardView: View {
     @State private var showAddTransaction = false
     @State private var showSettings = false
 
+    // MARK: - AI narrative state (T19b)
+    @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
+    /// Constructed lazily on first use and reused for the view's lifetime —
+    /// `LiveNarrativeModelSession` bakes the system instructions in at init,
+    /// and NarrativeGenerator's doc comment marks per-lifetime reuse as
+    /// load-bearing (re-creating per call would re-send instructions each turn).
+    @State private var narrativeSession: NarrativeModelSession?
+    /// Validated AI rewrite of the spending-delta sentences; nil = show the
+    /// deterministic template rows (the always-works path).
+    @State private var narrative: String?
+
     @State private var savingsContentWidth: CGFloat = 0
     @State private var savingsVisibleWidth: CGFloat = 0
     @State private var savingsScrollOffset: CGFloat = 0
@@ -293,10 +304,16 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("What changed this month?")
                         .font(.headline).foregroundStyle(Color.nestBrown)
-                    ForEach(spendingDeltas) { delta in
-                        Text(delta.sentence)
+                    if let narrative {
+                        Text(narrative)
                             .font(.caption)
                             .foregroundStyle(Color.twig)
+                    } else {
+                        ForEach(spendingDeltas) { delta in
+                            Text(delta.sentence)
+                                .font(.caption)
+                                .foregroundStyle(Color.twig)
+                        }
                     }
                 }
                 Spacer()
@@ -307,6 +324,31 @@ struct DashboardView: View {
             .nestCard()
         }
         .buttonStyle(.plain)
+        // Keyed on the toggle + the rendered sentence text (NOT the array or
+        // transaction count): unrelated @Query re-fires that don't change the
+        // top-3 sentences must not re-trigger a model call, and flipping the
+        // toggle mid-flight cancels the task and clears the narrative.
+        .task(id: "\(aiNarrativeEnabled)|\(spendingDeltas.map(\.sentence).joined(separator: "|"))") {
+            guard aiNarrativeEnabled, NarrativeGenerator.isAvailable(), !spendingDeltas.isEmpty else {
+                narrative = nil
+                return
+            }
+            // Clear any previous narrative BEFORE the await: if the underlying
+            // data just changed, the old paragraph's figures no longer match
+            // the live deltas — the template rows (always derived from current
+            // data) must show during the model round-trip, never stale figures.
+            narrative = nil
+            if narrativeSession == nil {
+                narrativeSession = LiveNarrativeModelSession(instructions: NarrativeGenerator.instructions)
+            }
+            guard let session = narrativeSession else { return }
+            let sentences = spendingDeltas.map {
+                NarrativeGenerator.Sentence(text: $0.sentence, figures: $0.figures)
+            }
+            let result = await NarrativeGenerator.generate(sentences: sentences, session: session)
+            // A cancelled-but-suspended task must not overwrite a newer task's result.
+            if !Task.isCancelled { narrative = result }
+        }
     }
 
     // MARK: - Budget preview
