@@ -484,7 +484,11 @@ struct DashboardView: View {
                 } description: {
                     Text("Add your first transaction with the + button.")
                 }
-                .frame(height: 140)
+                // Unlike the List-row empty states (MetricsView/CashFlowForecastView/
+                // SafeToSpendView), this sits in a plain VStack inside a ScrollView, so
+                // a `minHeight` lets the card grow with Dynamic Type instead of clipping
+                // — a fixed `.frame(height:)` here was the B27 defect.
+                .frame(minHeight: 140)
             } else {
                 VStack(spacing: 0) {
                     ForEach(recentTransactions) { tx in
@@ -529,10 +533,18 @@ private struct BudgetTileView: View {
     private var spent: Double { budget.spent(from: transactions) }
     private var progress: Double { budget.progress(from: transactions) }
 
+    private var progressAccessibilityValue: String {
+        let base = "\(Int(progress * 100))% used, \(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budget.limitAmount))"
+        return progress > 1 ? base + ", over budget" : base
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 EggProgressView(progress: progress, size: 46)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(budget.name)
+                    .accessibilityValue(progressAccessibilityValue)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption2)
@@ -571,10 +583,17 @@ private struct SavingsGoalTileView: View {
 
     private var goalColor: Color { Color(hex: goal.colorHex) ?? .yolk }
 
+    private var progressAccessibilityValue: String {
+        "\(Int(goal.progress * 100))% saved, \(CurrencyFormat.money(goal.currentAmount)) of \(CurrencyFormat.money(goal.targetAmount))"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 EggProgressView(progress: goal.progress, size: 46)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(goal.name)
+                    .accessibilityValue(progressAccessibilityValue)
                 Spacer()
                 Image(systemName: goal.icon)
                     .font(.caption)

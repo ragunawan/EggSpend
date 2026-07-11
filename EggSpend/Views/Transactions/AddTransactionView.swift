@@ -142,6 +142,7 @@ struct AddTransactionView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                .accessibilityLabel("Transaction type")
                 .onChange(of: selectedEntryKind) { _, newKind in
                     if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != newKind.transactionType {
                         selectedCategory = nil
@@ -158,8 +159,10 @@ struct AddTransactionView: View {
             HStack {
                 Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
                 TextField("0.00", text: $amountText)
                     .keyboardType(.decimalPad)
+                    .accessibilityLabel("Amount")
             }
             DatePicker("Date", selection: $date, displayedComponents: .date)
         }
@@ -170,8 +173,10 @@ struct AddTransactionView: View {
             HStack {
                 Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
                 TextField("0.00", text: $amountText)
                     .keyboardType(.decimalPad)
+                    .accessibilityLabel("Amount")
             }
             DatePicker("Date", selection: $date, displayedComponents: .date)
         }
@@ -185,6 +190,7 @@ struct AddTransactionView: View {
             } else {
                 HStack {
                     Text("Account")
+                        .accessibilityHidden(true)
                     Spacer()
                     Menu {
                         Button("None") { selectedAccount = nil }
@@ -206,6 +212,8 @@ struct AddTransactionView: View {
                         .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: 180, alignment: .trailing)
+                    .accessibilityLabel("Account")
+                    .accessibilityValue(selectedAccount?.name ?? "None")
                 }
             }
         }

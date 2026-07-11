@@ -12,6 +12,10 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 ## Unprioritized inbox
 (The Documentation Agent appends here; the Planner promotes items into docs/task-backlog.md + IMPLEMENTATION_PLAN.md.)
 
+- T24a follow-ups (Accessibility pass: VoiceOver labels + Dynamic Type audit + B27 fix):
+  - NestHeaderView `.accessibilityHidden(true)` placement: currently placed before the overlay/gesture chain; safe today incidentally, move to end of modifier chain defensively to protect against future view restructuring.
+  - Account menu `.accessibilityValue` parity: currently shows only the account name; consider including the balance (e.g., "Checking - $1,234.56") for full parity with the visible label and better financial context for VoiceOver users.
+  - MetricsView category donut hide+legend consistency: consider applying BudgetDetailView's hide+legend pattern (chart hidden, legend provides accessible textual summary) to the Metrics tab's spending-by-category donut for visual consistency and improved accessibility; filed as T24b polish candidate (non-blocking for T24a, same pattern already proven in BudgetDetailView).
 - T23 follow-ups (CloudKit duplicate-sweep for generated recurring transactions):
   - V2 trigger: scenePhase .active path or remote-change notification — currently sweep runs launch-only (v1 per spec "if available" qualifier; remote-change notification infrastructure does not exist in this codebase, filed as non-blocking follow-up).
   - Speculative future register item B28: per-transaction application ledger IF multi-device races prove non-rare — would eliminate the residual over-correction risk accepted in T23 (deterministic double-reversal guard; currently non-discriminant implementation accepts one over-correction per race, which is bounded and non-compounding but would benefit from explicit ledger tracking if production usage patterns show frequent concurrent materializations).

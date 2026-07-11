@@ -107,6 +107,7 @@ struct SavingsGoalsView: View {
                 ForEach(activeGoals) { goal in
                     SavingsGoalRowView(goal: goal)
                         .onTapGesture { editingGoal = goal }
+                        .accessibilityAddTraits(.isButton)
                         .swipeActions(edge: .trailing) {
                             Button("Delete", systemImage: "trash", role: .destructive) {
                                 modelContext.delete(goal)
@@ -161,6 +162,7 @@ struct SavingsGoalsView: View {
                         SavingsGoalRowView(goal: goal)
                             .opacity(0.7)
                             .onTapGesture { editingGoal = goal }
+                            .accessibilityAddTraits(.isButton)
                             .swipeActions(edge: .trailing) {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     modelContext.delete(goal)
@@ -206,10 +208,17 @@ struct SavingsGoalRowView: View {
 
     private var goalColor: Color { Color(hex: goal.colorHex) ?? .yolk }
 
+    private var progressAccessibilityValue: String {
+        "\(Int(goal.progress * 100))% saved, \(CurrencyFormat.money(goal.currentAmount)) of \(CurrencyFormat.money(goal.targetAmount))"
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
                 EggProgressView(progress: goal.progress, size: 56)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(goal.name)
+                    .accessibilityValue(progressAccessibilityValue)
 
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 6) {

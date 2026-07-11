@@ -112,6 +112,10 @@ struct CashFlowForecastView: View {
             // action button doesn't stretch to fill the scroll view, using
             // `emptyStateHeight` so it still grows with Dynamic Type.
             .frame(height: emptyStateHeight)
+            // Cap Dynamic Type growth beyond AX3 — the fixed `emptyStateHeight`
+            // budget above was sized/settled for that ceiling (loop 26); letting
+            // text keep scaling past it would clip the CTA button again.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
         }
         .listRowBackground(Color.clear)
     }
@@ -132,6 +136,11 @@ struct CashFlowForecastView: View {
     }
 
     // MARK: - Balance Chart
+
+    private var balanceChartAccessibilityValue: String {
+        let base = "Today \(CurrencyFormat.money(startBalance)), ending \(CurrencyFormat.money(endBalance)), lowest \(CurrencyFormat.money(lowestBalance))"
+        return lowestBalance < 0 ? base + ", goes negative" : base
+    }
 
     private var balanceChartSection: some View {
         Section {
@@ -222,6 +231,11 @@ struct CashFlowForecastView: View {
                     }
                 }
                 .frame(height: 220)
+                // Summarize the projection as one stop rather than exposing every
+                // daily point/event dot individually.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Projected balance")
+                .accessibilityValue(balanceChartAccessibilityValue)
 
                 // Summary row
                 HStack {

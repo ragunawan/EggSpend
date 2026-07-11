@@ -185,6 +185,9 @@ struct BudgetView: View {
             }
             .frame(width: 52, height: 52)
             .animation(.spring(), value: displayed.count)
+            // The adjacent legend already conveys this breakdown accessibly;
+            // hide the chart itself to avoid a redundant, hard-to-parse VoiceOver stop.
+            .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
                 if !overBudget.isEmpty    { donutLegend("Over budget", count: overBudget.count, color: .red) }
@@ -360,10 +363,18 @@ struct BudgetRowView: View {
     private var remaining:  Double { budget.remaining(from: transactions) }
     private var statusColor: Color { budget.statusColor(progress: progress) }
 
+    private var progressAccessibilityValue: String {
+        let base = "\(Int(progress * 100))% used, \(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budget.limitAmount))"
+        return progress > 1 ? base + ", over budget" : base
+    }
+
     var body: some View {
         HStack(spacing: 14) {
             EggProgressView(progress: progress, size: 56)
                 .layoutPriority(1)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(budget.name)
+                .accessibilityValue(progressAccessibilityValue)
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {

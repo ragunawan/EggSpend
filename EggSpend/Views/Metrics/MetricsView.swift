@@ -192,6 +192,10 @@ struct MetricsView: View {
             // fixed height still grows with Dynamic Type instead of clipping
             // the CTA button at larger accessibility sizes.
             .frame(height: emptyStateHeight)
+            // Cap Dynamic Type growth beyond AX3 — the fixed `emptyStateHeight`
+            // budget above was sized/settled for that ceiling (loop 26); letting
+            // text keep scaling past it would clip the CTA button again.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
         }
         .listRowBackground(Color.clear)
     }
@@ -254,6 +258,8 @@ struct MetricsView: View {
                         )
                     )
                     .interpolationMethod(.catmullRom)
+                    // Purely decorative fill under the line — the LineMark below carries the data.
+                    .accessibilityHidden(true)
                 }
                 // Line on top
                 ForEach(data, id: \.date) { point in
@@ -266,6 +272,8 @@ struct MetricsView: View {
                     .interpolationMethod(.catmullRom)
                     .symbol(Circle().strokeBorder(lineWidth: 1.5))
                     .symbolSize(20)
+                    .accessibilityLabel(point.date.formatted(calloutDateFormat))
+                    .accessibilityValue(CurrencyFormat.money(point.worth))
                 }
                 // Interactive selection rule
                 if let sel = selectedNetWorthDate,
@@ -279,12 +287,16 @@ struct MetricsView: View {
                                     overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
                             netWorthCallout(date: closest.date, worth: closest.worth)
                         }
+                        // Selection state is already exposed via the LineMark's own
+                        // label/value; hide this redundant highlight from VoiceOver.
+                        .accessibilityHidden(true)
                     PointMark(
                         x: .value("Selected", closest.date),
                         y: .value("Worth", closest.worth)
                     )
                     .foregroundStyle(Color.eggBlue)
                     .symbolSize(64)
+                    .accessibilityHidden(true)
                 }
             }
             .chartXSelection(value: $selectedNetWorthDate)
@@ -363,6 +375,8 @@ struct MetricsView: View {
                     .foregroundStyle(Color.nestLeafGreen.gradient)
                     .position(by: .value("Series", "Income"))
                     .cornerRadius(4)
+                    .accessibilityLabel("\(point.date.formatted(calloutDateFormat)) income")
+                    .accessibilityValue(CurrencyFormat.money(point.income))
 
                     BarMark(
                         x: .value("Period", point.date, unit: selectedPeriod.bucketUnit),
@@ -371,12 +385,15 @@ struct MetricsView: View {
                     .foregroundStyle(Color.red.opacity(0.8).gradient)
                     .position(by: .value("Series", "Expenses"))
                     .cornerRadius(4)
+                    .accessibilityLabel("\(point.date.formatted(calloutDateFormat)) expenses")
+                    .accessibilityValue(CurrencyFormat.money(point.expenses))
                 }
 
                 // Zero rule line
                 RuleMark(y: .value("Zero", 0))
                     .foregroundStyle(Color.twig.opacity(0.4))
                     .lineStyle(StrokeStyle(lineWidth: 1))
+                    .accessibilityHidden(true)
 
                 // Selection rule
                 if let sel = selectedCashFlowDate,
@@ -392,6 +409,9 @@ struct MetricsView: View {
                                             income: closest.income,
                                             expenses: closest.expenses)
                         }
+                        // Selection state is already exposed via the BarMarks' own
+                        // labels/values; hide this redundant highlight from VoiceOver.
+                        .accessibilityHidden(true)
                 }
             }
             .chartXSelection(value: $selectedCashFlowDate)
@@ -468,8 +488,12 @@ struct MetricsView: View {
                 Chart {
                     BarMark(x: .value("Type", "Income"),   y: .value("Amount", totalIncome))
                         .foregroundStyle(Color.nestLeafGreen.gradient)
+                        .accessibilityLabel("Income")
+                        .accessibilityValue(CurrencyFormat.money(totalIncome))
                     BarMark(x: .value("Type", "Expenses"), y: .value("Amount", totalExpenses))
                         .foregroundStyle(Color.red.opacity(0.8).gradient)
+                        .accessibilityLabel("Expenses")
+                        .accessibilityValue(CurrencyFormat.money(totalExpenses))
                 }
                 .chartYAxis {
                     AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
@@ -513,6 +537,12 @@ struct MetricsView: View {
                                angularInset: 2)
                         .foregroundStyle(by: .value("Category", name))
                         .cornerRadius(4)
+                        .accessibilityLabel(name)
+                        .accessibilityValue(
+                            totalExpenses > 0
+                                ? "\(CurrencyFormat.money(amount)), \(Int(amount / totalExpenses * 100))%"
+                                : CurrencyFormat.money(amount)
+                        )
                 }
                 .frame(height: 200)
                 .padding(.vertical, 8)

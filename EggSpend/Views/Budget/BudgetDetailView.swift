@@ -147,12 +147,20 @@ struct BudgetDetailView: View {
 
     // MARK: – Egg hero
 
+    private var eggProgressAccessibilityValue: String {
+        let base = "\(Int(progress * 100))% used, \(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budget.limitAmount))"
+        return progress > 1 ? base + ", over budget" : base
+    }
+
     private var eggHeroSection: some View {
         VStack(spacing: 16) {
             // Large animated egg
             EggProgressView(progress: progress, size: 120)
                 .scaleEffect(eggVisible ? 1 : 0.6)
                 .opacity(eggVisible ? 1 : 0)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(budget.name)
+                .accessibilityValue(eggProgressAccessibilityValue)
 
             VStack(spacing: 4) {
                 // Status headline
@@ -237,6 +245,11 @@ struct BudgetDetailView: View {
 
     // MARK: – Spending chart
 
+    private var spendingChartAccessibilityValue: String {
+        "Spent \(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budget.limitAmount)), projected \(CurrencyFormat.money(projectedTotal)), "
+        + (isOnTrack ? "on track" : "exceeds limit")
+    }
+
     private var spendingChartSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Spending Trajectory")
@@ -313,6 +326,11 @@ struct BudgetDetailView: View {
                 }
             }
             .frame(height: 200)
+            // Summarize the trend as one stop rather than exposing every mark —
+            // the individual daily points aren't independently meaningful here.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Spending trajectory")
+            .accessibilityValue(spendingChartAccessibilityValue)
 
             // Legend
             HStack(spacing: 20) {

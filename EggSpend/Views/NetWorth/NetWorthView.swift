@@ -145,12 +145,16 @@ struct NetWorthView: View {
                     y: .value("Amount", totalAssets)
                 )
                 .foregroundStyle(Color.nestLeafGreen)
+                .accessibilityLabel("Assets")
+                .accessibilityValue(CurrencyFormat.money(totalAssets))
 
                 BarMark(
                     x: .value("Type", "Liabilities"),
                     y: .value("Amount", totalLiabilities)
                 )
                 .foregroundStyle(.red)
+                .accessibilityLabel("Liabilities")
+                .accessibilityValue(CurrencyFormat.money(totalLiabilities))
             }
             .frame(height: 180)
             .padding(.vertical, 8)

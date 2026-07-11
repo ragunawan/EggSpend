@@ -27,6 +27,9 @@ struct NestHeaderView: View {
         Canvas { context, size in
             drawNest(context: context, size: size)
         }
+        // Purely decorative hero graphic — the easter-egg tap interaction has
+        // no informational purpose for VoiceOver users.
+        .accessibilityHidden(true)
         .overlay(eggsOverlay)
         .scaleEffect(nestScale)
         .opacity(nestOpacity)

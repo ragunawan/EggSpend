@@ -78,6 +78,10 @@ struct SafeToSpendView: View {
             // action button doesn't stretch to fill the scroll view, using
             // `emptyStateHeight` so it still grows with Dynamic Type.
             .frame(height: emptyStateHeight)
+            // Cap Dynamic Type growth beyond AX3 — the fixed `emptyStateHeight`
+            // budget above was sized/settled for that ceiling (loop 26); letting
+            // text keep scaling past it would clip the CTA button again.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
         }
         .listRowBackground(Color.clear)
     }

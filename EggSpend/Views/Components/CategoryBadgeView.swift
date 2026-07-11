@@ -17,6 +17,8 @@ struct CategoryBadgeView: View {
         .padding(.horizontal, compact ? 6 : 10)
         .padding(.vertical, compact ? 3 : 5)
         .background(category.color.opacity(0.15), in: Capsule())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(category.name)
     }
 }
 
