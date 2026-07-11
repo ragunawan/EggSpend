@@ -3,9 +3,9 @@
 Prioritized feature work lives in `docs/task-backlog.md` (T7–T24) and is tracked in `IMPLEMENTATION_PLAN.md`. This file holds the strategy summary and the unprioritized inbox for ideas discovered during the loop.
 
 ## Product direction (decided)
-1. **"Cash Calm"** — Safe-to-Spend + Forecast + subscription intelligence as the hero loop (build first).
-2. Subscription leakage detection (T16).
-3. Plain-English "What changed this month?" (T18), on-device-AI-enrichable (T19).
+1. **"Cash Calm"** — Safe-to-Spend + Forecast + subscription intelligence as the hero loop (build first) — SHIPPED (T1–T7, T16, 2026-07-09).
+2. Subscription leakage detection (T16) — SHIPPED (2026-07-09).
+3. Plain-English "What changed this month?" (T18), on-device-AI-enrichable (T19) — SHIPPED (2026-07-09).
 
 Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only behind capability-gated toggle; accounts archive, never hard-delete by default; currency display-only.
 
@@ -78,8 +78,6 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 - T16b follow-ups (Subscription audit screen):
   - Manual VoiceOver smoke test of the corrected element tree: Track button is now a sibling to the .combine wrapper (not inside it), ensuring the button retains independent actionable trait for assistive technology.
   - Lightweight test asserting one RecurringTransaction insert per track() call: current test coverage pins view-layer wiring and SubscriptionDetector round-trip, but doesn't directly verify insertion cardinality (e.g. guard against accidental double-insert or silent failure-to-insert scenarios). Recommend a simple test that calls track() and asserts context changes count or uses a Mock to verify exactly one insert(_:) call.
-- T17a follow-ups (Auto-categorization rule engine):
-  - ~~Empty-pattern defensive guard for T17b~~ — **DONE (loop 20, T17b, 2026-07-09):** `recordRule` now returns `CategoryRule?` and no-ops on empty-normalized patterns; `categoryFor` returns nil for them; both pinned by tests in `CategoryRuleEngineTests.swift`.
 - T19a follow-ups (On-device AI narrative engine):
   - Trailing-comma token trim for bare-integer figures — numericTokens extractor currently swallows trailing list-comma into whole-number tokens without decimals (e.g. "$120," in "$120, $45" parsing as a bare-integer token), causing over-rejection in that narrow edge case (two-directional validator would reject because "$120," doesn't exactly match expected "$120"). Unreachable via CurrencyFormat.money today (always two decimals); low priority. Fix by trimming trailing comma from extracted tokens if a bare-integer/zero-decimal-currency figure surface is ever added to the app.
   - Directional-semantics doc-caveat for T19b — preserve-figures validator checks numeric-token equality only, not directional semantics (model could keep "$120" but flip "above"→"below" / "increased"→"decreased"). This is a pre-existing limitation of a figure-preservation-only validator (not a new defect); model still can't invent or drop figures. Document this trade-off for T19b's implementer (especially when wiring DashboardView.spendingDeltaCard sentences where direction is semantically important) so they understand the validation guarantees and limits.

@@ -12,7 +12,7 @@ EggSpend is the repository name, Xcode project name, iOS app target, product nam
 
 - Swift 6, SwiftUI, SwiftData
 - CloudKit-backed `ModelContainer` with automatic local fallback (no iCloud sign-in required)
-- iOS Simulator / Xcode workflow
+- iOS 26.0+, Xcode 26.6, iPhone 17 simulator workflow
 
 ## Common Commands
 
@@ -34,14 +34,16 @@ open EggSpend.xcodeproj
 ```
 
 Launch arguments (pass in Xcode scheme or via `ProcessInfo`):
-- `--preview-data` — seeds sample transactions, accounts, and budgets on launch
+- `--preview-data` — seeds sample transactions, accounts, and budgets on launch; also skips onboarding
 - `--tab <index>` — opens a specific root tab: `0` Home, `1` Transactions, `2` Budget, `3` Nest Egg, `4` Metrics
 
 ## Architecture
 
 ### Data layer
 
-Five SwiftData `@Model` classes: `Transaction`, `TransactionCategory`, `Account`, `Budget`, `RecurringTransaction`. The schema is declared once in `EggSpendApp.swift` and shared with the `ModelContainer`.
+Nine SwiftData `@Model` classes: `Transaction`, `TransactionCategory`, `Account`, `Budget`, `RecurringTransaction`, `SavingsGoal`, `Transfer`, `BalanceSnapshot`, `CategoryRule`. The schema is declared once in `EggSpendApp.swift` and shared with the `ModelContainer`.
+
+**UUID references.** `BalanceSnapshot.accountID` and `CategoryRule.categoryID` store raw UUIDs (not `@Relationship`) — deliberate: a deleted or archived `Account`/`TransactionCategory` must not cascade-nullify snapshot history or learned rules. Dangling IDs are tolerated on read (resolve against live rows; no match = no match). Follow this pattern for any new history-preserving reference.
 
 **CloudKit enum pattern.** CloudKit does not support Swift enums as stored properties. All enums (`TransactionType`, `BudgetPeriod`, `RecurrenceFrequency`, `AccountType`) are stored as `String` rawValues (e.g. `typeRaw`, `periodRaw`) with computed wrappers that convert back. Always follow this pattern when adding enum fields to a persistent model.
 
@@ -49,11 +51,13 @@ Five SwiftData `@Model` classes: `Transaction`, `TransactionCategory`, `Account`
 
 ### Business logic
 
-Domain logic lives outside views in three locations:
+Domain logic lives outside views in:
 
-- `EggSpend/Utilities/` — `CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`
+- `EggSpend/Utilities/` — `CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`
 - `EggSpend/Views/Forecast/ForecastEngine.swift` — forecast math lives here (in Views/, not Utilities/)
-- `EggSpend/Models/RecurringTransaction.swift` — `processRecurringTransactions(_:context:)` is a top-level function called from `EggSpendApp.onAppear` every launch; it generates `Transaction` records for every overdue due date and advances `nextDueDate`
+- `EggSpend/Models/RecurringTransaction.swift` — `processRecurringTransactions(_:context:)` is a top-level function called from `EggSpendApp.onAppear`; it generates `Transaction` records for every overdue due date and advances `nextDueDate`
+
+**Launch sequence.** `EggSpendApp.onAppear` runs: seed default categories → processRecurringTransactions → DuplicateSweeper.sweep (cloud sync self-heal) → captureBalanceSnapshots.
 
 **AccountBalanceService.** When creating, editing, or deleting a transaction that is linked to an account, you must call `AccountBalanceService.apply(_:to:)` or `AccountBalanceService.reverse(_:from:)` manually. The model does not auto-update balances.
 
@@ -67,6 +71,8 @@ Domain logic lives outside views in three locations:
 - `seedDefaultCategoriesIfNeeded` — runs at every launch; idempotent (no-ops if categories exist)
 - `previewContainer()` — returns an in-memory `ModelContainer` pre-populated with sample data; used in all `#Preview` blocks
 
+**@AppStorage keys.** Settings and onboarding state keys are owned by their feature files: `SettingsView.aiNarrativeStorageKey`, `SettingsView.appLockStorageKey`, `OnboardingView.hasCompletedOnboardingKey`.
+
 ### UI layer
 
 `ContentView` is a `TabView` with five tabs. Each tab root is a `NavigationStack`. Views use `@Query` to subscribe to SwiftData and pass arrays down to utility/model methods for calculations rather than querying inside utilities.
@@ -75,9 +81,9 @@ Domain logic lives outside views in three locations:
 
 ## Development Notes
 
-- When adding Swift files, keep both `EggSpend.xcodeproj/project.pbxproj` and `generate_project.py` in sync.
+- When adding Swift files, keep both `EggSpend.xcodeproj/project.pbxproj` and `generate_project.py` in sync (now also registers resources: PrivacyInfo.xcprivacy, Localizable.xcstrings).
 - Use `Decimal` or currency-safe formatting for any new money logic; avoid `Double` arithmetic for financial totals (the existing codebase uses `Double` — be intentional about extending that pattern).
-- Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes.
+- Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes. Test suite has 469 XCTest cases; every test file includes the 9-model schema list.
 
 ## Running & Screenshots
 
@@ -87,6 +93,8 @@ so Simulator interaction goes through `xcrun simctl` directly (build, install,
 This can launch into any tab and screenshot it, but **cannot tap, type, or
 scroll** — synthetic input (AppleScript UI scripting or `CGEventPost`) is
 blocked without an interactive Accessibility permission grant.
+
+Use `xcrun simctl ui <udid> content_size <category>` (e.g. `accessibility-extra-extra-extra-large`) to verify Dynamic Type rendering on this Xcode version.
 
 `scripts/capture_screenshots.sh <simulator-udid> <output-dir> [w h]` rebuilds
 the app, installs it on the given simulator, and captures the five primary

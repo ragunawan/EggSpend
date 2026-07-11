@@ -6,7 +6,7 @@ Priorities are sorted by expected user value, trust impact, and how naturally th
 
 ### Local Data Export And Backup
 
-- [ ] Add local data export and backup.
+- [x] Add local data export and backup. — ✅ shipped (T13)
 - Why: personal finance users need confidence that their data is portable and recoverable outside CloudKit sync.
 - Requirements:
   - Export transactions, transfers, accounts, categories, budgets, recurring transactions, and savings goals.
@@ -161,7 +161,7 @@ Priorities are sorted by expected user value, trust impact, and how naturally th
 
 ### Lightweight Onboarding
 
-- [ ] Add lightweight onboarding with sample-data reset.
+- [x] Add lightweight onboarding with sample-data reset. — ✅ shipped (T22)
 - Why: first-run setup can guide users through accounts, categories, budgets, and imports without making the app feel empty.
 - Requirements:
   - Detect first launch without existing user data.
@@ -180,9 +180,9 @@ These ideas are valuable, but should wait until the data-safety and core workflo
 
 - [ ] Backup restore flow.
 - [ ] iCloud sync diagnostics screen.
-- [ ] App lock with Face ID or passcode.
+- [x] App lock with Face ID or passcode. — ✅ shipped (T20)
 - [ ] Widgets for safe-to-spend, upcoming bills, and goal progress.
 - [ ] Multi-currency support.
 - [ ] Receipt photo attachments.
-- [ ] Rule-based auto-categorization.
+- [x] Rule-based auto-categorization. — ✅ shipped (T17)
 - [ ] Import duplicate review and merge workflow.
