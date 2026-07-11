@@ -43,6 +43,14 @@ struct MetricsView: View {
     @State private var selectedPeriod: Period = .month
     @State private var selectedNetWorthDate: Date? = nil
     @State private var selectedCashFlowDate: Date? = nil
+    @State private var showAddTransaction = false
+    // A List row needs a single concrete height for `noDataSection` below —
+    // `minHeight`/`maxHeight` ranges (and `.fixedSize`) were tried and don't
+    // constrain `ContentUnavailableView` inside a List row (confirmed by
+    // screenshot; it still balloons to fill the scroll view). `ScaledMetric`
+    // keeps a single, deterministic height while still growing with the
+    // user's Dynamic Type setting, so the CTA button isn't clipped.
+    @ScaledMetric(relativeTo: .body) private var emptyStateHeight: CGFloat = 340
 
     // MARK: - Period
 
@@ -134,9 +142,13 @@ struct MetricsView: View {
 
                 List {
                     periodPickerSection
-                    timelineSection
-                    incomeVsExpenseSection
-                    if !expensesByCategory.isEmpty { categoryBreakdownSection }
+                    if accounts.isEmpty && transactions.isEmpty {
+                        noDataSection
+                    } else {
+                        timelineSection
+                        incomeVsExpenseSection
+                        if !expensesByCategory.isEmpty { categoryBreakdownSection }
+                    }
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
@@ -144,7 +156,44 @@ struct MetricsView: View {
             }
             .navigationTitle("Metrics")
             .toolbarBackground(.hidden, for: .navigationBar)
+            .sheet(isPresented: $showAddTransaction) {
+                AddTransactionView()
+            }
         }
+    }
+
+    // MARK: - Empty state
+
+    private var noDataSection: some View {
+        Section {
+            ContentUnavailableView {
+                Label {
+                    Text("No Data Yet")
+                } icon: {
+                    Image(systemName: "chart.bar.xaxis").symbolEffect(.pulse)
+                }
+            } description: {
+                Text("Add your first transaction or account to see your metrics take shape.")
+            } actions: {
+                Button { showAddTransaction = true } label: {
+                    Label("Add Transaction", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent).tint(Color.nestBrown)
+            }
+            // `ContentUnavailableView` reports an unbounded ideal height —
+            // by design it fills whatever space it's offered (see
+            // DashboardView's `.frame(height: 140)` on the same component in
+            // a VStack, the closer analog than AccountsView's `.overlay`,
+            // which sidesteps List row sizing entirely rather than bounding
+            // it). A concrete `.frame(height:)` is what actually constrains
+            // it inside a List row; a `minHeight`/`maxHeight` range (and
+            // `.fixedSize`) were tried and still let it balloon to fill the
+            // scroll view. `emptyStateHeight` is `@ScaledMetric` so this
+            // fixed height still grows with Dynamic Type instead of clipping
+            // the CTA button at larger accessibility sizes.
+            .frame(height: emptyStateHeight)
+        }
+        .listRowBackground(Color.clear)
     }
 
     // MARK: - Period picker

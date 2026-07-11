@@ -11,6 +11,12 @@ struct CashFlowForecastView: View {
     @State private var horizon: ForecastHorizon = .days30
     @State private var selectedDate: Date? = nil
     @State private var showAssumptions = false
+    @State private var showAddAccount = false
+    // See MetricsView.emptyStateHeight — a single concrete `.frame(height:)`
+    // is what actually constrains `ContentUnavailableView` inside a List
+    // row; `@ScaledMetric` keeps that fixed height growing with Dynamic Type
+    // instead of clipping the CTA button at larger accessibility sizes.
+    @ScaledMetric(relativeTo: .body) private var emptyStateHeight: CGFloat = 340
 
     // MARK: - Horizon
 
@@ -55,11 +61,15 @@ struct CashFlowForecastView: View {
 
             List {
                 periodPickerSection
-                balanceChartSection
-                summaryStatsSection
-                if !inflows.isEmpty { inflowsSection }
-                if !outflows.isEmpty { outflowsSection }
-                assumptionsSection
+                if accounts.isEmpty {
+                    noAccountsSection
+                } else {
+                    balanceChartSection
+                    summaryStatsSection
+                    if !inflows.isEmpty { inflowsSection }
+                    if !outflows.isEmpty { outflowsSection }
+                    assumptionsSection
+                }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
@@ -75,6 +85,35 @@ struct CashFlowForecastView: View {
                 .foregroundStyle(Color.yolk)
             }
         }
+        .sheet(isPresented: $showAddAccount) {
+            AddAccountView()
+        }
+    }
+
+    // MARK: - Empty state
+
+    private var noAccountsSection: some View {
+        Section {
+            ContentUnavailableView {
+                Label {
+                    Text("No Accounts Yet")
+                } icon: {
+                    Image(systemName: "chart.line.uptrend.xyaxis").symbolEffect(.pulse)
+                }
+            } description: {
+                Text("The forecast needs at least one account to project your balance.")
+            } actions: {
+                Button { showAddAccount = true } label: {
+                    Label("Add Account", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent).tint(Color.nestBrown)
+            }
+            // See MetricsView.noDataSection — fixes row height so the
+            // action button doesn't stretch to fill the scroll view, using
+            // `emptyStateHeight` so it still grows with Dynamic Type.
+            .frame(height: emptyStateHeight)
+        }
+        .listRowBackground(Color.clear)
     }
 
     // MARK: - Period Picker

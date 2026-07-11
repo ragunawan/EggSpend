@@ -11,6 +11,12 @@ struct SafeToSpendView: View {
     private var activeGoals: [SavingsGoal]
 
     @State private var showAssumptions = false
+    @State private var showAddAccount = false
+    // See MetricsView.emptyStateHeight — a single concrete `.frame(height:)`
+    // is what actually constrains `ContentUnavailableView` inside a List
+    // row; `@ScaledMetric` keeps that fixed height growing with Dynamic Type
+    // instead of clipping the CTA button at larger accessibility sizes.
+    @ScaledMetric(relativeTo: .body) private var emptyStateHeight: CGFloat = 340
 
     private var result: SafeSpendResult {
         SafeSpendCalculator.calculate(
@@ -28,12 +34,16 @@ struct SafeToSpendView: View {
             AnimatedCanopyBackground()
 
             List {
-                headlineSection
-                breakdownSection
-                budgetSection
-                if !result.unscheduledSavingsGoalNames.isEmpty { unscheduledGoalsSection }
-                projectionSection
-                assumptionsSection
+                if accounts.isEmpty {
+                    noAccountsSection
+                } else {
+                    headlineSection
+                    breakdownSection
+                    budgetSection
+                    if !result.unscheduledSavingsGoalNames.isEmpty { unscheduledGoalsSection }
+                    projectionSection
+                    assumptionsSection
+                }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
@@ -41,6 +51,35 @@ struct SafeToSpendView: View {
         }
         .navigationTitle("Safe to Spend")
         .toolbarBackground(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showAddAccount) {
+            AddAccountView()
+        }
+    }
+
+    // MARK: - Empty state
+
+    private var noAccountsSection: some View {
+        Section {
+            ContentUnavailableView {
+                Label {
+                    Text("No Accounts Yet")
+                } icon: {
+                    Image(systemName: "banknote").symbolEffect(.pulse)
+                }
+            } description: {
+                Text("Add an account so EggSpend can calculate what's safe to spend today.")
+            } actions: {
+                Button { showAddAccount = true } label: {
+                    Label("Add Account", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent).tint(Color.nestBrown)
+            }
+            // See MetricsView.noDataSection — fixes row height so the
+            // action button doesn't stretch to fill the scroll view, using
+            // `emptyStateHeight` so it still grows with Dynamic Type.
+            .frame(height: emptyStateHeight)
+        }
+        .listRowBackground(Color.clear)
     }
 
     // MARK: - Headline
