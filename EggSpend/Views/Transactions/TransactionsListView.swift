@@ -82,18 +82,8 @@ struct TransactionsListView: View {
             .sorted { $0.date > $1.date }
     }
 
-    private var grouped: [(String, [LedgerRow])] {
-        let formatter = DateFormatter.sectionHeader
-        var dict: [String: [LedgerRow]] = [:]
-        for row in rows {
-            let key = formatter.string(from: row.date)
-            dict[key, default: []].append(row)
-        }
-        return dict.sorted { lhs, rhs in
-            let d1 = rows.first { formatter.string(from: $0.date) == lhs.key }?.date ?? .distantPast
-            let d2 = rows.first { formatter.string(from: $0.date) == rhs.key }?.date ?? .distantPast
-            return d1 > d2
-        }
+    private var grouped: [(day: Date, rows: [LedgerRow])] {
+        TransactionGrouping.groupByDay(rows)
     }
 
     var body: some View {
@@ -183,7 +173,8 @@ struct TransactionsListView: View {
 
     private var transactionList: some View {
         List {
-            ForEach(grouped, id: \.0) { section, items in
+            ForEach(grouped, id: \.day) { section in
+                let items = section.rows
                 let groupable = items.filter { !$0.isUpcoming }
                 let upcoming = items.filter { $0.isUpcoming }
 
@@ -214,7 +205,7 @@ struct TransactionsListView: View {
                     }
                 } header: {
                     HStack {
-                        Text(section)
+                        Text(section.day, format: Date.FormatStyle().month(.wide).day().year())
                             .font(.headline)
                             .foregroundStyle(Color.twig)
                         Spacer()
@@ -409,14 +400,6 @@ private struct UpcomingRecurringRowView: View {
         }
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }
-}
-
-extension DateFormatter {
-    static let sectionHeader: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "MMMM d, yyyy"
-        return f
-    }()
 }
 
 #Preview {

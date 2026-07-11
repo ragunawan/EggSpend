@@ -79,6 +79,7 @@
 		AA0200000000000000000065 /* NarrativeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007A /* NarrativeGenerator.swift */; };
 		AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000074 /* SubscriptionAuditView.swift */; };
 		AA0200000000000000000067 /* AppLockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007C /* AppLockController.swift */; };
+		AA0200000000000000000069 /* TransactionGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007E /* TransactionGrouping.swift */; };
 		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
 		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
 		AA0200000000000000000027 /* TransactionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000030 /* TransactionModelTests.swift */; };
@@ -108,6 +109,7 @@
 		AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */; };
 		AA0200000000000000000066 /* NarrativeGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007B /* NarrativeGeneratorTests.swift */; };
 		AA0200000000000000000068 /* AppLockControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007D /* AppLockControllerTests.swift */; };
+		AA020000000000000000006A /* TransactionGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007F /* TransactionGroupingTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -195,6 +197,7 @@
 		AA010000000000000000007A /* NarrativeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrativeGenerator.swift; sourceTree = "<group>"; };
 		AA0100000000000000000074 /* SubscriptionAuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionAuditView.swift; sourceTree = "<group>"; };
 		AA010000000000000000007C /* AppLockController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockController.swift; sourceTree = "<group>"; };
+		AA010000000000000000007E /* TransactionGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionGrouping.swift; sourceTree = "<group>"; };
 		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
 		AA0100000000000000000051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -225,6 +228,7 @@
 		AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpendingDeltaCalculatorTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000007B /* NarrativeGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrativeGeneratorTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000007D /* AppLockControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockControllerTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000007F /* TransactionGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionGroupingTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -449,6 +453,7 @@
 				AA0100000000000000000078 /* SpendingDeltaCalculator.swift */,
 				AA010000000000000000007A /* NarrativeGenerator.swift */,
 				AA010000000000000000007C /* AppLockController.swift */,
+				AA010000000000000000007E /* TransactionGrouping.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -535,6 +540,7 @@
 				AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */,
 				AA010000000000000000007B /* NarrativeGeneratorTests.swift */,
 				AA010000000000000000007D /* AppLockControllerTests.swift */,
+				AA010000000000000000007F /* TransactionGroupingTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -712,6 +718,7 @@
 				AA0200000000000000000065 /* NarrativeGenerator.swift in Sources */,
 				AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */,
 				AA0200000000000000000067 /* AppLockController.swift in Sources */,
+				AA0200000000000000000069 /* TransactionGrouping.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -746,6 +753,7 @@
 				AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */,
 				AA0200000000000000000066 /* NarrativeGeneratorTests.swift in Sources */,
 				AA0200000000000000000068 /* AppLockControllerTests.swift in Sources */,
+				AA020000000000000000006A /* TransactionGroupingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

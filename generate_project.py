@@ -120,6 +120,8 @@ FR = {
     "TEST_NarrativeGenerator": u(1, 0x7B),
     "AppLockController":       u(1, 0x7C),
     "TEST_AppLockController":  u(1, 0x7D),
+    "TransactionGrouping":     u(1, 0x7E),
+    "TEST_TransactionGrouping": u(1, 0x7F),
 }
 
 # Build files
@@ -255,6 +257,7 @@ APP_SOURCES = [
     ("NarrativeGenerator",      "Utilities/NarrativeGenerator.swift"),
     ("SubscriptionAuditView",   "Views/Subscriptions/SubscriptionAuditView.swift"),
     ("AppLockController",       "Utilities/AppLockController.swift"),
+    ("TransactionGrouping",     "Utilities/TransactionGrouping.swift"),
 ]
 
 TEST_SOURCES = [
@@ -285,6 +288,7 @@ TEST_SOURCES = [
     ("TEST_SpendingDelta",      "EggSpendTests/SpendingDeltaCalculatorTests.swift"),
     ("TEST_NarrativeGenerator", "EggSpendTests/NarrativeGeneratorTests.swift"),
     ("TEST_AppLockController",  "EggSpendTests/AppLockControllerTests.swift"),
+    ("TEST_TransactionGrouping", "EggSpendTests/TransactionGroupingTests.swift"),
 ]
 
 def pbxproj():
@@ -470,7 +474,7 @@ def pbxproj():
     simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController", "TransactionGrouping"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])

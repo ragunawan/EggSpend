@@ -12,6 +12,9 @@ Constraints (resolved 2026-07-08): Plaid = long-term only; AI = on-device only b
 ## Unprioritized inbox
 (The Documentation Agent appends here; the Planner promotes items into docs/task-backlog.md + IMPLEMENTATION_PLAN.md.)
 
+- T21 follow-ups (Transactions grouping perf + localized headers):
+  - Generalize groupByDay only if a second call site appears — currently specific to TransactionsListView; RecurringNext30DaysView has an inline equivalent that could reuse groupByDay if scope expands, but YAGNI for now (from T21 code review).
+  - Locale-parameterized golden-string test for the header FormatStyle — T21's empirical localization probe (en_US/de_DE/ja_JP/fr_FR scratch test) is manual QA work; a future polish task could add a unit test pinning the exact FormatStyle output for each major locale to prevent regressions (from T21 code review).
 - T20 follow-ups (Face ID / Touch ID app lock):
   - Generic lock-screen copy could name the biometry type adaptively — display "Face ID" or "Touch ID" based on available device authentication method (currently generic "Use biometrics").
   - Consolidate duplicate LAContext/canEvaluatePolicy calls in SettingsView — currently evaluates canEvaluate twice per body render (once for Section gating, once for label adaptation), same calls can be shared via local variable.
