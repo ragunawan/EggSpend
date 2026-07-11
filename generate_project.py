@@ -125,6 +125,7 @@ FR = {
     "OnboardingView":          u(1, 0x80),
     "DuplicateSweeper":        u(1, 0x81),
     "TEST_DuplicateSweeper":   u(1, 0x82),
+    "Localizable":             u(1, 0x83),
 }
 
 # Build files
@@ -318,6 +319,7 @@ def pbxproj():
         a(f"\t\t{BF[key]} /* {filename} in Sources */ = {{isa = PBXBuildFile; fileRef = {FR[key]} /* {filename} */; }};")
     a(f"\t\t{BF['Assets']} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {FR['Assets']} /* Assets.xcassets */; }};")
     a(f"\t\t{BF['PrivacyInfo']} /* PrivacyInfo.xcprivacy in Resources */ = {{isa = PBXBuildFile; fileRef = {FR['PrivacyInfo']} /* PrivacyInfo.xcprivacy */; }};")
+    a(f"\t\t{BF['Localizable']} /* Localizable.xcstrings in Resources */ = {{isa = PBXBuildFile; fileRef = {FR['Localizable']} /* Localizable.xcstrings */; }};")
     for key, path in TEST_SOURCES:
         filename = path.split("/")[-1]
         a(f"\t\t{BF[key]} /* {filename} in Sources */ = {{isa = PBXBuildFile; fileRef = {FR[key]} /* {filename} */; }};")
@@ -346,6 +348,7 @@ def pbxproj():
     a(f"\t\t{FR['Assets']} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};")
     a(f"\t\t{FR['Entitlements']} /* EggSpend.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = \"<group>\"; }};")
     a(f"\t\t{FR['PrivacyInfo']} /* PrivacyInfo.xcprivacy */ = {{isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = \"<group>\"; }};")
+    a(f"\t\t{FR['Localizable']} /* Localizable.xcstrings */ = {{isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = \"<group>\"; }};")
     for key, path in TEST_SOURCES:
         filename = path.split("/")[-1]
         a(f"\t\t{FR[key]} /* {filename} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {filename}; sourceTree = \"<group>\"; }};")
@@ -405,6 +408,7 @@ def pbxproj():
     a(f"\t\t\t\t{FR['EggSpendTheme']} /* EggSpendTheme.swift */,")
     a(f"\t\t\t\t{FR['Entitlements']} /* EggSpend.entitlements */,")
     a(f"\t\t\t\t{FR['PrivacyInfo']} /* PrivacyInfo.xcprivacy */,")
+    a(f"\t\t\t\t{FR['Localizable']} /* Localizable.xcstrings */,")
     a(f"\t\t\t\t{GR['Models']} /* Models */,")
     a(f"\t\t\t\t{GR['Views']} /* Views */,")
     a(f"\t\t\t\t{GR['Utilities']} /* Utilities */,")
@@ -600,6 +604,7 @@ def pbxproj():
     a(f"\t\t\tfiles = (")
     a(f"\t\t\t\t{BF['Assets']} /* Assets.xcassets in Resources */,")
     a(f"\t\t\t\t{BF['PrivacyInfo']} /* PrivacyInfo.xcprivacy in Resources */,")
+    a(f"\t\t\t\t{BF['Localizable']} /* Localizable.xcstrings in Resources */,")
     a(f"\t\t\t);")
     a(f"\t\t\trunOnlyForDeploymentPostprocessing = 0;")
     a(f"\t\t}};")
