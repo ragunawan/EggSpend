@@ -73,6 +73,10 @@ struct EggSpendApp: App {
                         // Process any overdue recurring transactions on every launch
                         let recurring = (try? ctx.fetch(FetchDescriptor<RecurringTransaction>())) ?? []
                         processRecurringTransactions(recurring, context: ctx)
+                        // Sweep any cross-device duplicate generated transactions after
+                        // materialization but before snapshotting, so the day's balance
+                        // snapshot reflects the corrected (post-sweep) balance.
+                        DuplicateSweeper.sweep(context: ctx)
                         // Snapshot today's balances only after recurring transactions have
                         // been applied above, so the snapshot reflects the settled balance.
                         captureBalanceSnapshots(context: ctx)
