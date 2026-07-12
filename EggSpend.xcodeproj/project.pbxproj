@@ -14,6 +14,9 @@
 		AA0200000000000000000070 /* NestBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000085 /* NestBackground.swift */; };
 		AA0200000000000000000071 /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000086 /* SectionHeader.swift */; };
 		AA0200000000000000000072 /* AmountText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000087 /* AmountText.swift */; };
+		AA0200000000000000000073 /* StatTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000088 /* StatTile.swift */; };
+		AA0200000000000000000074 /* ThinProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000089 /* ThinProgressBar.swift */; };
+		AA0200000000000000000075 /* CompactProgressRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008A /* CompactProgressRow.swift */; };
 		AA0200000000000000000003 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000003 /* Transaction.swift */; };
 		AA0200000000000000000004 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000004 /* TransactionCategory.swift */; };
 		AA0200000000000000000005 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000005 /* Account.swift */; };
@@ -140,6 +143,9 @@
 		AA0100000000000000000085 /* NestBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestBackground.swift; sourceTree = "<group>"; };
 		AA0100000000000000000086 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		AA0100000000000000000087 /* AmountText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmountText.swift; sourceTree = "<group>"; };
+		AA0100000000000000000088 /* StatTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTile.swift; sourceTree = "<group>"; };
+		AA0100000000000000000089 /* ThinProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinProgressBar.swift; sourceTree = "<group>"; };
+		AA010000000000000000008A /* CompactProgressRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactProgressRow.swift; sourceTree = "<group>"; };
 		AA0100000000000000000003 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		AA0100000000000000000004 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
 		AA0100000000000000000005 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -430,6 +436,9 @@
 				AA0100000000000000000085 /* NestBackground.swift */,
 				AA0100000000000000000086 /* SectionHeader.swift */,
 				AA0100000000000000000087 /* AmountText.swift */,
+				AA0100000000000000000088 /* StatTile.swift */,
+				AA0100000000000000000089 /* ThinProgressBar.swift */,
+				AA010000000000000000008A /* CompactProgressRow.swift */,
 				AA0100000000000000000016 /* NestHeaderView.swift */,
 				AA0100000000000000000017 /* EggProgressView.swift */,
 				AA0100000000000000000018 /* BirdAnimationView.swift */,
@@ -686,6 +695,9 @@
 				AA0200000000000000000070 /* NestBackground.swift in Sources */,
 				AA0200000000000000000071 /* SectionHeader.swift in Sources */,
 				AA0200000000000000000072 /* AmountText.swift in Sources */,
+				AA0200000000000000000073 /* StatTile.swift in Sources */,
+				AA0200000000000000000074 /* ThinProgressBar.swift in Sources */,
+				AA0200000000000000000075 /* CompactProgressRow.swift in Sources */,
 				AA0200000000000000000003 /* Transaction.swift in Sources */,
 				AA0200000000000000000004 /* TransactionCategory.swift in Sources */,
 				AA0200000000000000000005 /* Account.swift in Sources */,

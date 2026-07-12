@@ -444,22 +444,11 @@ struct BudgetRowView: View {
 
 struct AnimatedProgressBar: View {
     let progress: Double
-    var color: Color = .nestLeafGreen
-    var height: CGFloat = 10
+    var color: Color = .positive
+    var height: CGFloat = 4
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: height / 2)
-                    .fill(Color.twig.opacity(0.15))
-                    .frame(height: height)
-                RoundedRectangle(cornerRadius: height / 2)
-                    .fill(color)
-                    .frame(width: geo.size.width * min(progress, 1.0), height: height)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: progress)
-            }
-        }
-        .frame(height: height)
+        ThinProgressBar(progress: progress, color: color, height: height)
     }
 }
 
