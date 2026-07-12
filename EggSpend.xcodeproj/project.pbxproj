@@ -36,6 +36,7 @@
 		AA0200000000000000000009 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000009 /* TransactionDetailView.swift */; };
 		AA0200000000000000000044 /* TransferDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005F /* TransferDetailView.swift */; };
 		AA0200000000000000000075 /* CurrencyKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000090 /* CurrencyKeypadView.swift */; };
+		AA0200000000000000000076 /* MerchantSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000091 /* MerchantSuggestion.swift */; };
 		AA020000000000000000000A /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000A /* NetWorthView.swift */; };
 		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
 		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
@@ -121,6 +122,7 @@
 		AA0200000000000000000064 /* TransactionGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007F /* TransactionGroupingTests.swift */; };
 		AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000082 /* DuplicateSweeperTests.swift */; };
 		AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008F /* TransactionEntryServiceTests.swift */; };
+		AA0200000000000000000077 /* MerchantSuggestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000092 /* MerchantSuggestionTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -165,6 +167,7 @@
 		AA0100000000000000000009 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
 		AA010000000000000000005F /* TransferDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetailView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000090 /* CurrencyKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyKeypadView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000091 /* MerchantSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantSuggestion.swift; sourceTree = "<group>"; };
 		AA010000000000000000000A /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -251,6 +254,7 @@
 		AA010000000000000000007F /* TransactionGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionGroupingTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000082 /* DuplicateSweeperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSweeperTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000008F /* TransactionEntryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEntryServiceTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000092 /* MerchantSuggestionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantSuggestionTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -373,6 +377,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0100000000000000000090 /* CurrencyKeypadView.swift */,
+				AA0100000000000000000091 /* MerchantSuggestion.swift */,
 			);
 			path = QuickAdd;
 			sourceTree = "<group>";
@@ -590,6 +595,7 @@
 				AA010000000000000000007F /* TransactionGroupingTests.swift */,
 				AA0100000000000000000082 /* DuplicateSweeperTests.swift */,
 				AA010000000000000000008F /* TransactionEntryServiceTests.swift */,
+				AA0100000000000000000092 /* MerchantSuggestionTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -725,6 +731,7 @@
 				AA0200000000000000000009 /* TransactionDetailView.swift in Sources */,
 				AA0200000000000000000044 /* TransferDetailView.swift in Sources */,
 				AA0200000000000000000075 /* CurrencyKeypadView.swift in Sources */,
+				AA0200000000000000000076 /* MerchantSuggestion.swift in Sources */,
 				AA020000000000000000000A /* NetWorthView.swift in Sources */,
 				AA020000000000000000000B /* MetricsView.swift in Sources */,
 				AA020000000000000000000C /* AccountsView.swift in Sources */,
@@ -814,6 +821,7 @@
 				AA0200000000000000000064 /* TransactionGroupingTests.swift in Sources */,
 				AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */,
 				AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */,
+				AA0200000000000000000077 /* MerchantSuggestionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

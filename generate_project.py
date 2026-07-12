@@ -133,6 +133,8 @@ FR = {
     "TransactionEntryService": u(1, 0x8E),
     "TEST_TransactionEntryService": u(1, 0x8F),
     "CurrencyKeypadView":     u(1, 0x90),
+    "MerchantSuggestion":     u(1, 0x91),
+    "TEST_MerchantSuggestion": u(1, 0x92),
 }
 
 # Build files
@@ -227,6 +229,7 @@ APP_SOURCES = [
     ("TransactionDetailView","Views/Transactions/TransactionDetailView.swift"),
     ("TransferDetailView",   "Views/Transactions/TransferDetailView.swift"),
     ("CurrencyKeypadView",   "Views/QuickAdd/CurrencyKeypadView.swift"),
+    ("MerchantSuggestion",   "Views/QuickAdd/MerchantSuggestion.swift"),
     ("NetWorthView",         "Views/NetWorth/NetWorthView.swift"),
     ("MetricsView",          "Views/Metrics/MetricsView.swift"),
     ("AccountsView",         "Views/Accounts/AccountsView.swift"),
@@ -312,6 +315,7 @@ TEST_SOURCES = [
     ("TEST_TransactionGrouping", "EggSpendTests/TransactionGroupingTests.swift"),
     ("TEST_DuplicateSweeper",    "EggSpendTests/DuplicateSweeperTests.swift"),
     ("TEST_TransactionEntryService", "EggSpendTests/TransactionEntryServiceTests.swift"),
+    ("TEST_MerchantSuggestion", "EggSpendTests/MerchantSuggestionTests.swift"),
 ]
 
 def pbxproj():
@@ -493,7 +497,7 @@ def pbxproj():
 
     simple_group("Dashboard",    "Dashboard",    ["DashboardView", "DashboardHomeComponents"])
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
-    simple_group("QuickAdd",     "QuickAdd",     ["CurrencyKeypadView"])
+    simple_group("QuickAdd",     "QuickAdd",     ["CurrencyKeypadView", "MerchantSuggestion"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
     simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])
     simple_group("Subscriptions", "Subscriptions", ["SubscriptionAuditView"])
