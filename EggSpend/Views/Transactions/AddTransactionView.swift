@@ -22,6 +22,11 @@ struct AddTransactionView: View {
     var editingTransaction: Transaction? = nil
     var editingTransfer: Transfer? = nil
     var initialEntryKind: EntryKind = .expense
+    var initialTitle: String = ""
+    var initialAmountText: String = ""
+    var initialDate: Date = .now
+    var initialCategory: TransactionCategory? = nil
+    var initialAccount: Account? = nil
 
     @State private var title = ""
     @State private var amountText = ""
@@ -391,6 +396,11 @@ struct AddTransactionView: View {
             notes = transfer.notes
         } else {
             selectedEntryKind = initialEntryKind
+            title = initialTitle
+            amountText = initialAmountText
+            date = initialDate
+            selectedCategory = initialCategory
+            selectedAccount = initialAccount
         }
     }
 }

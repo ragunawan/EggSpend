@@ -1,6 +1,15 @@
 import SwiftUI
 import SwiftData
 
+struct QuickAddDraft {
+    let amountText: String
+    let entryKind: EntryKind
+    let title: String
+    let category: TransactionCategory?
+    let account: Account?
+    let date: Date
+}
+
 struct QuickAddSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -21,10 +30,21 @@ struct QuickAddSheet: View {
     @State private var isEnteringTitle = false
 
     var initialKind: EntryKind = .expense
-    var onMoreOptions: (() -> Void)?
+    var onMoreOptions: ((QuickAddDraft) -> Void)?
 
     private var amount: Double {
         AmountParser.parse(amountText) ?? 0
+    }
+
+    private var draft: QuickAddDraft {
+        QuickAddDraft(
+            amountText: amountText,
+            entryKind: entryKind,
+            title: title,
+            category: selectedCategory,
+            account: selectedAccount,
+            date: date
+        )
     }
 
     private var isValid: Bool {
@@ -66,7 +86,7 @@ struct QuickAddSheet: View {
                 CurrencyKeypadView(amountText: $amountText)
 
                 Button {
-                    onMoreOptions?()
+                    onMoreOptions?(draft)
                     dismiss()
                 } label: {
                     Label("More options", systemImage: "chevron.down")
