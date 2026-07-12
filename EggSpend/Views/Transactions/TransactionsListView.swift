@@ -4,6 +4,7 @@ import SwiftData
 struct TransactionsListView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Transfer.date, order: .reverse) private var transfers: [Transfer]
+    @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Query(filter: #Predicate<RecurringTransaction> { $0.isActive == true }, sort: \RecurringTransaction.nextDueDate)
     private var recurring: [RecurringTransaction]
     @State private var searchText = ""
@@ -13,6 +14,8 @@ struct TransactionsListView: View {
     @State private var showAddTransaction = false
     @State private var showImport = false
     @State private var showFilterSheet = false
+    @State private var editingTransaction: Transaction?
+    @State private var editingTransfer: Transfer?
 
     private var filteredTransactions: [Transaction] {
         transactions.filter { tx in
@@ -59,6 +62,22 @@ struct TransactionsListView: View {
 
     private var grouped: [(day: Date, rows: [LedgerRow])] {
         TransactionGrouping.groupByDay(rows)
+    }
+
+    private var topCategories: [TransactionCategory] {
+        let activeCategories = categories.filter { !$0.isArchived }
+        let usageCounts = Dictionary(grouping: transactions.compactMap(\.category?.id), by: { $0 })
+            .mapValues(\.count)
+
+        return activeCategories
+            .sorted {
+                let lhsCount = usageCounts[$0.id, default: 0]
+                let rhsCount = usageCounts[$1.id, default: 0]
+                if lhsCount != rhsCount { return lhsCount > rhsCount }
+                return $0.sortOrder < $1.sortOrder
+            }
+            .prefix(5)
+            .map { $0 }
     }
 
     var body: some View {
@@ -150,6 +169,12 @@ struct TransactionsListView: View {
             }
             .sheet(isPresented: $showAddTransaction) {
                 AddTransactionView()
+            }
+            .sheet(item: $editingTransaction) { transaction in
+                AddTransactionView(editingTransaction: transaction)
+            }
+            .sheet(item: $editingTransfer) { transfer in
+                AddTransactionView(editingTransfer: transfer)
             }
             .sheet(isPresented: $showFilterSheet) {
                 TransactionFilterView(filter: $filter, hideTransfers: $hideTransfers)
@@ -281,15 +306,66 @@ struct TransactionsListView: View {
             NavigationLink(destination: TransactionDetailView(transaction: tx)) {
                 LedgerRowView(row: row, showsMeta: [.category, .account])
             }
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    AccountBalanceService.reverse(tx, from: tx.account)
+                    modelContext.delete(tx)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                Button {
+                    editingTransaction = tx
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+                .tint(.yolk)
+
+                if !topCategories.isEmpty {
+                    Menu {
+                        ForEach(topCategoriesFor(tx)) { category in
+                            Button {
+                                tx.category = category
+                            } label: {
+                                Label(category.name, systemImage: category.icon)
+                            }
+                        }
+                    } label: {
+                        Label("Categorize", systemImage: "tag")
+                    }
+                    .tint(.info)
+                }
+            }
         case .transfer(let transfer):
             NavigationLink(destination: TransferDetailView(transfer: transfer)) {
                 LedgerRowView(row: row, showsMeta: [.date])
             }
-        case .upcoming(let occurrence):
+            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                Button(role: .destructive) {
+                    TransferBalanceService.reverse(transfer)
+                    modelContext.delete(transfer)
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                Button {
+                    editingTransfer = transfer
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+                .tint(.yolk)
+            }
+        case .upcoming:
             NavigationLink(destination: RecurringTransactionsView()) {
                 LedgerRowView(row: row, style: .upcoming)
             }
         }
+    }
+
+    private func topCategoriesFor(_ transaction: Transaction) -> [TransactionCategory] {
+        topCategories.filter { $0.appliesTo == nil || $0.appliesTo == transaction.type }
     }
 
     @ViewBuilder
