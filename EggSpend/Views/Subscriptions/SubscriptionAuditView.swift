@@ -41,7 +41,7 @@ struct SubscriptionAuditView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 if !detected.isEmpty {
@@ -112,8 +112,8 @@ struct SubscriptionAuditView: View {
                                 systemImage: item.latestAmount > item.modeAmount ? "arrow.up" : "arrow.down"
                             )
                             .font(.caption).padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(Color.orange.opacity(0.12), in: Capsule())
-                            .foregroundStyle(Color.orange)
+                            .background(Color.warningTone.opacity(0.12), in: Capsule())
+                            .foregroundStyle(Color.warningTone)
                         }
                     }
                 }
@@ -135,7 +135,7 @@ struct SubscriptionAuditView: View {
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }
 

@@ -62,7 +62,7 @@ struct TransactionsListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AnimatedCanopyBackground()
+                NestBackground()
 
                 VStack(spacing: 0) {
                     activeFilterBanner

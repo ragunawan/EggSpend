@@ -38,7 +38,7 @@ struct TransactionFilterView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AnimatedCanopyBackground()
+                NestBackground()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {

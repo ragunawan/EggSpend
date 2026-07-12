@@ -22,7 +22,7 @@ struct NetWorthView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AnimatedCanopyBackground()
+                NestBackground()
 
                 List {
                     summarySection
@@ -41,7 +41,6 @@ struct NetWorthView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Button { showAddAccount = true } label: {
                         Image(systemName: "plus.circle.fill")
-                            .font(.title2)
                             .foregroundStyle(Color.yolk)
                     }
                 }
@@ -109,8 +108,8 @@ struct NetWorthView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Text(netWorth, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
-                        .foregroundStyle(netWorth >= 0 ? Color.primary : Color.red)
+                        .font(NestType.hero)
+                        .foregroundStyle(netWorth >= 0 ? Color.primary : Color.negative)
                 }
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -128,12 +127,11 @@ struct NetWorthView: View {
                             .foregroundStyle(.secondary)
                         Text(totalLiabilities, format: .currency(code: CurrencyFormat.code))
                             .font(.headline)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.negative)
                     }
                 }
             }
-            .padding(.vertical, 8)
-            .appearRise(delay: 0.05)
+            .padding(.vertical, Space.sm)
         }
     }
 
@@ -152,13 +150,12 @@ struct NetWorthView: View {
                     x: .value("Type", "Liabilities"),
                     y: .value("Amount", totalLiabilities)
                 )
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.negative)
                 .accessibilityLabel("Liabilities")
                 .accessibilityValue(CurrencyFormat.money(totalLiabilities))
             }
             .frame(height: 180)
-            .padding(.vertical, 8)
-            .appearRise(delay: 0.1)
+            .padding(.vertical, Space.sm)
         }
         .listRowBackground(Color.clear)
     }
@@ -184,7 +181,6 @@ struct NetWorthView: View {
                     }
                 }
             }
-            .appearRise(delay: 0.15)
         }
         .listRowBackground(Color.clear)
     }
@@ -207,7 +203,6 @@ struct NetWorthView: View {
                                 editingAccount = account
                             } label: {
                                 Image(systemName: "pencil.circle.fill")
-                                    .font(.title3)
                                     .foregroundStyle(Color.yolk)
                                     .accessibilityLabel("Edit \(account.name)")
                             }
@@ -228,7 +223,6 @@ struct NetWorthView: View {
                     }
                 }
             }
-            .appearRise(delay: 0.2)
         }
         .listRowBackground(Color.clear)
     }
@@ -267,10 +261,10 @@ private struct AccountRowView: View {
         HStack(spacing: 12) {
             ZStack {
                 Circle()
-                    .fill((account.isAsset ? Color.nestLeafGreen : Color.red).opacity(0.15))
+                    .fill((account.isAsset ? Color.nestLeafGreen : Color.negative).opacity(0.15))
                     .frame(width: 40, height: 40)
                 Image(systemName: account.type.icon)
-                    .foregroundStyle(account.isAsset ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(account.isAsset ? Color.nestLeafGreen : Color.negative)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(account.name)
@@ -281,7 +275,7 @@ private struct AccountRowView: View {
                 if let dueDate = account.dueDate {
                     Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
                         .font(.caption2)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.warningTone)
                 }
                 if account.isLiability && !account.includeInNetWorth {
                     Text("Excluded from net worth")
@@ -291,10 +285,10 @@ private struct AccountRowView: View {
             }
             Spacer()
             Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
-                .font(.system(.callout, design: .rounded, weight: .medium))
-                .foregroundStyle(account.isAsset ? Color.nestLeafGreen : .red)
+                .font(NestType.amount)
+                .foregroundStyle(account.isAsset ? Color.nestLeafGreen : Color.negative)
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, Space.sm)
     }
 }
 

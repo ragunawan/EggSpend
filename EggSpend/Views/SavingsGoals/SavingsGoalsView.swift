@@ -40,7 +40,7 @@ struct SavingsGoalsView: View {
                     }
                 }
             }
-            .background(AnimatedCanopyBackground())
+            .background(NestBackground())
             .navigationTitle("Savings Goals")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -113,7 +113,7 @@ struct SavingsGoalsView: View {
                                 modelContext.delete(goal)
                             }
                             Button("Edit", systemImage: "pencil") { editingGoal = goal }
-                                .tint(.blue)
+                                .tint(Color.info)
                         }
                         .swipeActions(edge: .leading) {
                             Button("Complete", systemImage: "checkmark.seal.fill") {
@@ -167,7 +167,7 @@ struct SavingsGoalsView: View {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     modelContext.delete(goal)
                                 }
-                                Button("Edit", systemImage: "pencil") { editingGoal = goal }.tint(.blue)
+                                Button("Edit", systemImage: "pencil") { editingGoal = goal }.tint(Color.info)
                             }
                             .swipeActions(edge: .leading) {
                                 Button("Reactivate", systemImage: "arrow.counterclockwise") {
@@ -252,7 +252,7 @@ struct SavingsGoalRowView: View {
                         if let daysRemaining = goal.daysRemaining, !goal.isCompleted {
                             Text(dateLabel(for: daysRemaining))
                                 .font(.caption2)
-                                .foregroundStyle(daysRemaining < 0 ? .red : Color.twig)
+                                .foregroundStyle(daysRemaining < 0 ? Color.negative : Color.twig)
                         }
                     }
 

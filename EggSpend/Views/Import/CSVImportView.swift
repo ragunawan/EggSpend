@@ -108,7 +108,7 @@ struct CSVImportView: View {
                     .fill(Color.yolk.opacity(0.12))
                     .frame(width: 100, height: 100)
                 Image(systemName: "doc.badge.plus")
-                    .font(.system(size: 44))
+                    .font(.largeTitle)
                     .foregroundStyle(Color.yolk)
             }
 
@@ -137,7 +137,7 @@ struct CSVImportView: View {
                 }
             }
             .padding()
-            .background(Color.nestCream, in: RoundedRectangle(cornerRadius: 14))
+            .background(Color.nestCream, in: RoundedRectangle(cornerRadius: Radius.card))
             .padding(.horizontal, 32)
 
             Button {
@@ -147,7 +147,7 @@ struct CSVImportView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.yolk, in: RoundedRectangle(cornerRadius: 14))
+                    .background(Color.yolk, in: RoundedRectangle(cornerRadius: Radius.card))
                     .foregroundStyle(.white)
             }
             .padding(.horizontal, 32)
@@ -299,7 +299,7 @@ struct CSVImportView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.nestBrown, in: RoundedRectangle(cornerRadius: 14))
+                    .background(Color.nestBrown, in: RoundedRectangle(cornerRadius: Radius.card))
                     .foregroundStyle(.white)
             }
             .padding()
@@ -326,11 +326,11 @@ struct CSVImportView: View {
             Spacer()
             if duplicates > 0 {
                 Label("\(duplicates) duplicates", systemImage: "doc.on.doc.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.warningTone)
             }
             if invalid > 0 {
                 Label("\(invalid) skipped", systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.warningTone)
             }
         }
         .font(.subheadline).fontWeight(.medium)
@@ -346,7 +346,7 @@ struct CSVImportView: View {
             ZStack {
                 Circle().fill(Color.nestLeafGreen.opacity(0.15)).frame(width: 100, height: 100)
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 52)).foregroundStyle(Color.nestLeafGreen)
+                    .font(.largeTitle).foregroundStyle(Color.nestLeafGreen)
             }
             VStack(spacing: 8) {
                 Text("Import Complete")
@@ -355,18 +355,18 @@ struct CSVImportView: View {
                     .foregroundStyle(.secondary)
                 if skippedCount > 0 {
                     Text("\(skippedCount) rows skipped (invalid data)")
-                        .font(.caption).foregroundStyle(.orange)
+                        .font(.caption).foregroundStyle(Color.warningTone)
                 }
                 if duplicateSkippedCount > 0 {
                     Text("\(duplicateSkippedCount) duplicates skipped")
-                        .font(.caption).foregroundStyle(.orange)
+                        .font(.caption).foregroundStyle(Color.warningTone)
                 }
             }
             Button("Done") { dismiss() }
                 .font(.headline)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.nestBrown, in: RoundedRectangle(cornerRadius: 14))
+                .background(Color.nestBrown, in: RoundedRectangle(cornerRadius: Radius.card))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 32)
             Spacer()
@@ -594,18 +594,18 @@ private struct TransactionPreviewRow: View {
                      ? "doc.on.doc.fill"
                      : (result.type == .income ? "arrow.down.circle.fill" : "arrow.up.circle.fill")))
                 .foregroundStyle(!result.isValid
-                                 ? .orange
+                                 ? Color.warningTone
                                  : (result.isDuplicate
-                                    ? .orange
-                                    : (result.type == .income ? Color.nestLeafGreen : .red)))
+                                    ? Color.warningTone
+                                    : (result.type == .income ? Color.nestLeafGreen : Color.negative)))
                 .frame(width: 22)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(result.title).font(.body).lineLimit(1)
                 if result.isValid && result.isDuplicate {
-                    Text("Duplicate — will skip").font(.caption).foregroundStyle(.orange)
+                    Text("Duplicate — will skip").font(.caption).foregroundStyle(Color.warningTone)
                 } else if let err = result.validationError {
-                    Text(err).font(.caption).foregroundStyle(.orange)
+                    Text(err).font(.caption).foregroundStyle(Color.warningTone)
                 } else {
                     HStack(spacing: 6) {
                         if let date = result.date {
@@ -645,14 +645,14 @@ private struct AccountPreviewRow: View {
         HStack(spacing: 10) {
             Image(systemName: result.isValid ? result.type.icon : "exclamationmark.triangle.fill")
                 .foregroundStyle(result.isValid
-                                 ? (result.type.isAsset ? Color.nestLeafGreen : .red)
-                                 : .orange)
+                                 ? (result.type.isAsset ? Color.nestLeafGreen : Color.negative)
+                                 : Color.warningTone)
                 .frame(width: 22)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(result.name).font(.body).lineLimit(1)
                 if let err = result.validationError {
-                    Text(err).font(.caption).foregroundStyle(.orange)
+                    Text(err).font(.caption).foregroundStyle(Color.warningTone)
                 } else {
                     Text(result.type.rawValue).font(.caption).foregroundStyle(.secondary)
                 }
@@ -663,7 +663,7 @@ private struct AccountPreviewRow: View {
             if let balance = result.balance {
                 Text(abs(balance), format: .currency(code: CurrencyFormat.code))
                     .font(.system(.callout, design: .rounded, weight: .medium))
-                    .foregroundStyle(result.type.isAsset ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(result.type.isAsset ? Color.nestLeafGreen : Color.negative)
             } else {
                 Text("—").foregroundStyle(.secondary)
             }

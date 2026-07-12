@@ -23,7 +23,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             VStack(spacing: 0) {
                 HStack {
@@ -67,7 +67,7 @@ struct OnboardingView: View {
     private var welcomeStep: some View {
         VStack(spacing: 20) {
             Image(systemName: "bird.fill")
-                .font(.system(size: 64))
+                .font(.largeTitle)
                 .foregroundStyle(Color.nestBrown)
                 .symbolEffect(.pulse)
 
@@ -100,7 +100,7 @@ struct OnboardingView: View {
     private var createAccountStep: some View {
         VStack(spacing: 20) {
             Image(systemName: "building.columns")
-                .font(.system(size: 56))
+                .font(.largeTitle)
                 .foregroundStyle(Color.eggBlue)
                 .symbolEffect(.pulse)
 
@@ -146,7 +146,7 @@ struct OnboardingView: View {
     private var extrasStep: some View {
         VStack(spacing: 20) {
             Image(systemName: "sparkles")
-                .font(.system(size: 56))
+                .font(.largeTitle)
                 .foregroundStyle(Color.yolk)
                 .symbolEffect(.pulse)
 

@@ -61,7 +61,7 @@ struct AccountsView: View {
         HStack {
             Image(systemName: account.type.icon)
                 .frame(width: 32)
-                .foregroundStyle(account.isAsset ? .green : .red)
+                .foregroundStyle(account.isAsset ? Color.positive : Color.negative)
             VStack(alignment: .leading, spacing: 2) {
                 Text(account.name)
                 if !account.notes.isEmpty {
@@ -73,7 +73,7 @@ struct AccountsView: View {
             }
             Spacer()
             Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
-                .foregroundStyle(account.isAsset ? .green : .red)
+                .foregroundStyle(account.isAsset ? Color.positive : Color.negative)
                 .font(.system(.callout, design: .rounded, weight: .medium))
         }
     }

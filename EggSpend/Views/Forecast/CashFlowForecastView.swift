@@ -57,7 +57,7 @@ struct CashFlowForecastView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 periodPickerSection
@@ -152,7 +152,7 @@ struct CashFlowForecastView: View {
                     Spacer()
                     if lowestBalance < 0 {
                         Label("Goes negative", systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption2).foregroundStyle(.red)
+                            .font(.caption2).foregroundStyle(Color.negative)
                     }
                 }
 
@@ -189,7 +189,7 @@ struct CashFlowForecastView: View {
 
                     // Zero line — visually marks where balance would go negative
                     RuleMark(y: .value("Zero", 0))
-                        .foregroundStyle(Color.red.opacity(0.45))
+                        .foregroundStyle(Color.negative.opacity(0.45))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
 
                     // Event dots (capped to keep chart readable)
@@ -249,7 +249,7 @@ struct CashFlowForecastView: View {
                             Text(abs(balanceDelta), format: .currency(code: CurrencyFormat.code))
                                 .font(.system(.callout, design: .rounded, weight: .semibold))
                         }
-                        .foregroundStyle(balanceDelta >= 0 ? Color.nestLeafGreen : .red)
+                        .foregroundStyle(balanceDelta >= 0 ? Color.nestLeafGreen : Color.negative)
                     }
                     Spacer()
                     labeledAmount(label: "Day \(horizon.rawValue)", value: endBalance, alignment: .trailing)
@@ -274,7 +274,7 @@ struct CashFlowForecastView: View {
                 .font(.caption2).foregroundStyle(.secondary)
             Text(balance, format: .currency(code: CurrencyFormat.code))
                 .font(.caption).fontWeight(.semibold)
-                .foregroundStyle(balance >= 0 ? Color.nestBrown : .red)
+                .foregroundStyle(balance >= 0 ? Color.nestBrown : Color.negative)
         }
         .padding(.horizontal, 8).padding(.vertical, 5)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
@@ -286,7 +286,7 @@ struct CashFlowForecastView: View {
             Text(label).font(.caption).foregroundStyle(.secondary)
             Text(value, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .semibold))
-                .foregroundStyle(value >= 0 ? Color.nestBrown : .red)
+                .foregroundStyle(value >= 0 ? Color.nestBrown : Color.negative)
         }
     }
 
@@ -310,7 +310,7 @@ struct CashFlowForecastView: View {
                 statChip(
                     title: "Sched. Out",
                     value: totalScheduledOutflows,
-                    color: .red,
+                    color: Color.negative,
                     icon: "arrow.up.circle.fill"
                 )
             }
@@ -359,7 +359,7 @@ struct CashFlowForecastView: View {
             }
         } header: {
             Label("Scheduled Outflows", systemImage: "arrow.up.circle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.negative)
         }
     }
 
@@ -371,7 +371,7 @@ struct CashFlowForecastView: View {
                     .fill((event.amount > 0 ? Color.nestLeafGreen : Color.yolk).opacity(0.15))
                     .frame(width: 38, height: 38)
                 Image(systemName: event.categoryIcon)
-                    .font(.system(size: 14))
+                    .font(.caption)
                     .foregroundStyle(event.amount > 0 ? Color.nestLeafGreen : Color.yolk)
             }
             VStack(alignment: .leading, spacing: 2) {
@@ -386,7 +386,7 @@ struct CashFlowForecastView: View {
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .shadow(color: Color.nestBrown.opacity(0.06), radius: 4, y: 2)
         .padding(.vertical, 1)
         .listRowBackground(Color.clear)

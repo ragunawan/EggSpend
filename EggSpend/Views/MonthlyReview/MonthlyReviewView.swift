@@ -27,7 +27,7 @@ struct MonthlyReviewView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 monthNavigationSection
@@ -96,9 +96,9 @@ struct MonthlyReviewView: View {
                 statChip(title: "Income", value: review.income,
                          color: .eggBlue, icon: "arrow.down.circle.fill")
                 statChip(title: "Expenses", value: review.expenses,
-                         color: .red, icon: "arrow.up.circle.fill")
+                         color: Color.negative, icon: "arrow.up.circle.fill")
                 statChip(title: "Net Savings", value: review.netSavings,
-                         color: review.netSavings >= 0 ? .nestLeafGreen : .red,
+                         color: review.netSavings >= 0 ? .nestLeafGreen : Color.negative,
                          icon: "leaf.circle.fill")
             }
         }
@@ -130,17 +130,17 @@ struct MonthlyReviewView: View {
                         .font(.subheadline).foregroundStyle(Color.twig)
                     if let rate = review.savingsRate {
                         Text("\(Int((rate * 100).rounded()))%")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundStyle(rate >= 0 ? Color.nestLeafGreen : .red)
+                            .font(NestType.hero)
+                            .foregroundStyle(rate >= 0 ? Color.nestLeafGreen : Color.negative)
                     } else {
                         Text("—")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .font(NestType.hero)
                             .foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 Image(systemName: (review.savingsRate ?? 0) >= 0 ? "chart.line.uptrend.xyaxis" : "chart.line.downtrend.xyaxis")
-                    .font(.system(size: 30))
+                    .font(.title)
                     .foregroundStyle(Color.yolk.opacity(0.7))
             }
             .padding(.vertical, 8)
@@ -159,7 +159,7 @@ struct MonthlyReviewView: View {
                             .fill(Color.yolk.opacity(0.15))
                             .frame(width: 36, height: 36)
                         Image(systemName: entry.icon)
-                            .font(.system(size: 14))
+                            .font(.caption)
                             .foregroundStyle(Color.yolk)
                     }
                     Text(entry.name)
@@ -194,10 +194,10 @@ struct MonthlyReviewView: View {
                         Spacer()
                         Text("+\(overrun.overage, format: .currency(code: CurrencyFormat.code))")
                             .font(.system(.caption, design: .rounded, weight: .semibold))
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.negative)
                     }
                     ProgressView(value: min(overrun.progress, 1.5), total: 1.5)
-                        .tint(.red)
+                        .tint(Color.negative)
                     HStack {
                         Text("Spent \(overrun.spent, format: .currency(code: CurrencyFormat.code))")
                         Spacer()
@@ -210,7 +210,7 @@ struct MonthlyReviewView: View {
             }
         } header: {
             Label("Budget Overruns", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.negative)
         }
     }
 
@@ -234,7 +234,7 @@ struct MonthlyReviewView: View {
                         Text(abs(review.netWorthChange), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                     }
-                    .foregroundStyle(review.netWorthChange >= 0 ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(review.netWorthChange >= 0 ? Color.nestLeafGreen : Color.negative)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {

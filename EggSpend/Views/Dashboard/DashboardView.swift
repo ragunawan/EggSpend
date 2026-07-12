@@ -64,21 +64,21 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
-                AnimatedCanopyBackground()
+                NestBackground()
                 BirdAnimationView().frame(height: 100).frame(maxWidth: .infinity).padding(.top, Space.xl)
 
                 ScrollView {
                     VStack(spacing: 20) {
                         nestHeaderSection
                         netWorthCard
-                        safeToSpendCard.appearRise(delay: 0.05)
-                        monthlySnapshotRow.appearRise(delay: 0.1)
-                        cashFlowForecastCard.appearRise(delay: 0.15)
-                        monthlyReviewCard.appearRise(delay: 0.2)
-                        savingsGoalsPreviewSection.appearRise(delay: 0.25)
-                        if !topBudgets.isEmpty { budgetPreviewSection.appearRise(delay: 0.3) }
-                        recentTransactionsSection.appearRise(delay: 0.35)
-                        if !spendingDeltas.isEmpty { spendingDeltaCard.appearRise(delay: 0.4) }
+                        safeToSpendCard
+                        monthlySnapshotRow
+                        cashFlowForecastCard
+                        monthlyReviewCard
+                        savingsGoalsPreviewSection
+                        if !topBudgets.isEmpty { budgetPreviewSection }
+                        recentTransactionsSection
+                        if !spendingDeltas.isEmpty { spendingDeltaCard }
                     }
                     .padding(Space.lg)
                     .padding(.bottom, Space.xl)

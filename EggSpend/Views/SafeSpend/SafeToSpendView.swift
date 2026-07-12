@@ -25,7 +25,7 @@ struct SafeToSpendView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 if accounts.isEmpty {
@@ -73,7 +73,7 @@ struct SafeToSpendView: View {
                 Text("Safe to Spend Today")
                     .font(.subheadline).foregroundStyle(Color.twig)
                 Text(result.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .font(NestType.hero)
                     .foregroundStyle(statusColor)
                 Label(statusLabel, systemImage: statusIcon)
                     .font(.caption.weight(.semibold))
@@ -105,7 +105,7 @@ struct SafeToSpendView: View {
         switch result.status {
         case .onTrack: return .nestLeafGreen
         case .tight:   return .yolk
-        case .pause:   return .red
+        case .pause:   return Color.negative
         }
     }
 
@@ -114,7 +114,7 @@ struct SafeToSpendView: View {
     private var breakdownSection: some View {
         Section {
             breakdownRow(label: "Liquid cash", value: result.liquidBalance, color: .eggBlue)
-            breakdownRow(label: "Upcoming 30-day bills", value: -result.upcomingNetOutflowReserve, color: .red)
+            breakdownRow(label: "Upcoming 30-day bills", value: -result.upcomingNetOutflowReserve, color: Color.negative)
             breakdownRow(label: "Cash buffer", value: -result.requiredBuffer, color: .yolk)
             breakdownRow(label: "Savings goal reserve", value: -result.plannedSavingsReserve, color: .nestLeafGreen)
             breakdownRow(label: "Cash available after obligations", value: result.cashAvailableAfterObligations,
@@ -199,7 +199,7 @@ struct SafeToSpendView: View {
                         Text(abs(result.thirtyDayNetWorthDelta), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                     }
-                    .foregroundStyle(result.thirtyDayNetWorthDelta >= 0 ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(result.thirtyDayNetWorthDelta >= 0 ? Color.nestLeafGreen : Color.negative)
                 }
             }
             .padding(.vertical, 6)

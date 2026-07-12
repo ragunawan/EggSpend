@@ -51,18 +51,18 @@ struct BudgetView: View {
                 } else {
                     VStack(spacing: 20) {
                         summaryHeroCard
-                        periodPicker.appearRise(delay: 0.05)
+                        periodPicker
 
                         ScrollView {
                             VStack(spacing: 16) {
                                 if displayed.isEmpty && periodFilter != nil {
                                     filteredEmptyState
-                                        .appearRise(delay: 0.1)
+
                                 } else {
-                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .negative).appearRise(delay: 0.1) }
-                                    if !warningBudgets.isEmpty { budgetGroup("Watch Out", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
-                                    if !healthyBudgets.isEmpty { budgetGroup("On Track",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
-                                    inactiveBudgetsSection.appearRise(delay: 0.25)
+                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .negative) }
+                                    if !warningBudgets.isEmpty { budgetGroup("Watch Out", warningBudgets, accent: .yolk) }
+                                    if !healthyBudgets.isEmpty { budgetGroup("On Track",   healthyBudgets, accent: .nestLeafGreen) }
+                                    inactiveBudgetsSection
                                 }
                             }
                             .padding(Space.md)
@@ -76,7 +76,7 @@ struct BudgetView: View {
                     .padding(.bottom, Space.xl)
                 }
             }
-            .background(AnimatedCanopyBackground())
+            .background(NestBackground())
             .navigationTitle("Budget Eggs")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

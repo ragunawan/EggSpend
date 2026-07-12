@@ -53,7 +53,7 @@ struct CashFlowCalendarView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 Section {
@@ -107,11 +107,11 @@ struct CashFlowCalendarView: View {
         HStack {
             Label(day.netFlow >= 0 ? "Net Inflow" : "Net Outflow", systemImage: day.netFlow >= 0 ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.caption)
-                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : .red)
+                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : Color.negative)
             Spacer()
             Text(day.netFlow, format: .currency(code: CurrencyFormat.code))
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : .red)
+                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : Color.negative)
             Text("Balance \(day.projectedBalance, format: .currency(code: CurrencyFormat.code))")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -126,7 +126,7 @@ struct CashFlowCalendarView: View {
             title: transaction.title,
             subtitle: transaction.category?.name ?? "Actual transaction",
             amount: transaction.signedAmount,
-            color: transaction.type == .income ? Color.eggBlue : .red
+            color: transaction.type == .income ? Color.eggBlue : Color.negative
         )
     }
 
@@ -136,7 +136,7 @@ struct CashFlowCalendarView: View {
             title: occurrence.title,
             subtitle: "Upcoming recurring",
             amount: occurrence.signedAmount,
-            color: occurrence.type == .income ? Color.eggBlue : .red
+            color: occurrence.type == .income ? Color.eggBlue : Color.negative
         )
     }
 

@@ -130,7 +130,7 @@ struct MetricsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AnimatedCanopyBackground()
+                NestBackground()
 
                 List {
                     periodPickerSection
@@ -191,8 +191,8 @@ struct MetricsView: View {
                 Divider()
                 cashFlowChart
             }
-            .padding(.vertical, 8)
-            .appearRise(delay: 0.05)
+            .padding(.vertical, Space.sm)
+
         } header: {
             Label("Timeline", systemImage: "chart.xyaxis.line")
                 .foregroundStyle(Color.twig)
@@ -294,7 +294,7 @@ struct MetricsView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Current").font(.caption).foregroundStyle(.secondary)
                         Text(last.worth, format: .currency(code: CurrencyFormat.code))
-                            .font(.system(.callout, design: .rounded, weight: .semibold))
+                            .font(NestType.amount)
                             .foregroundStyle(Color.nestBrown)
                     }
                     Spacer()
@@ -304,9 +304,9 @@ struct MetricsView: View {
                             Image(systemName: change >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
                             Text(abs(change), format: .currency(code: CurrencyFormat.code))
-                                .font(.system(.callout, design: .rounded, weight: .semibold))
+                                .font(NestType.amount)
                         }
-                        .foregroundStyle(change >= 0 ? Color.nestLeafGreen : .red)
+                        .foregroundStyle(change >= 0 ? Color.nestLeafGreen : Color.negative)
                     }
                 }
                 .padding(.top, 4)
@@ -321,9 +321,10 @@ struct MetricsView: View {
             Text(worth, format: .currency(code: CurrencyFormat.code))
                 .font(.caption).fontWeight(.semibold).foregroundStyle(Color.nestBrown)
         }
-        .padding(.horizontal, 8).padding(.vertical, 5)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+        .padding(.horizontal, Space.sm)
+        .padding(.vertical, Space.xs)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.control))
+        .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
     }
 
     // Cash flow bar chart (income positive, expenses negative from zero line)
@@ -351,7 +352,7 @@ struct MetricsView: View {
                         x: .value("Period", point.date, unit: selectedPeriod.bucketUnit),
                         y: .value("Expenses", -point.expenses)
                     )
-                    .foregroundStyle(Color.red.opacity(0.8).gradient)
+                    .foregroundStyle(Color.negative.opacity(0.8).gradient)
                     .position(by: .value("Series", "Expenses"))
                     .cornerRadius(4)
                     .accessibilityLabel("\(point.date.formatted(calloutDateFormat)) expenses")
@@ -391,7 +392,7 @@ struct MetricsView: View {
                         if let v = value.as(Double.self) {
                             Text(abs(v), format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                                 .font(.caption2)
-                                .foregroundStyle(v >= 0 ? Color.nestLeafGreen : .red)
+                                .foregroundStyle(v >= 0 ? Color.nestLeafGreen : Color.negative)
                         }
                     }
                 }
@@ -405,7 +406,7 @@ struct MetricsView: View {
             .chartLegend(position: .topTrailing, spacing: 8) {
                 HStack(spacing: 12) {
                     Label("Income",   systemImage: "square.fill").foregroundStyle(Color.nestLeafGreen)
-                    Label("Expenses", systemImage: "square.fill").foregroundStyle(.red)
+                    Label("Expenses", systemImage: "square.fill").foregroundStyle(Color.negative)
                 }
                 .font(.caption)
             }
@@ -423,12 +424,13 @@ struct MetricsView: View {
                     .font(.caption).foregroundStyle(Color.nestLeafGreen)
                 Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                       systemImage: "arrow.up.circle.fill")
-                    .font(.caption).foregroundStyle(.red)
+                    .font(.caption).foregroundStyle(Color.negative)
             }
         }
-        .padding(.horizontal, 8).padding(.vertical, 5)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-        .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+        .padding(.horizontal, Space.sm)
+        .padding(.vertical, Space.xs)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.control))
+        .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
     }
 
     // MARK: - Axis format helpers
@@ -460,7 +462,7 @@ struct MetricsView: View {
                         .accessibilityLabel("Income")
                         .accessibilityValue(CurrencyFormat.money(totalIncome))
                     BarMark(x: .value("Type", "Expenses"), y: .value("Amount", totalExpenses))
-                        .foregroundStyle(Color.red.opacity(0.8).gradient)
+                        .foregroundStyle(Color.negative.opacity(0.8).gradient)
                         .accessibilityLabel("Expenses")
                         .accessibilityValue(CurrencyFormat.money(totalExpenses))
                 }
@@ -468,14 +470,14 @@ struct MetricsView: View {
                     AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                 }
                 .frame(height: 160)
-                .padding(.vertical, 8)
+                .padding(.vertical, Space.sm)
 
                 HStack {
                     VStack(alignment: .leading) {
                         Text("Net").font(.caption).foregroundStyle(.secondary)
                         Text(totalIncome - totalExpenses, format: .currency(code: CurrencyFormat.code))
                             .font(.headline)
-                            .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : .red)
+                            .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : Color.negative)
                     }
                     Spacer()
                     VStack(alignment: .trailing) {
@@ -488,9 +490,9 @@ struct MetricsView: View {
                         }
                     }
                 }
-                .padding(.vertical, 4)
+                .padding(.vertical, Space.xs)
             }
-            .appearRise(delay: 0.1)
+
         }
         .listRowBackground(Color.clear)
     }
@@ -514,7 +516,7 @@ struct MetricsView: View {
                         )
                 }
                 .frame(height: 200)
-                .padding(.vertical, 8)
+                .padding(.vertical, Space.sm)
 
                 ForEach(expensesByCategory.prefix(6), id: \.0) { name, amount, icon in
                     HStack {
@@ -529,7 +531,7 @@ struct MetricsView: View {
                     }
                 }
             }
-            .appearRise(delay: 0.15)
+
         }
         .listRowBackground(Color.clear)
     }

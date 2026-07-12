@@ -143,11 +143,11 @@ struct AddEditCategoryView: View {
                             .foregroundStyle(isSelected ? Color.yolk : .primary)
                             .frame(width: 44, height: 44)
                             .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                                     .fill(isSelected ? Color.yolk.opacity(0.15) : Color(.systemFill))
                             )
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                                     .stroke(isSelected ? Color.yolk : Color.clear, lineWidth: 2)
                             )
                     }
@@ -183,7 +183,7 @@ struct AddEditCategoryView: View {
                         .padding(8)
                         .background(
                             (Color(hex: effectiveColorHex) ?? Color.yolk).opacity(0.15),
-                            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                         )
                 }
             }
@@ -246,7 +246,7 @@ struct AddEditCategoryView: View {
                         .transition(.opacity)
                 } else if !customColorHex.isEmpty {
                     Image(systemName: "exclamationmark.triangle")
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.warningTone)
                         .font(.caption)
                 }
             }

@@ -14,7 +14,7 @@ struct DebtPayoffPlannerView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 Section {
@@ -23,8 +23,8 @@ struct DebtPayoffPlannerView: View {
                             .font(.headline)
                             .foregroundStyle(Color.nestBrown)
                         Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundStyle(.red)
+                            .font(NestType.hero)
+                            .foregroundStyle(Color.negative)
                     }
                     .padding(.vertical, 6)
                 }
@@ -45,7 +45,7 @@ struct DebtPayoffPlannerView: View {
                             .foregroundStyle(Color.twig)
                     case .insufficientPayment:
                         Label("Payment is too low to cover monthly interest.", systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.negative)
                     case .projected:
                         valueRow("Months to payoff", "\(result.months)")
                         valueRow("Total interest", result.totalInterest.formatted(.currency(code: CurrencyFormat.code)))

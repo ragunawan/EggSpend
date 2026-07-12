@@ -110,7 +110,7 @@ struct BudgetDetailView: View {
             .padding(.horizontal)
             .padding(.bottom, Space.xl)
         }
-        .background(AnimatedCanopyBackground())
+        .background(NestBackground())
         .navigationTitle(budget.name)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
