@@ -323,64 +323,50 @@ struct AddTransactionView: View {
     private func saveTransaction() {
         guard let type = selectedEntryKind.transactionType else { return }
         if let tx = editingTransaction {
-            // Capture old account before any changes so we can reverse its effect.
-            let oldAccount = tx.account
-            AccountBalanceService.reverse(tx, from: oldAccount)
-
-            tx.title = title.trimmingCharacters(in: .whitespaces)
-            tx.amount = amount
-            tx.date = date
-            tx.type = type
-            tx.category = selectedCategory
-            tx.account = selectedAccount
-            tx.notes = notes
-
-            AccountBalanceService.apply(tx, to: selectedAccount)
-            if let selectedCategory {
-                CategoryRuleEngine.recordRule(title: title.trimmingCharacters(in: .whitespaces), category: selectedCategory, context: modelContext)
-            }
-            BudgetAlertCoordinator.checkBudgets(context: modelContext)
-        } else {
-            let tx = Transaction(
-                title: title.trimmingCharacters(in: .whitespaces),
+            TransactionEntryService.updateTransaction(
+                tx,
+                title: title,
                 amount: amount,
                 date: date,
                 type: type,
                 category: selectedCategory,
                 account: selectedAccount,
-                notes: notes
+                notes: notes,
+                context: modelContext
             )
-            modelContext.insert(tx)
-            AccountBalanceService.apply(tx, to: selectedAccount)
-            if let selectedCategory {
-                CategoryRuleEngine.recordRule(title: title.trimmingCharacters(in: .whitespaces), category: selectedCategory, context: modelContext)
-            }
-            BudgetAlertCoordinator.checkBudgets(context: modelContext)
+        } else {
+            TransactionEntryService.createTransaction(
+                title: title,
+                amount: amount,
+                date: date,
+                type: type,
+                category: selectedCategory,
+                account: selectedAccount,
+                notes: notes,
+                context: modelContext
+            )
         }
     }
 
     private func saveTransfer() {
         if let transfer = editingTransfer {
-            // Capture old accounts before any changes so we can reverse their effect.
-            TransferBalanceService.reverse(transfer)
-
-            transfer.amount = amount
-            transfer.date = date
-            transfer.fromAccount = fromAccount
-            transfer.toAccount = toAccount
-            transfer.notes = notes
-
-            TransferBalanceService.apply(transfer)
-        } else {
-            let transfer = Transfer(
+            TransactionEntryService.updateTransfer(
+                transfer,
                 amount: amount,
                 date: date,
                 fromAccount: fromAccount,
                 toAccount: toAccount,
                 notes: notes
             )
-            modelContext.insert(transfer)
-            TransferBalanceService.apply(transfer)
+        } else {
+            TransactionEntryService.createTransfer(
+                amount: amount,
+                date: date,
+                fromAccount: fromAccount,
+                toAccount: toAccount,
+                notes: notes,
+                context: modelContext
+            )
         }
     }
 

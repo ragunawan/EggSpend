@@ -1,0 +1,148 @@
+import XCTest
+import SwiftData
+@testable import EggSpend
+
+final class TransactionEntryServiceTests: XCTestCase {
+    var container: ModelContainer!
+    var context: ModelContext!
+
+    override func setUpWithError() throws {
+        let schema = Schema([
+            Transaction.self, TransactionCategory.self, Account.self,
+            Budget.self, RecurringTransaction.self, SavingsGoal.self,
+            Transfer.self, BalanceSnapshot.self, CategoryRule.self
+        ])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        container = try ModelContainer(for: schema, configurations: [config])
+        context = ModelContext(container)
+    }
+
+    override func tearDownWithError() throws {
+        container = nil
+        context = nil
+    }
+
+    func testCreateTransactionAppliesBalanceRecordsRuleAndInvokesAlerts() throws {
+        let account = Account(name: "Checking", type: .checking, balance: 100)
+        let category = TransactionCategory(name: "Coffee", icon: "cup.and.saucer", colorHex: "#000000", typeFilter: .expense)
+        context.insert(account)
+        context.insert(category)
+
+        var alertCallCount = 0
+        let transaction = TransactionEntryService.createTransaction(
+            title: "  Blue Bottle  ",
+            amount: 12.50,
+            date: Date(timeIntervalSince1970: 1_000),
+            type: .expense,
+            category: category,
+            account: account,
+            notes: "latte",
+            context: context,
+            budgetAlertChecker: { alertContext in
+                XCTAssertTrue(alertContext === self.context)
+                alertCallCount += 1
+            }
+        )
+
+        XCTAssertEqual(transaction.title, "Blue Bottle")
+        XCTAssertEqual(transaction.amount, 12.50, accuracy: 0.001)
+        XCTAssertEqual(transaction.category?.id, category.id)
+        XCTAssertEqual(transaction.account?.id, account.id)
+        XCTAssertEqual(account.balance, 87.50, accuracy: 0.001)
+        XCTAssertEqual(alertCallCount, 1)
+
+        let rules = try context.fetch(FetchDescriptor<CategoryRule>())
+        XCTAssertEqual(rules.count, 1)
+        XCTAssertEqual(rules.first?.normalizedPattern, "blue bottle")
+        XCTAssertEqual(rules.first?.categoryID, category.id)
+    }
+
+    func testUpdateTransactionReversesOldAccountAppliesNewAccountRecordsRuleAndInvokesAlerts() throws {
+        let oldAccount = Account(name: "Checking", type: .checking, balance: 100)
+        let newAccount = Account(name: "Savings", type: .savings, balance: 50)
+        let category = TransactionCategory(name: "Dining", icon: "fork.knife", colorHex: "#000000", typeFilter: .expense)
+        let transaction = Transaction(title: "Lunch", amount: 20, type: .expense, account: oldAccount)
+        context.insert(oldAccount)
+        context.insert(newAccount)
+        context.insert(category)
+        context.insert(transaction)
+        AccountBalanceService.apply(transaction, to: oldAccount)
+
+        var alertCallCount = 0
+        TransactionEntryService.updateTransaction(
+            transaction,
+            title: "  Dinner  ",
+            amount: 30,
+            date: Date(timeIntervalSince1970: 2_000),
+            type: .expense,
+            category: category,
+            account: newAccount,
+            notes: "changed",
+            context: context,
+            budgetAlertChecker: { _ in alertCallCount += 1 }
+        )
+
+        XCTAssertEqual(oldAccount.balance, 100, accuracy: 0.001)
+        XCTAssertEqual(newAccount.balance, 20, accuracy: 0.001)
+        XCTAssertEqual(transaction.title, "Dinner")
+        XCTAssertEqual(transaction.notes, "changed")
+        XCTAssertEqual(transaction.account?.id, newAccount.id)
+        XCTAssertEqual(alertCallCount, 1)
+
+        let rules = try context.fetch(FetchDescriptor<CategoryRule>())
+        XCTAssertEqual(rules.count, 1)
+        XCTAssertEqual(rules.first?.normalizedPattern, "dinner")
+    }
+
+    func testCreateTransferAppliesBalancesAndInsertsTransfer() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 100)
+        let savings = Account(name: "Savings", type: .savings, balance: 10)
+        context.insert(checking)
+        context.insert(savings)
+
+        let transfer = TransactionEntryService.createTransfer(
+            amount: 25,
+            date: Date(timeIntervalSince1970: 3_000),
+            fromAccount: checking,
+            toAccount: savings,
+            notes: "move",
+            context: context
+        )
+
+        XCTAssertEqual(checking.balance, 75, accuracy: 0.001)
+        XCTAssertEqual(savings.balance, 35, accuracy: 0.001)
+        XCTAssertEqual(transfer.notes, "move")
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Transfer>()).count, 1)
+    }
+
+    func testUpdateTransferReversesOldAccountsAndAppliesNewValues() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 100)
+        let savings = Account(name: "Savings", type: .savings, balance: 10)
+        let cash = Account(name: "Cash", type: .other, balance: 40)
+        let investment = Account(name: "Investment", type: .investment, balance: 200)
+        let transfer = Transfer(amount: 25, fromAccount: checking, toAccount: savings)
+        context.insert(checking)
+        context.insert(savings)
+        context.insert(cash)
+        context.insert(investment)
+        context.insert(transfer)
+        TransferBalanceService.apply(transfer)
+
+        TransactionEntryService.updateTransfer(
+            transfer,
+            amount: 15,
+            date: Date(timeIntervalSince1970: 4_000),
+            fromAccount: cash,
+            toAccount: investment,
+            notes: "updated"
+        )
+
+        XCTAssertEqual(checking.balance, 100, accuracy: 0.001)
+        XCTAssertEqual(savings.balance, 10, accuracy: 0.001)
+        XCTAssertEqual(cash.balance, 25, accuracy: 0.001)
+        XCTAssertEqual(investment.balance, 215, accuracy: 0.001)
+        XCTAssertEqual(transfer.notes, "updated")
+        XCTAssertEqual(transfer.fromAccount?.id, cash.id)
+        XCTAssertEqual(transfer.toAccount?.id, investment.id)
+    }
+}

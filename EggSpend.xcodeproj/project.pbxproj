@@ -54,6 +54,7 @@
 		AA020000000000000000001C /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001E /* CSVParser.swift */; };
 		AA020000000000000000002C /* AccountBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000044 /* AccountBalanceService.swift */; };
 		AA0200000000000000000043 /* TransferBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005D /* TransferBalanceService.swift */; };
+		AA0200000000000000000073 /* TransactionEntryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008E /* TransactionEntryService.swift */; };
 		AA020000000000000000001D /* CSVImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001F /* CSVImportView.swift */; };
 		AA020000000000000000001E /* CategoryManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000036 /* CategoryManagementView.swift */; };
 		AA020000000000000000001F /* AddEditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000037 /* AddEditCategoryView.swift */; };
@@ -118,6 +119,7 @@
 		AA0200000000000000000062 /* AppLockControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007D /* AppLockControllerTests.swift */; };
 		AA0200000000000000000064 /* TransactionGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007F /* TransactionGroupingTests.swift */; };
 		AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000082 /* DuplicateSweeperTests.swift */; };
+		AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008F /* TransactionEntryServiceTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -180,6 +182,7 @@
 		AA010000000000000000001E /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		AA0100000000000000000044 /* AccountBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceService.swift; sourceTree = "<group>"; };
 		AA010000000000000000005D /* TransferBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferBalanceService.swift; sourceTree = "<group>"; };
+		AA010000000000000000008E /* TransactionEntryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEntryService.swift; sourceTree = "<group>"; };
 		AA010000000000000000001F /* CSVImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVImportView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000036 /* CategoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagementView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000037 /* AddEditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditCategoryView.swift; sourceTree = "<group>"; };
@@ -245,6 +248,7 @@
 		AA010000000000000000007D /* AppLockControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockControllerTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000007F /* TransactionGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionGroupingTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000082 /* DuplicateSweeperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSweeperTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000008F /* TransactionEntryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEntryServiceTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -466,6 +470,7 @@
 				AA010000000000000000001E /* CSVParser.swift */,
 				AA0100000000000000000044 /* AccountBalanceService.swift */,
 				AA010000000000000000005D /* TransferBalanceService.swift */,
+				AA010000000000000000008E /* TransactionEntryService.swift */,
 				AA0100000000000000000046 /* MonthlyReviewCalculator.swift */,
 				AA0100000000000000000067 /* NetWorthCalculator.swift */,
 				AA0100000000000000000049 /* TransactionFilter.swift */,
@@ -573,6 +578,7 @@
 				AA010000000000000000007D /* AppLockControllerTests.swift */,
 				AA010000000000000000007F /* TransactionGroupingTests.swift */,
 				AA0100000000000000000082 /* DuplicateSweeperTests.swift */,
+				AA010000000000000000008F /* TransactionEntryServiceTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -726,6 +732,7 @@
 				AA020000000000000000001C /* CSVParser.swift in Sources */,
 				AA020000000000000000002C /* AccountBalanceService.swift in Sources */,
 				AA0200000000000000000043 /* TransferBalanceService.swift in Sources */,
+				AA0200000000000000000073 /* TransactionEntryService.swift in Sources */,
 				AA020000000000000000001D /* CSVImportView.swift in Sources */,
 				AA020000000000000000001E /* CategoryManagementView.swift in Sources */,
 				AA020000000000000000001F /* AddEditCategoryView.swift in Sources */,
@@ -794,6 +801,7 @@
 				AA0200000000000000000062 /* AppLockControllerTests.swift in Sources */,
 				AA0200000000000000000064 /* TransactionGroupingTests.swift in Sources */,
 				AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */,
+				AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
