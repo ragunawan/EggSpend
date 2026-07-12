@@ -168,20 +168,9 @@ struct TransactionsListView: View {
                 let upcoming = items.filter { $0.isUpcoming }
 
                 Section {
-                    ForEach(Array(groupable.enumerated()), id: \.element.id) { index, row in
-                        let isFirst = index == 0
-                        let isLast = index == groupable.count - 1
+                    ForEach(groupable) { row in
                         rowView(for: row, showsCardBackground: false)
-                            .listRowBackground(mergedRowBackground(isFirst: isFirst, isLast: isLast))
-                            .listRowSeparator(.hidden)
-                            .overlay(alignment: .bottom) {
-                                if !isLast {
-                                    Rectangle()
-                                        .fill(Color.twig.opacity(0.15))
-                                        .frame(height: 0.5)
-                                        .padding(.leading, Space.xl * 2 + Space.lg)
-                                }
-                            }
+                            .listRowBackground(Color.clear)
                     }
                     .onDelete { indexSet in
                         deleteRows(groupable, at: indexSet)
@@ -194,14 +183,14 @@ struct TransactionsListView: View {
                     }
                 } header: {
                     HStack {
-                        Text(section.day, format: Date.FormatStyle().month(.wide).day().year())
-                            .font(.headline)
-                            .foregroundStyle(Color.twig)
+                        Text(compactSectionTitle(for: section.day))
+                            .font(NestType.overline)
+                            .foregroundStyle(Color.textSecondaryWarm)
                         Spacer()
                         if !groupable.isEmpty {
                             let total = dailyNetTotal(groupable)
                             Text(total, format: .currency(code: CurrencyFormat.code).sign(strategy: .always()))
-                                .font(.caption.weight(.semibold))
+                                .font(NestType.overline)
                                 .fontDesign(.rounded)
                                 .foregroundStyle(total >= 0 ? Color.positive : Color.negative)
                         }
@@ -218,16 +207,8 @@ struct TransactionsListView: View {
         .padding(.top, Space.sm)
     }
 
-    @ViewBuilder
-    private func mergedRowBackground(isFirst: Bool, isLast: Bool) -> some View {
-        UnevenRoundedRectangle(
-            topLeadingRadius: isFirst ? Radius.card : 0,
-            bottomLeadingRadius: isLast ? Radius.card : 0,
-            bottomTrailingRadius: isLast ? Radius.card : 0,
-            topTrailingRadius: isFirst ? Radius.card : 0,
-            style: .continuous
-        )
-        .fill(.regularMaterial)
+    private func compactSectionTitle(for date: Date) -> String {
+        date.formatted(.dateTime.month(.abbreviated).day()).uppercased()
     }
 
     private func dailyNetTotal(_ items: [LedgerRow]) -> Double {
