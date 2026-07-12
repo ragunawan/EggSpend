@@ -279,15 +279,15 @@ struct TransactionsListView: View {
         switch row {
         case .transaction(let tx):
             NavigationLink(destination: TransactionDetailView(transaction: tx)) {
-                TransactionRowView(transaction: tx, showsCardBackground: showsCardBackground)
+                LedgerRowView(row: row, showsMeta: [.category, .account])
             }
         case .transfer(let transfer):
             NavigationLink(destination: TransferDetailView(transfer: transfer)) {
-                TransferRowView(transfer: transfer, showsCardBackground: showsCardBackground)
+                LedgerRowView(row: row, showsMeta: [.date])
             }
         case .upcoming(let occurrence):
             NavigationLink(destination: RecurringTransactionsView()) {
-                UpcomingRecurringRowView(occurrence: occurrence)
+                LedgerRowView(row: row, style: .upcoming)
             }
         }
     }
@@ -361,51 +361,6 @@ struct TransactionsListView: View {
             return false
         }
         return true
-    }
-}
-
-private struct UpcomingRecurringRowView: View {
-    let occurrence: RecurringOccurrence
-
-    var body: some View {
-        HStack(spacing: Space.md) {
-            ZStack {
-                Circle()
-                    .fill((occurrence.category?.color ?? Color.eggBlue).opacity(0.15))
-                    .frame(width: 40, height: 40)
-                Image(systemName: occurrence.category?.icon ?? occurrence.source.frequency.icon)
-                    .font(.body)
-                    .foregroundStyle(occurrence.category?.color ?? Color.eggBlue)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(occurrence.title)
-                    .font(.body)
-                    .lineLimit(1)
-                HStack(spacing: Space.sm) {
-                    Text("Upcoming")
-                        .font(.caption)
-                        .padding(.horizontal, Space.sm)
-                        .padding(.vertical, Space.xs)
-                        .background(Color.eggBlue.opacity(0.15), in: Capsule())
-                        .foregroundStyle(Color.eggBlue)
-                    if let category = occurrence.category {
-                        CategoryBadgeView(category: category, compact: true)
-                    }
-                    Text(occurrence.dueDate, style: .date)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Spacer(minLength: 8)
-            AmountLabel(amount: occurrence.amount, type: occurrence.type, font: .callout)
-        }
-        .padding(.vertical, Space.sm)
-        .padding(.horizontal, Space.md)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                .stroke(Color.eggBlue, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [5, 4]))
-        }
     }
 }
 

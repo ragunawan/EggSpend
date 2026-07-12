@@ -386,7 +386,7 @@ struct BudgetDetailView: View {
             } else {
                 VStack(spacing: 0) {
                     ForEach(periodTransactions) { tx in
-                        TransactionRowView(transaction: tx)
+                        LedgerRowView(row: .transaction(tx), showsMeta: [.category, .account, .date])
                         if tx.id != periodTransactions.last?.id {
                             Divider().padding(.leading, Space.xl * 2 + Space.xs)
                         }
