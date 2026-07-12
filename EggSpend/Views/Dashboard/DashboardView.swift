@@ -13,6 +13,7 @@ struct DashboardView: View {
     @State private var netWorthVisible = false
     @State private var showAddTransaction = false
     @State private var showSettings = false
+    @State private var safeSpendResult = DashboardView.emptySafeSpendResult
 
     // MARK: - AI narrative state (T19b)
     @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
@@ -49,8 +50,70 @@ struct DashboardView: View {
     private var recentTransactions: [Transaction] { Array(transactions.prefix(5)) }
     private var topBudgets: [Budget] { budgets.sorted { $0.name < $1.name } }
     private var topGoals: [SavingsGoal] { activeGoals.sorted { $0.createdAt < $1.createdAt } }
-    private var safeSpendResult: SafeSpendResult {
-        SafeSpendCalculator.calculate(
+    private static let emptySafeSpendResult = SafeSpendResult(
+        safeToSpendToday: 0,
+        liquidBalance: 0,
+        requiredBuffer: 0,
+        upcomingNetOutflowReserve: 0,
+        plannedSavingsReserve: 0,
+        cashAvailableAfterObligations: 0,
+        budgetDailyAllowance: 0,
+        hasActiveBudgets: false,
+        unscheduledSavingsGoalNames: [],
+        projectedThirtyDayBalance: 0,
+        thirtyDayNetWorthDelta: 0,
+        status: .pause
+    )
+
+    private var safeSpendRefreshKey: Int {
+        var hasher = Hasher()
+        hasher.combine(accounts.count)
+        for account in accounts {
+            hasher.combine(account.id)
+            hasher.combine(account.balance)
+            hasher.combine(account.typeRaw)
+            hasher.combine(account.isArchived)
+        }
+        hasher.combine(transactions.count)
+        for transaction in transactions {
+            hasher.combine(transaction.id)
+            hasher.combine(transaction.amount)
+            hasher.combine(transaction.date)
+            hasher.combine(transaction.typeRaw)
+            hasher.combine(transaction.isAdjustment)
+            hasher.combine(transaction.account?.id)
+            hasher.combine(transaction.category?.id)
+        }
+        hasher.combine(recurring.count)
+        for item in recurring {
+            hasher.combine(item.id)
+            hasher.combine(item.amount)
+            hasher.combine(item.nextDueDate)
+            hasher.combine(item.frequencyRaw)
+            hasher.combine(item.isActive)
+        }
+        hasher.combine(budgets.count)
+        for budget in budgets {
+            hasher.combine(budget.id)
+            hasher.combine(budget.limitAmount)
+            hasher.combine(budget.periodRaw)
+            hasher.combine(budget.isActive)
+            hasher.combine(budget.category?.id)
+        }
+        hasher.combine(activeGoals.count)
+        for goal in activeGoals {
+            hasher.combine(goal.id)
+            hasher.combine(goal.currentAmount)
+            hasher.combine(goal.targetAmount)
+            hasher.combine(goal.targetDate)
+            hasher.combine(goal.statusRaw)
+            hasher.combine(goal.linkedAccount?.id)
+        }
+        return hasher.finalize()
+    }
+
+    private func refreshSafeSpendResult() {
+        safeSpendResult = SafeSpendCalculator.calculate(
             accounts: Array(accounts),
             transactions: Array(transactions),
             recurring: Array(recurring),
@@ -110,6 +173,9 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showAddTransaction) { AddTransactionView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
+            .task(id: safeSpendRefreshKey) {
+                refreshSafeSpendResult()
+            }
         }
     }
 
@@ -137,62 +203,9 @@ struct DashboardView: View {
 
     private var safeToSpendCard: some View {
         NavigationLink(destination: SafeToSpendView()) {
-            VStack(spacing: Space.md) {
-                HStack {
-                    Label("Safe to Spend Today", systemImage: "leaf.circle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.nestBrown)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption).foregroundStyle(Color.textSecondaryWarm)
-                }
-
-                HStack(alignment: .firstTextBaseline) {
-                    Text(safeSpendResult.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
-                        .font(NestType.hero)
-                        .foregroundStyle(safeSpendStatusColor)
-                    Spacer()
-                    Label(safeSpendStatusLabel, systemImage: safeSpendStatusIcon)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(safeSpendStatusColor)
-                }
-
-                HStack {
-                    Text("Keeps \(safeSpendResult.requiredBuffer, format: .currency(code: CurrencyFormat.code)) cash buffer")
-                    Spacer()
-                    Text("Based on next 30 days")
-                }
-                .font(.caption2)
-                .foregroundStyle(Color.textSecondaryWarm)
-            }
-            .padding(Space.md)
-            .nestCard()
+            SafeSpendHeroCard(result: safeSpendResult)
         }
         .buttonStyle(.plain)
-    }
-
-    private var safeSpendStatusLabel: String {
-        switch safeSpendResult.status {
-        case .onTrack: return "On track"
-        case .tight:   return "Tight today"
-        case .pause:   return "Pause spending"
-        }
-    }
-
-    private var safeSpendStatusIcon: String {
-        switch safeSpendResult.status {
-        case .onTrack: return "checkmark.circle.fill"
-        case .tight:   return "exclamationmark.triangle.fill"
-        case .pause:   return "hand.raised.fill"
-        }
-    }
-
-    private var safeSpendStatusColor: Color {
-        switch safeSpendResult.status {
-        case .onTrack: return .nestLeafGreen
-        case .tight:   return .yolk
-        case .pause:   return .negative
-        }
     }
 
     // MARK: - Monthly snapshot
@@ -470,6 +483,75 @@ struct DashboardView: View {
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card))
             }
         }
+    }
+}
+
+private struct SafeSpendHeroCard: View {
+    let result: SafeSpendResult
+
+    private var statusLabel: String {
+        switch result.status {
+        case .onTrack: return "On track"
+        case .tight: return "Tight today"
+        case .pause: return "Pause spending"
+        }
+    }
+
+    private var statusIcon: String {
+        switch result.status {
+        case .onTrack: return "checkmark.circle.fill"
+        case .tight: return "exclamationmark.triangle.fill"
+        case .pause: return "hand.raised.fill"
+        }
+    }
+
+    private var statusColor: Color {
+        switch result.status {
+        case .onTrack: return .nestLeafGreen
+        case .tight: return .yolk
+        case .pause: return .negative
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: Space.md) {
+            HStack {
+                Label("Safe to Spend Today", systemImage: "leaf.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.nestBrown)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(Color.textSecondaryWarm)
+            }
+
+            HStack(alignment: .firstTextBaseline) {
+                Text(result.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
+                    .font(NestType.hero)
+                    .foregroundStyle(statusColor)
+                    .contentTransition(.numericText())
+                Spacer()
+                Label(statusLabel, systemImage: statusIcon)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(statusColor)
+                    .padding(.horizontal, Space.sm)
+                    .padding(.vertical, Space.xs)
+                    .background(statusColor.opacity(0.12), in: Capsule())
+            }
+
+            HStack {
+                Text("Keeps \(result.requiredBuffer, format: .currency(code: CurrencyFormat.code)) cash buffer")
+                Spacer()
+                Text("Based on next 30 days")
+            }
+            .font(.caption2)
+            .foregroundStyle(Color.textSecondaryWarm)
+        }
+        .padding(Space.md)
+        .nestCard()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Safe to Spend Today")
+        .accessibilityValue("\(CurrencyFormat.money(result.safeToSpendToday)), \(statusLabel)")
     }
 }
 
