@@ -18,6 +18,7 @@
 		AA0200000000000000000074 /* ThinProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000089 /* ThinProgressBar.swift */; };
 		AA0200000000000000000075 /* CompactProgressRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008A /* CompactProgressRow.swift */; };
 		AA0200000000000000000076 /* LedgerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008B /* LedgerRowView.swift */; };
+		AA0200000000000000000077 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008C /* EmptyStateView.swift */; };
 		AA0200000000000000000003 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000003 /* Transaction.swift */; };
 		AA0200000000000000000004 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000004 /* TransactionCategory.swift */; };
 		AA0200000000000000000005 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000005 /* Account.swift */; };
@@ -148,6 +149,7 @@
 		AA0100000000000000000089 /* ThinProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinProgressBar.swift; sourceTree = "<group>"; };
 		AA010000000000000000008A /* CompactProgressRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactProgressRow.swift; sourceTree = "<group>"; };
 		AA010000000000000000008B /* LedgerRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerRowView.swift; sourceTree = "<group>"; };
+		AA010000000000000000008C /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000003 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		AA0100000000000000000004 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
 		AA0100000000000000000005 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -442,6 +444,7 @@
 				AA0100000000000000000089 /* ThinProgressBar.swift */,
 				AA010000000000000000008A /* CompactProgressRow.swift */,
 				AA010000000000000000008B /* LedgerRowView.swift */,
+				AA010000000000000000008C /* EmptyStateView.swift */,
 				AA0100000000000000000016 /* NestHeaderView.swift */,
 				AA0100000000000000000017 /* EggProgressView.swift */,
 				AA0100000000000000000018 /* BirdAnimationView.swift */,
@@ -702,6 +705,7 @@
 				AA0200000000000000000074 /* ThinProgressBar.swift in Sources */,
 				AA0200000000000000000075 /* CompactProgressRow.swift in Sources */,
 				AA0200000000000000000076 /* LedgerRowView.swift in Sources */,
+				AA0200000000000000000077 /* EmptyStateView.swift in Sources */,
 				AA0200000000000000000003 /* Transaction.swift in Sources */,
 				AA0200000000000000000004 /* TransactionCategory.swift in Sources */,
 				AA0200000000000000000005 /* Account.swift in Sources */,

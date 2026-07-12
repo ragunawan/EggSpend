@@ -12,12 +12,6 @@ struct SafeToSpendView: View {
 
     @State private var showAssumptions = false
     @State private var showAddAccount = false
-    // See MetricsView.emptyStateHeight — a single concrete `.frame(height:)`
-    // is what actually constrains `ContentUnavailableView` inside a List
-    // row; `@ScaledMetric` keeps that fixed height growing with Dynamic Type
-    // instead of clipping the CTA button at larger accessibility sizes.
-    @ScaledMetric(relativeTo: .body) private var emptyStateHeight: CGFloat = 340
-
     private var result: SafeSpendResult {
         SafeSpendCalculator.calculate(
             accounts: Array(accounts),
@@ -60,28 +54,13 @@ struct SafeToSpendView: View {
 
     private var noAccountsSection: some View {
         Section {
-            ContentUnavailableView {
-                Label {
-                    Text("No Accounts Yet")
-                } icon: {
-                    Image(systemName: "banknote").symbolEffect(.pulse)
-                }
-            } description: {
-                Text("Add an account so EggSpend can calculate what's safe to spend today.")
-            } actions: {
-                Button { showAddAccount = true } label: {
-                    Label("Add Account", systemImage: "plus")
-                }
-                .buttonStyle(.borderedProminent).tint(Color.nestBrown)
-            }
-            // See MetricsView.noDataSection — fixes row height so the
-            // action button doesn't stretch to fill the scroll view, using
-            // `emptyStateHeight` so it still grows with Dynamic Type.
-            .frame(height: emptyStateHeight)
-            // Cap Dynamic Type growth beyond AX3 — the fixed `emptyStateHeight`
-            // budget above was sized/settled for that ceiling (loop 26); letting
-            // text keep scaling past it would clip the CTA button again.
-            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
+            EmptyStateView(
+                title: "No Accounts Yet",
+                icon: "banknote",
+                description: "Add an account so EggSpend can calculate what's safe to spend today.",
+                action: ("Add Account", { showAddAccount = true }),
+                context: .listRow
+            )
         }
         .listRowBackground(Color.clear)
     }

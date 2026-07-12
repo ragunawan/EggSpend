@@ -475,20 +475,11 @@ struct DashboardView: View {
             .buttonStyle(.plain)
 
             if recentTransactions.isEmpty {
-                ContentUnavailableView {
-                    Label {
-                        Text("Your nest is empty")
-                    } icon: {
-                        Image(systemName: "bird").symbolEffect(.pulse)
-                    }
-                } description: {
-                    Text("Add your first transaction with the + button.")
-                }
-                // Unlike the List-row empty states (MetricsView/CashFlowForecastView/
-                // SafeToSpendView), this sits in a plain VStack inside a ScrollView, so
-                // a `minHeight` lets the card grow with Dynamic Type instead of clipping
-                // — a fixed `.frame(height:)` here was the B27 defect.
-                .frame(minHeight: 140)
+                EmptyStateView(
+                    title: "Your nest is empty",
+                    icon: "bird",
+                    description: "Add your first transaction with the + button."
+                )
             } else {
                 VStack(spacing: 0) {
                     ForEach(recentTransactions) { tx in
