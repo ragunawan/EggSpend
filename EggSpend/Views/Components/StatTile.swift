@@ -6,6 +6,7 @@ struct StatTile<Destination: View>: View {
     var trend: LocalizedStringKey?
     var trendPositive: Bool?
     private let destination: (() -> Destination)?
+    private let action: (() -> Void)?
 
     init(
         label: LocalizedStringKey,
@@ -19,12 +20,16 @@ struct StatTile<Destination: View>: View {
         self.trend = trend
         self.trendPositive = trendPositive
         self.destination = destination
+        action = nil
     }
 
     var body: some View {
         Group {
             if let destination {
                 NavigationLink(destination: destination) { content }
+                    .buttonStyle(.plain)
+            } else if let action {
+                Button(action: action) { content }
                     .buttonStyle(.plain)
             } else {
                 content
@@ -34,7 +39,7 @@ struct StatTile<Destination: View>: View {
     }
 
     private var content: some View {
-        VStack(alignment: .leading, spacing: Space.sm) {
+        VStack(alignment: .leading, spacing: Space.xs) {
             Text(label)
                 .font(NestType.overline)
                 .textCase(.uppercase)
@@ -50,7 +55,7 @@ struct StatTile<Destination: View>: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(Space.md)
+        .padding(Space.sm)
         .nestCard()
     }
 
@@ -75,6 +80,22 @@ extension StatTile where Destination == EmptyView {
         self.trend = trend
         self.trendPositive = trendPositive
         destination = nil
+        action = nil
+    }
+
+    init(
+        label: LocalizedStringKey,
+        value: Double,
+        trend: LocalizedStringKey? = nil,
+        trendPositive: Bool? = nil,
+        action: @escaping () -> Void
+    ) {
+        self.label = label
+        self.value = value
+        self.trend = trend
+        self.trendPositive = trendPositive
+        destination = nil
+        self.action = action
     }
 }
 

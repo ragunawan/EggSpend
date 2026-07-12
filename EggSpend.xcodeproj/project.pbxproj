@@ -30,6 +30,7 @@
 		AA020000000000000000005C /* CategoryRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000075 /* CategoryRule.swift */; };
 		AA0200000000000000000048 /* RecurringProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000061 /* RecurringProjection.swift */; };
 		AA0200000000000000000006 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000006 /* DashboardView.swift */; };
+		AA0200000000000000000074 /* DashboardHomeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008D /* DashboardHomeComponents.swift */; };
 		AA0200000000000000000007 /* TransactionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000007 /* TransactionsListView.swift */; };
 		AA0200000000000000000008 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000008 /* AddTransactionView.swift */; };
 		AA0200000000000000000009 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000009 /* TransactionDetailView.swift */; };
@@ -157,6 +158,7 @@
 		AA0100000000000000000075 /* CategoryRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRule.swift; sourceTree = "<group>"; };
 		AA0100000000000000000061 /* RecurringProjection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringProjection.swift; sourceTree = "<group>"; };
 		AA0100000000000000000006 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		AA010000000000000000008D /* DashboardHomeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHomeComponents.swift; sourceTree = "<group>"; };
 		AA0100000000000000000007 /* TransactionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000008 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000009 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0100000000000000000006 /* DashboardView.swift */,
+				AA010000000000000000008D /* DashboardHomeComponents.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -705,6 +708,7 @@
 				AA020000000000000000005C /* CategoryRule.swift in Sources */,
 				AA0200000000000000000048 /* RecurringProjection.swift in Sources */,
 				AA0200000000000000000006 /* DashboardView.swift in Sources */,
+				AA0200000000000000000074 /* DashboardHomeComponents.swift in Sources */,
 				AA0200000000000000000007 /* TransactionsListView.swift in Sources */,
 				AA0200000000000000000008 /* AddTransactionView.swift in Sources */,
 				AA0200000000000000000009 /* TransactionDetailView.swift in Sources */,

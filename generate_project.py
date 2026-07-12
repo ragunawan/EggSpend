@@ -131,6 +131,7 @@ FR = {
     "CompactProgressRow":     u(1, 0x8A),
     "LedgerRowView":          u(1, 0x8B),
     "EmptyStateView":         u(1, 0x8C),
+    "DashboardHomeComponents": u(1, 0x8D),
 }
 
 # Build files
@@ -218,6 +219,7 @@ APP_SOURCES = [
     ("CategoryRule",         "Models/CategoryRule.swift"),
     ("RecurringProjection",  "Utilities/RecurringProjection.swift"),
     ("DashboardView",        "Views/Dashboard/DashboardView.swift"),
+    ("DashboardHomeComponents", "Views/Dashboard/DashboardHomeComponents.swift"),
     ("TransactionsListView", "Views/Transactions/TransactionsListView.swift"),
     ("AddTransactionView",   "Views/Transactions/AddTransactionView.swift"),
     ("TransactionDetailView","Views/Transactions/TransactionDetailView.swift"),
@@ -485,7 +487,7 @@ def pbxproj():
         a(f"\t\t\tsourceTree = \"<group>\";")
         a(f"\t\t}};")
 
-    simple_group("Dashboard",    "Dashboard",    ["DashboardView"])
+    simple_group("Dashboard",    "Dashboard",    ["DashboardView", "DashboardHomeComponents"])
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
     simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])

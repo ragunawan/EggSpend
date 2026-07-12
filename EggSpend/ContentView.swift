@@ -1,16 +1,29 @@
 import SwiftUI
 
-struct ContentView: View {
-    @State private var selectedTab: Int = {
+@Observable
+final class TabRouter {
+    var selectedTab: Int
+
+    init(selectedTab: Int = TabRouter.initialTabFromLaunchArguments()) {
+        self.selectedTab = selectedTab
+    }
+
+    private static func initialTabFromLaunchArguments() -> Int {
         let args = ProcessInfo.processInfo.arguments
         if let idx = args.firstIndex(of: "--tab"), args.count > idx + 1 {
             return Int(args[idx + 1]) ?? 0
         }
         return 0
-    }()
+    }
+}
+
+struct ContentView: View {
+    @State private var tabRouter = TabRouter()
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        @Bindable var tabRouter = tabRouter
+
+        TabView(selection: $tabRouter.selectedTab) {
             DashboardView()
                 .tabItem { Label("Home", systemImage: "bird.fill") }
                 .tag(0)
@@ -32,6 +45,7 @@ struct ContentView: View {
                 .tag(4)
         }
         .tint(.yolk)
+        .environment(tabRouter)
     }
 }
 
