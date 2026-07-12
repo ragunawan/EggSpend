@@ -135,6 +135,7 @@ FR = {
     "CurrencyKeypadView":     u(1, 0x90),
     "MerchantSuggestion":     u(1, 0x91),
     "TEST_MerchantSuggestion": u(1, 0x92),
+    "QuickAddSheet":          u(1, 0x93),
 }
 
 # Build files
@@ -230,6 +231,7 @@ APP_SOURCES = [
     ("TransferDetailView",   "Views/Transactions/TransferDetailView.swift"),
     ("CurrencyKeypadView",   "Views/QuickAdd/CurrencyKeypadView.swift"),
     ("MerchantSuggestion",   "Views/QuickAdd/MerchantSuggestion.swift"),
+    ("QuickAddSheet",        "Views/QuickAdd/QuickAddSheet.swift"),
     ("NetWorthView",         "Views/NetWorth/NetWorthView.swift"),
     ("MetricsView",          "Views/Metrics/MetricsView.swift"),
     ("AccountsView",         "Views/Accounts/AccountsView.swift"),
@@ -497,7 +499,7 @@ def pbxproj():
 
     simple_group("Dashboard",    "Dashboard",    ["DashboardView", "DashboardHomeComponents"])
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
-    simple_group("QuickAdd",     "QuickAdd",     ["CurrencyKeypadView", "MerchantSuggestion"])
+    simple_group("QuickAdd",     "QuickAdd",     ["CurrencyKeypadView", "MerchantSuggestion", "QuickAddSheet"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
     simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])
     simple_group("Subscriptions", "Subscriptions", ["SubscriptionAuditView"])
