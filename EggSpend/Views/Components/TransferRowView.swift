@@ -5,13 +5,13 @@ struct TransferRowView: View {
     var showsCardBackground: Bool = true
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Space.md) {
             icon
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.body)
                     .lineLimit(1)
-                HStack(spacing: 6) {
+                HStack(spacing: Space.sm) {
                     Text("Transfer")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -23,15 +23,14 @@ struct TransferRowView: View {
             Spacer(minLength: 8)
             Text(transfer.amount, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .medium))
-                .foregroundStyle(Color.twig)
+                .foregroundStyle(Color.textSecondaryWarm)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
+        .padding(.vertical, Space.sm)
+        .padding(.horizontal, Space.md)
         .background {
             if showsCardBackground {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                     .fill(.regularMaterial)
-                    .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
             }
         }
     }
@@ -48,8 +47,8 @@ struct TransferRowView: View {
                 .fill(Color.twig.opacity(0.15))
                 .frame(width: 40, height: 40)
             Image(systemName: "arrow.left.arrow.right.circle.fill")
-                .font(.system(size: 17))
-                .foregroundStyle(Color.twig)
+                .font(.body)
+                .foregroundStyle(Color.textSecondaryWarm)
         }
     }
 }

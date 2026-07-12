@@ -65,7 +65,7 @@ struct DashboardView: View {
         NavigationStack {
             ZStack(alignment: .top) {
                 AnimatedCanopyBackground()
-                BirdAnimationView().frame(height: 100).frame(maxWidth: .infinity).padding(.top, 60)
+                BirdAnimationView().frame(height: 100).frame(maxWidth: .infinity).padding(.top, Space.xl)
 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -80,8 +80,8 @@ struct DashboardView: View {
                         recentTransactionsSection.appearRise(delay: 0.35)
                         if !spendingDeltas.isEmpty { spendingDeltaCard.appearRise(delay: 0.4) }
                     }
-                    .padding()
-                    .padding(.bottom, 20)
+                    .padding(Space.lg)
+                    .padding(.bottom, Space.xl)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -93,14 +93,14 @@ struct DashboardView: View {
                 if case .localOnly = EggSpendApp.syncStatus {
                     ToolbarItem(placement: .topBarLeading) {
                         Image(systemName: "icloud.slash")
-                            .foregroundStyle(Color.twig)
+                            .foregroundStyle(Color.textSecondaryWarm)
                             .help("iCloud sync unavailable — data is stored locally only")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: {
                         Image(systemName: "gearshape.fill")
-                            .font(.title2).foregroundStyle(Color.twig)
+                            .font(.title2).foregroundStyle(Color.textSecondaryWarm)
                     }
                     .accessibilityLabel("Settings")
                 }
@@ -119,13 +119,13 @@ struct DashboardView: View {
     // MARK: - Nest header
 
     private var nestHeaderSection: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: Space.xs) {
             NestHeaderView()
                 .frame(width: 250, height: 160)
                 .opacity(headerVisible ? 1 : 0)
                 .scaleEffect(headerVisible ? 1 : 0.75)
             Text("Your Nest")
-                .font(.caption).foregroundStyle(Color.twig)
+                .font(.caption).foregroundStyle(Color.textSecondaryWarm)
                 .opacity(headerVisible ? 1 : 0)
         }
         .onAppear {
@@ -138,17 +138,17 @@ struct DashboardView: View {
     // MARK: - Net worth card
 
     private var netWorthCard: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: Space.sm) {
             Text("Nest Egg Total")
-                .font(.subheadline).foregroundStyle(Color.twig)
+                .font(.subheadline).foregroundStyle(Color.textSecondaryWarm)
             Text(netWorthVisible ? netWorth : 0, format: .currency(code: CurrencyFormat.code))
-                .font(.system(size: 42, weight: .bold, design: .rounded))
-                .foregroundStyle(netWorth >= 0 ? Color.nestBrown : Color.red)
+                .font(NestType.hero)
+                .foregroundStyle(netWorth >= 0 ? Color.nestBrown : Color.negative)
                 .contentTransition(.numericText())
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: netWorthVisible)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 28)
+        .padding(.vertical, Space.xl)
         .nestCard()
         .onAppear {
             withAnimation(.easeOut(duration: 0.5).delay(0.4)) { netWorthVisible = true }
@@ -159,19 +159,19 @@ struct DashboardView: View {
 
     private var safeToSpendCard: some View {
         NavigationLink(destination: SafeToSpendView()) {
-            VStack(spacing: 10) {
+            VStack(spacing: Space.md) {
                 HStack {
                     Label("Safe to Spend Today", systemImage: "leaf.circle.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(Color.nestBrown)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .font(.caption).foregroundStyle(Color.twig)
+                        .font(.caption).foregroundStyle(Color.textSecondaryWarm)
                 }
 
                 HStack(alignment: .firstTextBaseline) {
                     Text(safeSpendResult.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .font(NestType.hero)
                         .foregroundStyle(safeSpendStatusColor)
                     Spacer()
                     Label(safeSpendStatusLabel, systemImage: safeSpendStatusIcon)
@@ -185,9 +185,9 @@ struct DashboardView: View {
                     Text("Based on next 30 days")
                 }
                 .font(.caption2)
-                .foregroundStyle(Color.twig)
+                .foregroundStyle(Color.textSecondaryWarm)
             }
-            .padding(14)
+            .padding(Space.md)
             .nestCard()
         }
         .buttonStyle(.plain)
@@ -213,18 +213,18 @@ struct DashboardView: View {
         switch safeSpendResult.status {
         case .onTrack: return .nestLeafGreen
         case .tight:   return .yolk
-        case .pause:   return .red
+        case .pause:   return .negative
         }
     }
 
     // MARK: - Monthly snapshot
 
     private var monthlySnapshotRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Space.md) {
             NestMetricCard(title: "Flowed In",  amount: monthlyIncome,
                            color: .eggBlue,       icon: "arrow.down.circle.fill")
             NestMetricCard(title: "Flowed Out", amount: monthlyExpenses,
-                           color: .red,            icon: "arrow.up.circle.fill")
+                           color: .negative,       icon: "arrow.up.circle.fill")
             NestMetricCard(title: "Saved",      amount: monthlyIncome - monthlyExpenses,
                            color: .nestLeafGreen,  icon: "leaf.circle.fill")
         }
@@ -234,26 +234,26 @@ struct DashboardView: View {
 
     private var cashFlowForecastCard: some View {
         NavigationLink(destination: CashFlowForecastView()) {
-            HStack(spacing: 14) {
+            HStack(spacing: Space.md) {
                 ZStack {
                     Circle()
                         .fill(Color.eggBlue.opacity(0.15))
                         .frame(width: 44, height: 44)
                     Image(systemName: "chart.line.uptrend.xyaxis")
                         .foregroundStyle(Color.eggBlue)
-                        .font(.system(size: 18))
+                        .font(.body)
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Cash Flow Forecast")
                         .font(.headline).foregroundStyle(Color.nestBrown)
                     Text("30 · 60 · 90 day projections")
-                        .font(.caption).foregroundStyle(Color.twig)
+                        .font(.caption).foregroundStyle(Color.textSecondaryWarm)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.caption).foregroundStyle(Color.twig)
+                    .font(.caption).foregroundStyle(Color.textSecondaryWarm)
             }
-            .padding(14)
+            .padding(Space.md)
             .nestCard()
         }
         .buttonStyle(.plain)
@@ -263,26 +263,26 @@ struct DashboardView: View {
 
     private var monthlyReviewCard: some View {
         NavigationLink(destination: MonthlyReviewView()) {
-            HStack(spacing: 14) {
+            HStack(spacing: Space.md) {
                 ZStack {
                     Circle()
                         .fill(Color.yolk.opacity(0.15))
                         .frame(width: 44, height: 44)
                     Image(systemName: "calendar.badge.clock")
                         .foregroundStyle(Color.yolk)
-                        .font(.system(size: 18))
+                        .font(.body)
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Monthly Review")
                         .font(.headline).foregroundStyle(Color.nestBrown)
                     Text("Income, savings rate & budget recap")
-                        .font(.caption).foregroundStyle(Color.twig)
+                        .font(.caption).foregroundStyle(Color.textSecondaryWarm)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.caption).foregroundStyle(Color.twig)
+                    .font(.caption).foregroundStyle(Color.textSecondaryWarm)
             }
-            .padding(14)
+            .padding(Space.md)
             .nestCard()
         }
         .buttonStyle(.plain)
@@ -292,35 +292,35 @@ struct DashboardView: View {
 
     private var spendingDeltaCard: some View {
         NavigationLink(destination: MonthlyReviewView()) {
-            HStack(alignment: .top, spacing: 14) {
+            HStack(alignment: .top, spacing: Space.md) {
                 ZStack {
                     Circle()
                         .fill(Color.eggBlue.opacity(0.15))
                         .frame(width: 44, height: 44)
                     Image(systemName: "arrow.up.arrow.down.circle.fill")
                         .foregroundStyle(Color.eggBlue)
-                        .font(.system(size: 18))
+                        .font(.body)
                 }
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Space.sm) {
                     Text("What changed this month?")
                         .font(.headline).foregroundStyle(Color.nestBrown)
                     if let narrative {
                         Text(narrative)
                             .font(.caption)
-                            .foregroundStyle(Color.twig)
+                            .foregroundStyle(Color.textSecondaryWarm)
                     } else {
                         ForEach(spendingDeltas) { delta in
                             Text(delta.sentence)
                                 .font(.caption)
-                                .foregroundStyle(Color.twig)
+                                .foregroundStyle(Color.textSecondaryWarm)
                         }
                     }
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.caption).foregroundStyle(Color.twig)
+                    .font(.caption).foregroundStyle(Color.textSecondaryWarm)
             }
-            .padding(14)
+            .padding(Space.md)
             .nestCard()
         }
         .buttonStyle(.plain)
@@ -354,13 +354,13 @@ struct DashboardView: View {
     // MARK: - Budget preview
 
     private var budgetPreviewSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Space.md) {
             Label("Budget Eggs", systemImage: "egg.fill")
                 .font(.headline)
                 .foregroundStyle(Color.nestBrown)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: Space.md) {
                     ForEach(topBudgets) { budget in
                         NavigationLink(destination: BudgetDetailView(budget: budget)) {
                             BudgetTileView(budget: budget, transactions: Array(transactions))
@@ -368,8 +368,8 @@ struct DashboardView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal, 2)
-                .padding(.vertical, 4)
+                .padding(.horizontal, Space.xs)
+                .padding(.vertical, Space.xs)
                 .background(
                     GeometryReader { proxy in
                         Color.clear
@@ -398,13 +398,13 @@ struct DashboardView: View {
                 tint: .yolk
             )
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, Space.xs)
     }
 
     // MARK: - Savings goals preview
 
     private var savingsGoalsPreviewSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Space.md) {
             Label("Savings Goals", systemImage: "leaf.fill")
                 .font(.headline)
                 .foregroundStyle(Color.nestBrown)
@@ -413,12 +413,12 @@ struct DashboardView: View {
                 NavigationLink(destination: SavingsGoalsView()) {
                     Text("No goals yet — tap to add one, like a down payment or vacation fund.")
                         .font(.caption)
-                        .foregroundStyle(Color.twig)
+                        .foregroundStyle(Color.textSecondaryWarm)
                 }
                 .buttonStyle(.plain)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: Space.md) {
                         ForEach(topGoals) { goal in
                             NavigationLink(destination: SavingsGoalsView()) {
                                 SavingsGoalTileView(goal: goal)
@@ -426,8 +426,8 @@ struct DashboardView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(.horizontal, 2)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, Space.xs)
+                    .padding(.vertical, Space.xs)
                     .background(
                         GeometryReader { proxy in
                             Color.clear
@@ -457,13 +457,13 @@ struct DashboardView: View {
                 )
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, Space.xs)
     }
 
     // MARK: - Recent transactions
 
     private var recentTransactionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Space.md) {
             NavigationLink(destination: TransactionsListView()) {
                 HStack {
                     Label("Recent Activity", systemImage: "clock.fill")
@@ -485,11 +485,11 @@ struct DashboardView: View {
                     ForEach(recentTransactions) { tx in
                         TransactionRowView(transaction: tx)
                         if tx.id != recentTransactions.last?.id {
-                            Divider().padding(.leading, 52)
+                            Divider().padding(.leading, Space.xl * 2 + Space.xs)
                         }
                     }
                 }
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card))
             }
         }
     }
@@ -504,15 +504,15 @@ private struct NestMetricCard: View {
     let icon: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Space.sm) {
             Label(title, systemImage: icon).font(.caption).foregroundStyle(color)
             Text(amount, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.callout, design: .rounded, weight: .semibold))
-                .foregroundStyle(amount < 0 ? .red : Color.nestBrown)
+                .foregroundStyle(amount < 0 ? .negative : Color.nestBrown)
                 .minimumScaleFactor(0.7).lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
+        .padding(Space.md)
         .nestCard()
     }
 }
@@ -530,7 +530,7 @@ private struct BudgetTileView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Space.sm) {
             HStack(alignment: .top) {
                 EggProgressView(progress: progress, size: 46)
                     .accessibilityElement(children: .ignore)
@@ -548,10 +548,10 @@ private struct BudgetTileView: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Space.xs) {
                 Text("\(Int(progress * 100))% used")
                     .font(.caption2)
-                    .foregroundStyle(progress > 1 ? .red : Color.twig)
+                    .foregroundStyle(progress > 1 ? .negative : Color.textSecondaryWarm)
                 Text("\(formattedTileCurrency(spent)) of \(formattedTileCurrency(budget.limitAmount))")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -560,10 +560,10 @@ private struct BudgetTileView: View {
             }
         }
         .frame(width: 132, height: 128, alignment: .topLeading)
-        .padding(10)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .padding(Space.md)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .stroke(budget.statusColor(progress: progress).opacity(0.25), lineWidth: 1)
         )
     }
@@ -579,7 +579,7 @@ private struct SavingsGoalTileView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Space.sm) {
             HStack(alignment: .top) {
                 EggProgressView(progress: goal.progress, size: 46)
                     .accessibilityElement(children: .ignore)
@@ -597,7 +597,7 @@ private struct SavingsGoalTileView: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Space.xs) {
                 Text(goal.monthlySavingsLabel)
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(goal.isGoalMet ? Color.nestLeafGreen : Color.twig)
@@ -611,10 +611,10 @@ private struct SavingsGoalTileView: View {
             }
         }
         .frame(width: 132, height: 128, alignment: .topLeading)
-        .padding(10)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .padding(Space.md)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .stroke(goal.statusColor.opacity(0.25), lineWidth: 1)
         )
     }
@@ -669,7 +669,7 @@ private struct HorizontalScrollProgressBar: View {
                 }
             }
             .frame(height: height)
-            .padding(.horizontal, 2)
+            .padding(.horizontal, Space.xs)
             .animation(.easeOut(duration: 0.15), value: thumbOffsetFraction)
         }
     }

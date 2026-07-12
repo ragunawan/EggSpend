@@ -41,7 +41,7 @@ public struct EggProgressView: View {
         case ..<0.7:  return .eggBlue
         case ..<0.9:  return .yolk
         default:
-            return isOverBudget ? .red : .orange
+            return isOverBudget ? .negative : .warningTone
         }
     }
 
@@ -85,9 +85,8 @@ public struct EggProgressView: View {
 
             // Percentage label
             Text(percentText)
-                .font(.system(size: size * 0.22, weight: .bold, design: .rounded))
+                .font(NestType.amount)
                 .foregroundStyle(labelColor)
-                .shadow(color: .black.opacity(0.15), radius: 1, x: 0, y: 1)
         }
         .frame(width: size * 0.72, height: size)
         // Animate fill color transitions
@@ -199,6 +198,6 @@ struct CrackShape: Shape {
                 .foregroundStyle(.secondary)
         }
     }
-    .padding(24)
+    .padding(Space.xl)
     .background(Color.nestCream)
 }
