@@ -114,17 +114,30 @@ struct TransactionsListView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarLeading) {
-                    HStack(spacing: 4) {
-                        filterButton
+                    Menu {
+                        Button {
+                            showFilterSheet = true
+                        } label: {
+                            Label("Filter...", systemImage: filter.isActive
+                                ? "line.3.horizontal.decrease.circle.fill"
+                                : "line.3.horizontal.decrease.circle")
+                        }
+
                         NavigationLink(destination: RecurringTransactionsView()) {
-                            Image(systemName: "arrow.clockwise.circle")
+                            Label("Recurring", systemImage: "arrow.clockwise.circle")
                         }
+
                         NavigationLink(destination: CategoryManagementView()) {
-                            Image(systemName: "tag.circle")
+                            Label("Categories", systemImage: "tag.circle")
                         }
+
                         Button { showImport = true } label: {
-                            Image(systemName: "square.and.arrow.down")
+                            Label("Import CSV", systemImage: "square.and.arrow.down")
                         }
+                    } label: {
+                        Label("Menu", systemImage: filter.isActive
+                            ? "ellipsis.circle.fill"
+                            : "ellipsis.circle")
                     }
                     .foregroundStyle(Color.yolk)
                 }
@@ -235,22 +248,6 @@ struct TransactionsListView: View {
         case .upcoming(let occurrence):
             NavigationLink(destination: RecurringTransactionsView()) {
                 UpcomingRecurringRowView(occurrence: occurrence)
-            }
-        }
-    }
-
-    private var filterButton: some View {
-        Button { showFilterSheet = true } label: {
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: filter.isActive
-                    ? "line.3.horizontal.decrease.circle.fill"
-                    : "line.3.horizontal.decrease.circle")
-                if filter.isActive {
-                    Circle()
-                        .fill(Color.yolk)
-                        .frame(width: 7, height: 7)
-                        .offset(x: 5, y: -3)
-                }
             }
         }
     }
