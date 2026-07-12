@@ -18,6 +18,8 @@ struct AddTransactionView: View {
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
     @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
+    @Query private var categoryRules: [CategoryRule]
+    @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
 
     var editingTransaction: Transaction? = nil
     var editingTransfer: Transfer? = nil
@@ -161,6 +163,7 @@ struct AddTransactionView: View {
     private var detailsSection: some View {
         Section("Details") {
             TextField("Title", text: $title)
+                .onSubmit { prefillCategoryForTitle() }
             HStack {
                 Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
@@ -351,6 +354,7 @@ struct AddTransactionView: View {
                 context: modelContext
             )
         }
+        rememberSelectedAccount()
     }
 
     private func saveTransfer() {
@@ -401,7 +405,52 @@ struct AddTransactionView: View {
             date = initialDate
             selectedCategory = initialCategory
             selectedAccount = initialAccount
+            if let selectedCategory, !categoryMatchesSelectedType(selectedCategory) {
+                self.selectedCategory = nil
+            }
+            applyLastUsedAccountDefault()
         }
+    }
+
+    private func prefillCategoryForTitle() {
+        guard let category = CategoryRuleEngine.categoryFor(title: title, rules: categoryRules, categories: categories),
+              categoryMatchesSelectedType(category)
+        else { return }
+        selectedCategory = category
+        if let selectedBudget, selectedBudget.category?.id != category.id {
+            self.selectedBudget = nil
+        }
+    }
+
+    private func categoryMatchesSelectedType(_ category: TransactionCategory) -> Bool {
+        guard let type = selectedEntryKind.transactionType else { return false }
+        return !category.isArchived && (category.appliesTo == nil || category.appliesTo == type)
+    }
+
+    private func applyLastUsedAccountDefault() {
+        guard !isEditing,
+              initialAccount == nil,
+              selectedAccount == nil,
+              selectedEntryKind != .transfer,
+              !lastUsedAccountID.isEmpty
+        else { return }
+
+        guard let id = UUID(uuidString: lastUsedAccountID) else {
+            lastUsedAccountID = ""
+            return
+        }
+
+        guard let account = accounts.first(where: { $0.id == id && !$0.isArchived }) else {
+            lastUsedAccountID = ""
+            return
+        }
+
+        selectedAccount = account
+    }
+
+    private func rememberSelectedAccount() {
+        guard let selectedAccount else { return }
+        lastUsedAccountID = selectedAccount.id.uuidString
     }
 }
 

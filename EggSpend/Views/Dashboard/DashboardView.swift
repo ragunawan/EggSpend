@@ -13,7 +13,9 @@ struct DashboardView: View {
     private var recurring: [RecurringTransaction]
 
     @State private var showAddTransaction = false
+    @State private var showQuickAdd = false
     @State private var showSettings = false
+    @State private var quickAddDraft: QuickAddDraft?
     @State private var safeSpendResult = DashboardView.emptySafeSpendResult
 
     // MARK: - AI narrative state (T19b)
@@ -142,7 +144,7 @@ struct DashboardView: View {
                     .padding(.bottom, Space.xl * 2)
                 }
 
-                Button { showAddTransaction = true } label: {
+                Button { showQuickAdd = true } label: {
                     Image(systemName: "plus")
                         .font(.title3.weight(.bold))
                         .foregroundStyle(Color.white)
@@ -169,6 +171,15 @@ struct DashboardView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        quickAddDraft = nil
+                        showAddTransaction = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add transaction")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: {
                         Image(systemName: "gearshape.fill")
                             .font(.title2)
@@ -177,11 +188,39 @@ struct DashboardView: View {
                     .accessibilityLabel("Settings")
                 }
             }
-            .sheet(isPresented: $showAddTransaction) { AddTransactionView() }
+            .sheet(isPresented: $showAddTransaction) { addTransactionSheet }
+            .sheet(isPresented: $showQuickAdd) {
+                QuickAddSheet(onMoreOptions: openFullFormFromQuickAdd)
+                    .presentationDetents([.height(460), .large])
+            }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .task(id: safeSpendRefreshKey) {
                 refreshSafeSpendResult()
             }
+        }
+    }
+
+    @ViewBuilder
+    private var addTransactionSheet: some View {
+        if let quickAddDraft {
+            AddTransactionView(
+                initialEntryKind: quickAddDraft.entryKind,
+                initialTitle: quickAddDraft.title,
+                initialAmountText: quickAddDraft.amountText,
+                initialDate: quickAddDraft.date,
+                initialCategory: quickAddDraft.category,
+                initialAccount: quickAddDraft.account
+            )
+        } else {
+            AddTransactionView()
+        }
+    }
+
+    private func openFullFormFromQuickAdd(_ draft: QuickAddDraft) {
+        quickAddDraft = draft
+        showQuickAdd = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            showAddTransaction = true
         }
     }
 

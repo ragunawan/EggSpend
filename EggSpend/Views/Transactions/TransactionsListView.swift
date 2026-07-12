@@ -12,10 +12,12 @@ struct TransactionsListView: View {
     @State private var hideTransfers = false
     @State private var showUpcoming = true
     @State private var showAddTransaction = false
+    @State private var showQuickAdd = false
     @State private var showImport = false
     @State private var showFilterSheet = false
     @State private var editingTransaction: Transaction?
     @State private var editingTransfer: Transfer?
+    @State private var quickAddDraft: QuickAddDraft?
 
     private var filteredTransactions: [Transaction] {
         transactions.filter { tx in
@@ -123,7 +125,7 @@ struct TransactionsListView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
 
-                Button { showAddTransaction = true } label: {
+                Button { showQuickAdd = true } label: {
                     Image(systemName: "plus")
                         .font(.title3.weight(.bold))
                         .foregroundStyle(Color.white)
@@ -168,12 +170,25 @@ struct TransactionsListView: View {
                     }
                     .foregroundStyle(Color.yolk)
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        quickAddDraft = nil
+                        showAddTransaction = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add transaction")
+                }
             }
             .sheet(isPresented: $showImport) {
                 CSVImportView(importType: .transactions)
             }
             .sheet(isPresented: $showAddTransaction) {
-                AddTransactionView()
+                addTransactionSheet
+            }
+            .sheet(isPresented: $showQuickAdd) {
+                QuickAddSheet(onMoreOptions: openFullFormFromQuickAdd)
+                    .presentationDetents([.height(460), .large])
             }
             .sheet(item: $editingTransaction) { transaction in
                 AddTransactionView(editingTransaction: transaction)
@@ -187,6 +202,30 @@ struct TransactionsListView: View {
             .onAppear {
                 processRecurringTransactions(Array(recurring), context: modelContext)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var addTransactionSheet: some View {
+        if let quickAddDraft {
+            AddTransactionView(
+                initialEntryKind: quickAddDraft.entryKind,
+                initialTitle: quickAddDraft.title,
+                initialAmountText: quickAddDraft.amountText,
+                initialDate: quickAddDraft.date,
+                initialCategory: quickAddDraft.category,
+                initialAccount: quickAddDraft.account
+            )
+        } else {
+            AddTransactionView()
+        }
+    }
+
+    private func openFullFormFromQuickAdd(_ draft: QuickAddDraft) {
+        quickAddDraft = draft
+        showQuickAdd = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            showAddTransaction = true
         }
     }
 
