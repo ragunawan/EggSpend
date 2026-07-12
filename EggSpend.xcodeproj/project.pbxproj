@@ -35,6 +35,7 @@
 		AA0200000000000000000008 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000008 /* AddTransactionView.swift */; };
 		AA0200000000000000000009 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000009 /* TransactionDetailView.swift */; };
 		AA0200000000000000000044 /* TransferDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005F /* TransferDetailView.swift */; };
+		AA0200000000000000000075 /* CurrencyKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000090 /* CurrencyKeypadView.swift */; };
 		AA020000000000000000000A /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000A /* NetWorthView.swift */; };
 		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
 		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
@@ -163,6 +164,7 @@
 		AA0100000000000000000008 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000009 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
 		AA010000000000000000005F /* TransferDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetailView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000090 /* CurrencyKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyKeypadView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000A /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -326,6 +328,7 @@
 			children = (
 				AA0300000000000000000006 /* Dashboard */,
 				AA0300000000000000000007 /* Transactions */,
+				AA030000000000000000001A /* QuickAdd */,
 				AA030000000000000000000E /* Budget */,
 				AA030000000000000000000F /* Recurring */,
 				AA0300000000000000000018 /* Subscriptions */,
@@ -364,6 +367,14 @@
 				AA010000000000000000005F /* TransferDetailView.swift */,
 			);
 			path = Transactions;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000001A /* QuickAdd */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000090 /* CurrencyKeypadView.swift */,
+			);
+			path = QuickAdd;
 			sourceTree = "<group>";
 		};
 		AA030000000000000000000E /* Budget */ = {
@@ -713,6 +724,7 @@
 				AA0200000000000000000008 /* AddTransactionView.swift in Sources */,
 				AA0200000000000000000009 /* TransactionDetailView.swift in Sources */,
 				AA0200000000000000000044 /* TransferDetailView.swift in Sources */,
+				AA0200000000000000000075 /* CurrencyKeypadView.swift in Sources */,
 				AA020000000000000000000A /* NetWorthView.swift in Sources */,
 				AA020000000000000000000B /* MetricsView.swift in Sources */,
 				AA020000000000000000000C /* AccountsView.swift in Sources */,

@@ -132,6 +132,7 @@ FR = {
     "DashboardHomeComponents": u(1, 0x8D),
     "TransactionEntryService": u(1, 0x8E),
     "TEST_TransactionEntryService": u(1, 0x8F),
+    "CurrencyKeypadView":     u(1, 0x90),
 }
 
 # Build files
@@ -164,6 +165,7 @@ GR = {
     "Settings":   u(3, 0x17),
     "Subscriptions": u(3, 0x18),
     "Onboarding":    u(3, 0x19),
+    "QuickAdd":      u(3, 0x1A),
 }
 
 # Targets
@@ -224,6 +226,7 @@ APP_SOURCES = [
     ("AddTransactionView",   "Views/Transactions/AddTransactionView.swift"),
     ("TransactionDetailView","Views/Transactions/TransactionDetailView.swift"),
     ("TransferDetailView",   "Views/Transactions/TransferDetailView.swift"),
+    ("CurrencyKeypadView",   "Views/QuickAdd/CurrencyKeypadView.swift"),
     ("NetWorthView",         "Views/NetWorth/NetWorthView.swift"),
     ("MetricsView",          "Views/Metrics/MetricsView.swift"),
     ("AccountsView",         "Views/Accounts/AccountsView.swift"),
@@ -455,6 +458,7 @@ def pbxproj():
     a(f"\t\t\tchildren = (")
     a(f"\t\t\t\t{GR['Dashboard']} /* Dashboard */,")
     a(f"\t\t\t\t{GR['Transactions']} /* Transactions */,")
+    a(f"\t\t\t\t{GR['QuickAdd']} /* QuickAdd */,")
     a(f"\t\t\t\t{GR['Budget']} /* Budget */,")
     a(f"\t\t\t\t{GR['Recurring']} /* Recurring */,")
     a(f"\t\t\t\t{GR['Subscriptions']} /* Subscriptions */,")
@@ -489,6 +493,7 @@ def pbxproj():
 
     simple_group("Dashboard",    "Dashboard",    ["DashboardView", "DashboardHomeComponents"])
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
+    simple_group("QuickAdd",     "QuickAdd",     ["CurrencyKeypadView"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
     simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])
     simple_group("Subscriptions", "Subscriptions", ["SubscriptionAuditView"])
