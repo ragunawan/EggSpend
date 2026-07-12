@@ -82,7 +82,7 @@ struct TransactionsListView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .bottomTrailing) {
                 NestBackground()
 
                 VStack(spacing: 0) {
@@ -122,19 +122,24 @@ struct TransactionsListView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+
+                Button { showAddTransaction = true } label: {
+                    Image(systemName: "plus")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Color.white)
+                        .frame(width: 56, height: 56)
+                        .background(Color.yolk, in: Circle())
+                        .shadow(color: Color.nestBrown.opacity(0.18), radius: 12, y: 6)
+                }
+                .accessibilityLabel("Add transaction")
+                .padding(.trailing, Space.lg)
+                .padding(.bottom, Space.lg)
             }
             .navigationTitle("Transactions")
             .toolbarBackground(.regularMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .searchable(text: $searchText, prompt: "Search transactions")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button { showAddTransaction = true } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(Color.yolk)
-                    }
-                }
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
                         Button {
@@ -230,6 +235,9 @@ struct TransactionsListView: View {
         .background(Color.clear)
         .padding(.horizontal, Space.md)
         .padding(.top, Space.sm)
+        .safeAreaInset(edge: .bottom) {
+            Color.clear.frame(height: 72)
+        }
     }
 
     private func compactSectionTitle(for date: Date) -> String {
