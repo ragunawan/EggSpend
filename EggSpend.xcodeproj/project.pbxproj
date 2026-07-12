@@ -11,6 +11,9 @@
 		AA0200000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000002 /* ContentView.swift */; };
 		AA0200000000000000000013 /* EggSpendTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000013 /* EggSpendTheme.swift */; };
 		AA020000000000000000006F /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000084 /* DesignSystem.swift */; };
+		AA0200000000000000000070 /* NestBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000085 /* NestBackground.swift */; };
+		AA0200000000000000000071 /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000086 /* SectionHeader.swift */; };
+		AA0200000000000000000072 /* AmountText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000087 /* AmountText.swift */; };
 		AA0200000000000000000003 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000003 /* Transaction.swift */; };
 		AA0200000000000000000004 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000004 /* TransactionCategory.swift */; };
 		AA0200000000000000000005 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000005 /* Account.swift */; };
@@ -134,6 +137,9 @@
 		AA0100000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000013 /* EggSpendTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendTheme.swift; sourceTree = "<group>"; };
 		AA0100000000000000000084 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		AA0100000000000000000085 /* NestBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestBackground.swift; sourceTree = "<group>"; };
+		AA0100000000000000000086 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		AA0100000000000000000087 /* AmountText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmountText.swift; sourceTree = "<group>"; };
 		AA0100000000000000000003 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		AA0100000000000000000004 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
 		AA0100000000000000000005 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -421,6 +427,9 @@
 			isa = PBXGroup;
 			children = (
 				AA0100000000000000000084 /* DesignSystem.swift */,
+				AA0100000000000000000085 /* NestBackground.swift */,
+				AA0100000000000000000086 /* SectionHeader.swift */,
+				AA0100000000000000000087 /* AmountText.swift */,
 				AA0100000000000000000016 /* NestHeaderView.swift */,
 				AA0100000000000000000017 /* EggProgressView.swift */,
 				AA0100000000000000000018 /* BirdAnimationView.swift */,
@@ -674,6 +683,9 @@
 				AA0200000000000000000002 /* ContentView.swift in Sources */,
 				AA0200000000000000000013 /* EggSpendTheme.swift in Sources */,
 				AA020000000000000000006F /* DesignSystem.swift in Sources */,
+				AA0200000000000000000070 /* NestBackground.swift in Sources */,
+				AA0200000000000000000071 /* SectionHeader.swift in Sources */,
+				AA0200000000000000000072 /* AmountText.swift in Sources */,
 				AA0200000000000000000003 /* Transaction.swift in Sources */,
 				AA0200000000000000000004 /* TransactionCategory.swift in Sources */,
 				AA0200000000000000000005 /* Account.swift in Sources */,
