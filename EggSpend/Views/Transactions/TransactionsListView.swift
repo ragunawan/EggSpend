@@ -163,7 +163,7 @@ struct TransactionsListView: View {
                                     Rectangle()
                                         .fill(Color.twig.opacity(0.15))
                                         .frame(height: 0.5)
-                                        .padding(.leading, 64)
+                                        .padding(.leading, Space.xl * 2 + Space.lg)
                                 }
                             }
                     }
@@ -187,7 +187,7 @@ struct TransactionsListView: View {
                             Text(total, format: .currency(code: CurrencyFormat.code).sign(strategy: .always()))
                                 .font(.caption.weight(.semibold))
                                 .fontDesign(.rounded)
-                                .foregroundStyle(total >= 0 ? Color.green : Color.red)
+                                .foregroundStyle(total >= 0 ? Color.positive : Color.negative)
                         }
                     }
                     .textCase(nil)
@@ -198,22 +198,20 @@ struct TransactionsListView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(Color.clear)
-        .padding(.horizontal, 12)
-        .padding(.top, 8)
-        .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
+        .padding(.horizontal, Space.md)
+        .padding(.top, Space.sm)
     }
 
     @ViewBuilder
     private func mergedRowBackground(isFirst: Bool, isLast: Bool) -> some View {
         UnevenRoundedRectangle(
-            topLeadingRadius: isFirst ? 18 : 0,
-            bottomLeadingRadius: isLast ? 18 : 0,
-            bottomTrailingRadius: isLast ? 18 : 0,
-            topTrailingRadius: isFirst ? 18 : 0,
+            topLeadingRadius: isFirst ? Radius.card : 0,
+            bottomLeadingRadius: isLast ? Radius.card : 0,
+            bottomTrailingRadius: isLast ? Radius.card : 0,
+            topTrailingRadius: isFirst ? Radius.card : 0,
             style: .continuous
         )
         .fill(.regularMaterial)
-        .shadow(color: Color.nestBrown.opacity(0.07), radius: isFirst || isLast ? 5 : 0, y: 2)
     }
 
     private func dailyNetTotal(_ items: [LedgerRow]) -> Double {
@@ -260,7 +258,7 @@ struct TransactionsListView: View {
     @ViewBuilder
     private var activeFilterBanner: some View {
         if filter.isActive {
-            HStack(spacing: 8) {
+            HStack(spacing: Space.sm) {
                 Image(systemName: "line.3.horizontal.decrease.circle.fill")
                     .foregroundStyle(Color.yolk)
                 Text(filter.activeCount == 1 ? "1 filter active" : "\(filter.activeCount) filters active")
@@ -271,11 +269,11 @@ struct TransactionsListView: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.yolk)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Space.md)
+            .padding(.vertical, Space.md)
             .nestCard()
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.top, Space.sm)
         }
     }
 
@@ -333,24 +331,24 @@ private struct UpcomingRecurringRowView: View {
     let occurrence: RecurringOccurrence
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Space.md) {
             ZStack {
                 Circle()
                     .fill((occurrence.category?.color ?? Color.eggBlue).opacity(0.15))
                     .frame(width: 40, height: 40)
                 Image(systemName: occurrence.category?.icon ?? occurrence.source.frequency.icon)
-                    .font(.system(size: 17))
+                    .font(.body)
                     .foregroundStyle(occurrence.category?.color ?? Color.eggBlue)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(occurrence.title)
                     .font(.body)
                     .lineLimit(1)
-                HStack(spacing: 6) {
+                HStack(spacing: Space.sm) {
                     Text("Upcoming")
                         .font(.caption)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, Space.sm)
+                        .padding(.vertical, Space.xs)
                         .background(Color.eggBlue.opacity(0.15), in: Capsule())
                         .foregroundStyle(Color.eggBlue)
                     if let category = occurrence.category {
@@ -364,14 +362,13 @@ private struct UpcomingRecurringRowView: View {
             Spacer(minLength: 8)
             AmountLabel(amount: occurrence.amount, type: occurrence.type, font: .callout)
         }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .padding(.vertical, Space.sm)
+        .padding(.horizontal, Space.md)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .stroke(Color.eggBlue, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [5, 4]))
         }
-        .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }
 }
 

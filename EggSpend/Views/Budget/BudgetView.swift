@@ -59,22 +59,21 @@ struct BudgetView: View {
                                     filteredEmptyState
                                         .appearRise(delay: 0.1)
                                 } else {
-                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .red).appearRise(delay: 0.1) }
+                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .negative).appearRise(delay: 0.1) }
                                     if !warningBudgets.isEmpty { budgetGroup("Watch Out", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
                                     if !healthyBudgets.isEmpty { budgetGroup("On Track",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
                                     inactiveBudgetsSection.appearRise(delay: 0.25)
                                 }
                             }
-                            .padding(12)
+                            .padding(Space.md)
                             .frame(maxWidth: .infinity)
                         }
                         .frame(maxHeight: .infinity)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, Space.xl)
                 }
             }
             .background(AnimatedCanopyBackground())
@@ -113,7 +112,7 @@ struct BudgetView: View {
                     Text("Spent").font(.caption).foregroundStyle(.secondary)
                     Text(totalSpent, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundStyle(totalSpent > totalBudgeted ? .red : Color.nestBrown)
+                        .foregroundStyle(totalSpent > totalBudgeted ? .negative : Color.nestBrown)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
@@ -137,15 +136,15 @@ struct BudgetView: View {
                      ? "\(rem.formatted(.currency(code: CurrencyFormat.code))) remaining"
                      : "\(abs(rem).formatted(.currency(code: CurrencyFormat.code))) over")
                     .font(.caption2)
-                    .foregroundStyle(rem >= 0 ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(rem >= 0 ? Color.positive : .negative)
             }
 
             // Mini donut chart of budget health distribution
             if displayed.count > 1 { budgetHealthDonut }
         }
-        .padding(16)
+        .padding(Space.lg)
         .nestCard()
-        .padding(.top, 4)
+        .padding(.top, Space.xs)
     }
 
     private var overallHealthBadge: some View {
@@ -153,12 +152,12 @@ struct BudgetView: View {
         return Text(label)
             .font(.caption).fontWeight(.semibold)
             .foregroundStyle(color)
-            .padding(.horizontal, 10).padding(.vertical, 4)
+            .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
             .background(color.opacity(0.12), in: Capsule())
     }
 
     private var overallHealthLabel: (String, Color) {
-        if !overBudget.isEmpty   { return ("Over budget",  .red) }
+        if !overBudget.isEmpty   { return ("Over budget",  .negative) }
         if !warningBudgets.isEmpty { return ("Watch out", .yolk) }
         return ("Healthy", .nestLeafGreen)
     }
@@ -167,8 +166,8 @@ struct BudgetView: View {
         switch overallProgress {
         case ..<0.7: return .nestLeafGreen
         case ..<0.9: return .yolk
-        case ..<1.0: return .orange
-        default:     return .red
+        case ..<1.0: return .warningTone
+        default:     return .negative
         }
     }
 
@@ -179,7 +178,7 @@ struct BudgetView: View {
                 let w = Double(warningBudgets.count)
                 let h = Double(healthyBudgets.count)
                 let total = max(o + w + h, 1)
-                SectorMark(angle: .value("Over",    o / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(.red)
+                SectorMark(angle: .value("Over",    o / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.negative)
                 SectorMark(angle: .value("Warning", w / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.yolk)
                 SectorMark(angle: .value("Good",    h / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.nestLeafGreen)
             }
@@ -190,7 +189,7 @@ struct BudgetView: View {
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                if !overBudget.isEmpty    { donutLegend("Over budget", count: overBudget.count, color: .red) }
+                if !overBudget.isEmpty    { donutLegend("Over budget", count: overBudget.count, color: .negative) }
                 if !warningBudgets.isEmpty { donutLegend("Warning",    count: warningBudgets.count, color: .yolk) }
                 if !healthyBudgets.isEmpty { donutLegend("Healthy",    count: healthyBudgets.count, color: .nestLeafGreen) }
             }
@@ -216,7 +215,7 @@ struct BudgetView: View {
                                selected: periodFilter == period) { periodFilter = period }
                 }
             }
-            .padding(.horizontal, 2)
+            .padding(.horizontal, Space.xs)
         }
     }
 
@@ -240,14 +239,14 @@ struct BudgetView: View {
                     Button("Edit", systemImage: "pencil") {
                         editingBudget = budget
                     }
-                    .tint(.blue)
+                    .tint(.info)
                 }
                 .swipeActions(edge: .leading) {
                     Button(budget.isActive ? "Pause" : "Resume",
                            systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
                         budget.isActive.toggle()
                     }
-                    .tint(budget.isActive ? .orange : .nestLeafGreen)
+                    .tint(budget.isActive ? .warningTone : .positive)
                 }
                 .contextMenu {
                     Button("Edit", systemImage: "pencil") { editingBudget = budget }
@@ -296,7 +295,7 @@ struct BudgetView: View {
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing) {
                             Button("Delete", systemImage: "trash", role: .destructive) { modelContext.delete(budget) }
-                            Button("Edit", systemImage: "pencil") { editingBudget = budget }.tint(.blue)
+                            Button("Edit", systemImage: "pencil") { editingBudget = budget }.tint(.info)
                         }
                         .swipeActions(edge: .leading) {
                             Button("Resume", systemImage: "play.circle.fill") { budget.isActive.toggle() }
@@ -402,16 +401,16 @@ struct BudgetRowView: View {
 
                 HStack(spacing: 4) {
                     Image(systemName: remaining >= 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .font(.caption2).foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
+                        .font(.caption2).foregroundStyle(remaining >= 0 ? Color.positive : .negative)
                     Text(remaining >= 0
                          ? "\(remaining, format: .currency(code: CurrencyFormat.code)) left"
                          : "\(abs(remaining), format: .currency(code: CurrencyFormat.code)) over")
                         .font(.caption)
-                        .foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
+                        .foregroundStyle(remaining >= 0 ? Color.positive : .negative)
                 }
 
                 AnimatedProgressBar(progress: progress, color: statusColor, height: 3)
-                    .padding(.top, 2)
+                    .padding(.top, Space.xs)
             }
             .layoutPriority(2)
 
@@ -429,14 +428,13 @@ struct BudgetRowView: View {
             .frame(width: 48, alignment: .trailing)
             .fixedSize(horizontal: true, vertical: false)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, Space.md)
+        .padding(.vertical, Space.md)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .stroke(statusColor.opacity(0.2), lineWidth: 1)
         )
-        .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }
 }
 
@@ -464,7 +462,7 @@ private struct FilterChip: View {
                 if let icon { Image(systemName: icon).font(.caption2) }
                 Text(label).font(.subheadline)
             }
-            .padding(.horizontal, 14).padding(.vertical, 7)
+            .padding(.horizontal, Space.md).padding(.vertical, Space.sm)
             .background(selected ? Color.nestBrown : Color.nestBrown.opacity(0.08),
                         in: Capsule())
             .foregroundStyle(selected ? .white : Color.nestBrown)

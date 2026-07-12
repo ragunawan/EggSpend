@@ -246,7 +246,7 @@ struct AddTransactionView: View {
                 if let fromAccount, let toAccount, fromAccount.id == toAccount.id {
                     Label("Choose two different accounts.", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.negative)
                 }
             }
         } header: {

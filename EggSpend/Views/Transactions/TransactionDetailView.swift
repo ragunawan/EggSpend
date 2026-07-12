@@ -46,16 +46,16 @@ struct TransactionDetailView: View {
                 VStack(spacing: 8) {
                     Image(systemName: transaction.type.systemImage)
                         .font(.largeTitle)
-                        .foregroundStyle(transaction.type == .income ? .green : .red)
+                        .foregroundStyle(transaction.type == .income ? Color.positive : Color.negative)
                     Text(transaction.amount, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(NestType.hero)
                     Text(transaction.type.rawValue)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, Space.sm)
         }
     }
 
