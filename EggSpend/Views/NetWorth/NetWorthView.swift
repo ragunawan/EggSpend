@@ -35,7 +35,7 @@ struct NetWorthView: View {
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
             }
-            .navigationTitle("Net Worth")
+            .navigationTitle("Nest Egg")
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -104,7 +104,7 @@ struct NetWorthView: View {
         Section {
             VStack(spacing: 16) {
                 VStack(spacing: 4) {
-                    Text("Net Worth")
+                    Text("Net worth")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     Text(netWorth, format: .currency(code: CurrencyFormat.code))

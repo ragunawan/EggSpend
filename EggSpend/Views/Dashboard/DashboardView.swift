@@ -139,7 +139,7 @@ struct DashboardView: View {
 
     private var netWorthCard: some View {
         VStack(spacing: Space.sm) {
-            Text("Nest Egg Total")
+            Text("Net worth")
                 .font(.subheadline).foregroundStyle(Color.textSecondaryWarm)
             Text(netWorthVisible ? netWorth : 0, format: .currency(code: CurrencyFormat.code))
                 .font(NestType.hero)

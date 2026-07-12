@@ -58,7 +58,7 @@ struct AddAccountView: View {
                         if hasDueDate {
                             DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
                         }
-                        Toggle("Include in Net Worth", isOn: $includeInNetWorth)
+                        Toggle("Include in Nest Egg", isOn: $includeInNetWorth)
                     }
                 }
 
