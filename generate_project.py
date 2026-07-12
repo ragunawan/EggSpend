@@ -37,9 +37,7 @@ FR = {
     "EggSpendTheme":      u(1, 0x13),
     "Budget":              u(1, 0x14),
     "RecurringTransaction":u(1, 0x15),
-    "NestHeaderView":      u(1, 0x16),
     "EggProgressView":     u(1, 0x17),
-    "BirdAnimationView":   u(1, 0x18),
     "BudgetView":          u(1, 0x19),
     "AddBudgetView":       u(1, 0x1A),
     "BudgetDetailView":    u(1, 0x40),
@@ -235,9 +233,7 @@ APP_SOURCES = [
     ("RecurringTransactionsView", "Views/Recurring/RecurringTransactionsView.swift"),
     ("RecurringNext30DaysView", "Views/Recurring/RecurringNext30DaysView.swift"),
     ("AddRecurringTransactionView","Views/Recurring/AddRecurringTransactionView.swift"),
-    ("NestHeaderView",       "Views/Components/NestHeaderView.swift"),
     ("EggProgressView",      "Views/Components/EggProgressView.swift"),
-    ("BirdAnimationView",    "Views/Components/BirdAnimationView.swift"),
     ("CategoryBadgeView",    "Views/Components/CategoryBadgeView.swift"),
     ("AmountLabel",          "Views/Components/AmountLabel.swift"),
     ("TransactionRowView",   "Views/Components/TransactionRowView.swift"),
@@ -498,7 +494,7 @@ def pbxproj():
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
     simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])
-    simple_group("Components",   "Components",   ["DesignSystem","NestBackground","SectionHeader","AmountText","StatTile","ThinProgressBar","CompactProgressRow","LedgerRowView","EmptyStateView","NestHeaderView","EggProgressView","BirdAnimationView","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
+    simple_group("Components",   "Components",   ["DesignSystem","NestBackground","SectionHeader","AmountText","StatTile","ThinProgressBar","CompactProgressRow","LedgerRowView","EmptyStateView","EggProgressView","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
     simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController", "TransactionGrouping", "DuplicateSweeper"])

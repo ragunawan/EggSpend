@@ -11,7 +11,6 @@ struct DashboardView: View {
     private var recurring: [RecurringTransaction]
 
     @State private var netWorthVisible = false
-    @State private var headerVisible = false
     @State private var showAddTransaction = false
     @State private var showSettings = false
 
@@ -65,11 +64,9 @@ struct DashboardView: View {
         NavigationStack {
             ZStack(alignment: .top) {
                 NestBackground()
-                BirdAnimationView().frame(height: 100).frame(maxWidth: .infinity).padding(.top, Space.xl)
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        nestHeaderSection
                         netWorthCard
                         safeToSpendCard
                         monthlySnapshotRow
@@ -113,25 +110,6 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showAddTransaction) { AddTransactionView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
-        }
-    }
-
-    // MARK: - Nest header
-
-    private var nestHeaderSection: some View {
-        VStack(spacing: Space.xs) {
-            NestHeaderView()
-                .frame(width: 250, height: 160)
-                .opacity(headerVisible ? 1 : 0)
-                .scaleEffect(headerVisible ? 1 : 0.75)
-            Text("Your Nest")
-                .font(.caption).foregroundStyle(Color.textSecondaryWarm)
-                .opacity(headerVisible ? 1 : 0)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.7).delay(0.1)) {
-                headerVisible = true
-            }
         }
     }
 
