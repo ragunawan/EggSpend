@@ -133,6 +133,7 @@ FR = {
     "StatTile":               u(1, 0x88),
     "ThinProgressBar":        u(1, 0x89),
     "CompactProgressRow":     u(1, 0x8A),
+    "LedgerRowView":          u(1, 0x8B),
 }
 
 # Build files
@@ -207,6 +208,7 @@ APP_SOURCES = [
     ("StatTile",            "Views/Components/StatTile.swift"),
     ("ThinProgressBar",     "Views/Components/ThinProgressBar.swift"),
     ("CompactProgressRow",  "Views/Components/CompactProgressRow.swift"),
+    ("LedgerRowView",       "Views/Components/LedgerRowView.swift"),
     ("Transaction",          "Models/Transaction.swift"),
     ("TransactionCategory",  "Models/TransactionCategory.swift"),
     ("Account",              "Models/Account.swift"),
@@ -498,7 +500,7 @@ def pbxproj():
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
     simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])
-    simple_group("Components",   "Components",   ["DesignSystem","NestBackground","SectionHeader","AmountText","StatTile","ThinProgressBar","CompactProgressRow","NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
+    simple_group("Components",   "Components",   ["DesignSystem","NestBackground","SectionHeader","AmountText","StatTile","ThinProgressBar","CompactProgressRow","LedgerRowView","NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
     simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController", "TransactionGrouping", "DuplicateSweeper"])

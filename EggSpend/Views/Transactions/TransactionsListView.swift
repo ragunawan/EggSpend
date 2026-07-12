@@ -1,33 +1,6 @@
 import SwiftUI
 import SwiftData
 
-enum LedgerRow: Identifiable {
-    case transaction(Transaction)
-    case transfer(Transfer)
-    case upcoming(RecurringOccurrence)
-
-    var id: String {
-        switch self {
-        case .transaction(let tx): return "transaction-\(tx.id.uuidString)"
-        case .transfer(let transfer): return "transfer-\(transfer.id.uuidString)"
-        case .upcoming(let occurrence): return "upcoming-\(occurrence.id)"
-        }
-    }
-
-    var date: Date {
-        switch self {
-        case .transaction(let tx): return tx.date
-        case .transfer(let transfer): return transfer.date
-        case .upcoming(let occurrence): return occurrence.dueDate
-        }
-    }
-
-    var isUpcoming: Bool {
-        if case .upcoming = self { return true }
-        return false
-    }
-}
-
 struct TransactionsListView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Transfer.date, order: .reverse) private var transfers: [Transfer]
