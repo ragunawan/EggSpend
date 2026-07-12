@@ -76,6 +76,21 @@ extension Color {
     /// in dark mode so it reads as a tinted dark background rather than a
     /// bright accent color. `nestLeafGreen` stays bright for text/icons.
     static let nestCanopyTop = Color(lightHex: "3D7A3B", darkHex: "132313")
+
+    /// Positive values and status indicators.
+    static let positive = Color.nestLeafGreen
+
+    /// Negative values and destructive status indicators.
+    static let negative = Color(lightHex: "C03A2B", darkHex: "FF6B5E")
+
+    /// Warning and caution indicators.
+    static let warningTone = Color.yolk
+
+    /// Informational values and controls.
+    static let info = Color.eggBlue
+
+    /// Warm secondary text with accessible contrast on the cream background.
+    static let textSecondaryWarm = Color(lightHex: "7A5633", darkHex: "B08F63")
 }
 
 // MARK: - Gradient Extensions
@@ -103,12 +118,12 @@ private struct NestCardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(.regularMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             .shadow(
-                color: Color.nestBrown.opacity(0.12),
-                radius: 8,
+                color: Color.nestBrown.opacity(0.08),
+                radius: 6,
                 x: 0,
-                y: 3
+                y: 2
             )
     }
 }

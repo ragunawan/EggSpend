@@ -10,6 +10,7 @@
 		AA0200000000000000000001 /* EggSpendApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000001 /* EggSpendApp.swift */; };
 		AA0200000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000002 /* ContentView.swift */; };
 		AA0200000000000000000013 /* EggSpendTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000013 /* EggSpendTheme.swift */; };
+		AA020000000000000000006F /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000084 /* DesignSystem.swift */; };
 		AA0200000000000000000003 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000003 /* Transaction.swift */; };
 		AA0200000000000000000004 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000004 /* TransactionCategory.swift */; };
 		AA0200000000000000000005 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000005 /* Account.swift */; };
@@ -132,6 +133,7 @@
 		AA0100000000000000000001 /* EggSpendApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendApp.swift; sourceTree = "<group>"; };
 		AA0100000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000013 /* EggSpendTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendTheme.swift; sourceTree = "<group>"; };
+		AA0100000000000000000084 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		AA0100000000000000000003 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		AA0100000000000000000004 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
 		AA0100000000000000000005 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -418,6 +420,7 @@
 		AA030000000000000000000B /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				AA0100000000000000000084 /* DesignSystem.swift */,
 				AA0100000000000000000016 /* NestHeaderView.swift */,
 				AA0100000000000000000017 /* EggProgressView.swift */,
 				AA0100000000000000000018 /* BirdAnimationView.swift */,
@@ -670,6 +673,7 @@
 				AA0200000000000000000001 /* EggSpendApp.swift in Sources */,
 				AA0200000000000000000002 /* ContentView.swift in Sources */,
 				AA0200000000000000000013 /* EggSpendTheme.swift in Sources */,
+				AA020000000000000000006F /* DesignSystem.swift in Sources */,
 				AA0200000000000000000003 /* Transaction.swift in Sources */,
 				AA0200000000000000000004 /* TransactionCategory.swift in Sources */,
 				AA0200000000000000000005 /* Account.swift in Sources */,

@@ -126,6 +126,7 @@ FR = {
     "DuplicateSweeper":        u(1, 0x81),
     "TEST_DuplicateSweeper":   u(1, 0x82),
     "Localizable":             u(1, 0x83),
+    "DesignSystem":           u(1, 0x84),
 }
 
 # Build files
@@ -193,6 +194,7 @@ APP_SOURCES = [
     ("EggSpendApp",         "EggSpendApp.swift"),
     ("ContentView",          "ContentView.swift"),
     ("EggSpendTheme",       "EggSpendTheme.swift"),
+    ("DesignSystem",        "Views/Components/DesignSystem.swift"),
     ("Transaction",          "Models/Transaction.swift"),
     ("TransactionCategory",  "Models/TransactionCategory.swift"),
     ("Account",              "Models/Account.swift"),
@@ -484,7 +486,7 @@ def pbxproj():
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
     simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])
-    simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
+    simple_group("Components",   "Components",   ["DesignSystem","NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
     simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController", "TransactionGrouping", "DuplicateSweeper"])
