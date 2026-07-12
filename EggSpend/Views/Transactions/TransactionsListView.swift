@@ -9,6 +9,7 @@ struct TransactionsListView: View {
     @State private var searchText = ""
     @State private var filter = TransactionFilter()
     @State private var hideTransfers = false
+    @State private var showUpcoming = true
     @State private var showAddTransaction = false
     @State private var showImport = false
     @State private var showFilterSheet = false
@@ -24,7 +25,7 @@ struct TransactionsListView: View {
     }
 
     private var filteredTransfers: [Transfer] {
-        guard !hideTransfers else { return [] }
+        guard filter.type == nil && !hideTransfers else { return [] }
         return transfers.filter { transfer in
             searchText.isEmpty
                 || transfer.notes.localizedCaseInsensitiveContains(searchText)
@@ -34,7 +35,8 @@ struct TransactionsListView: View {
     }
 
     private var upcomingRecurring: [RecurringOccurrence] {
-        RecurringProjection.occurrences(from: recurring, start: .now, days: 7)
+        guard showUpcoming else { return [] }
+        return RecurringProjection.occurrences(from: recurring, start: .now, days: 7)
             .filter { $0.dueDate > Date.now }
             .filter { occurrence in
                 let matchesSearch = searchText.isEmpty
@@ -66,6 +68,7 @@ struct TransactionsListView: View {
 
                 VStack(spacing: 0) {
                     activeFilterBanner
+                    filterChipsRow
 
                     Group {
                         if transactions.isEmpty && transfers.isEmpty {
@@ -234,6 +237,62 @@ struct TransactionsListView: View {
         }
     }
 
+    private var filterChipsRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Space.sm) {
+                TransactionsFilterChip(
+                    label: "All",
+                    systemImage: "tray.full",
+                    isSelected: filter.type == nil && !hideTransfers && showUpcoming
+                ) {
+                    filter.type = nil
+                    hideTransfers = false
+                    showUpcoming = true
+                }
+
+                TransactionsFilterChip(
+                    label: "Expenses",
+                    systemImage: TransactionType.expense.systemImage,
+                    isSelected: filter.type == .expense
+                ) {
+                    filter.type = filter.type == .expense ? nil : .expense
+                }
+
+                TransactionsFilterChip(
+                    label: "Income",
+                    systemImage: TransactionType.income.systemImage,
+                    isSelected: filter.type == .income
+                ) {
+                    filter.type = filter.type == .income ? nil : .income
+                }
+
+                TransactionsFilterChip(
+                    label: "Transfers",
+                    systemImage: "arrow.left.arrow.right",
+                    isSelected: filter.type == nil && !hideTransfers
+                ) {
+                    if filter.type != nil || hideTransfers {
+                        filter.type = nil
+                        hideTransfers = false
+                    } else {
+                        hideTransfers = true
+                    }
+                }
+
+                TransactionsFilterChip(
+                    label: "Upcoming",
+                    systemImage: "calendar.badge.clock",
+                    isSelected: showUpcoming
+                ) {
+                    showUpcoming.toggle()
+                }
+            }
+            .padding(.horizontal, Space.lg)
+            .padding(.vertical, Space.sm)
+        }
+        .background(.regularMaterial)
+    }
+
     @ViewBuilder
     private func rowView(for row: LedgerRow, showsCardBackground: Bool = true) -> some View {
         switch row {
@@ -366,6 +425,26 @@ private struct UpcomingRecurringRowView: View {
             RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .stroke(Color.eggBlue, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [5, 4]))
         }
+    }
+}
+
+private struct TransactionsFilterChip: View {
+    let label: String
+    let systemImage: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(label, systemImage: systemImage)
+                .font(.subheadline.weight(.semibold))
+                .padding(.horizontal, Space.md)
+                .padding(.vertical, Space.sm)
+                .background(isSelected ? Color.yolk : Color.yolk.opacity(0.12), in: Capsule())
+                .foregroundStyle(isSelected ? .white : Color.yolk)
+        }
+        .buttonStyle(.plain)
+        .animation(.quickFade, value: isSelected)
     }
 }
 
