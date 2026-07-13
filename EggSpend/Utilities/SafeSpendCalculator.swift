@@ -80,9 +80,9 @@ enum SafeSpendCalculator {
 
     // MARK: Budget allowance
 
-    // ASSUMPTION: Each active budget protects its own category-level spending. A budget
+    // ASSUMPTION: Each active budget protects spending explicitly linked to it. A budget
     // already over its limit contributes zero (not negative) to the combined allowance,
-    // so one over-budget category drags the total down without other budgets going negative.
+    // so one over-budget line drags the total down without other budgets going negative.
     // When no active budgets exist, the budget side imposes no constraint.
     static func budgetDailyAllowance(budgets: [Budget], transactions: [Transaction]) -> Double {
         budgets

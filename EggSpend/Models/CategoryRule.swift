@@ -16,9 +16,9 @@ import Foundation
 ///   accounts — see T7), and a `.nullify` relationship would null out this
 ///   rule's category on category deletion. That collides with this domain:
 ///   here `nil`/dangling must always mean "no rule matches", never "matches
-///   uncategorized" (contrast with `Budget.category == nil`, which
-///   intentionally means "matches uncategorized" in that separate domain — do
-///   not conflate the two). Keeping a detached UUID lets a dangling id resolve
+///   uncategorized". Budget membership is explicit on `Transaction.budget`,
+///   so category rules must not be reused for budget matching. Keeping a
+///   detached UUID lets a dangling id resolve
 ///   to no-match at read time instead of accidentally auto-assigning
 ///   uncategorized spend.
 /// - Cross-device CloudKit sync can race and produce more than one row for

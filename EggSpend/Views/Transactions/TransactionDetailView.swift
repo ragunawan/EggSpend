@@ -79,6 +79,13 @@ struct TransactionDetailView: View {
                     CategoryBadgeView(category: category)
                 }
             }
+            if transaction.type == .expense, let budget = transaction.budget {
+                detailRow("Budget") {
+                    Label(budget.name, systemImage: budget.period.icon)
+                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                }
+            }
             detailRow("Title") {
                 Text(transaction.title)
                     .lineLimit(1)

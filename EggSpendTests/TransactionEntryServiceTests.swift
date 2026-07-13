@@ -25,8 +25,10 @@ final class TransactionEntryServiceTests: XCTestCase {
     func testCreateTransactionAppliesBalanceRecordsRuleAndInvokesAlerts() throws {
         let account = Account(name: "Checking", type: .checking, balance: 100)
         let category = TransactionCategory(name: "Coffee", icon: "cup.and.saucer", colorHex: "#000000", typeFilter: .expense)
+        let budget = Budget(name: "Coffee Budget", limitAmount: 50, category: category)
         context.insert(account)
         context.insert(category)
+        context.insert(budget)
 
         var alertCallCount = 0
         let transaction = TransactionEntryService.createTransaction(
@@ -36,6 +38,7 @@ final class TransactionEntryServiceTests: XCTestCase {
             type: .expense,
             category: category,
             account: account,
+            budget: budget,
             notes: "latte",
             context: context,
             budgetAlertChecker: { alertContext in
@@ -48,6 +51,7 @@ final class TransactionEntryServiceTests: XCTestCase {
         XCTAssertEqual(transaction.amount, 12.50, accuracy: 0.001)
         XCTAssertEqual(transaction.category?.id, category.id)
         XCTAssertEqual(transaction.account?.id, account.id)
+        XCTAssertEqual(transaction.budget?.id, budget.id)
         XCTAssertEqual(account.balance, 87.50, accuracy: 0.001)
         XCTAssertEqual(alertCallCount, 1)
 
@@ -61,10 +65,12 @@ final class TransactionEntryServiceTests: XCTestCase {
         let oldAccount = Account(name: "Checking", type: .checking, balance: 100)
         let newAccount = Account(name: "Savings", type: .savings, balance: 50)
         let category = TransactionCategory(name: "Dining", icon: "fork.knife", colorHex: "#000000", typeFilter: .expense)
+        let budget = Budget(name: "Dining Budget", limitAmount: 200, category: category)
         let transaction = Transaction(title: "Lunch", amount: 20, type: .expense, account: oldAccount)
         context.insert(oldAccount)
         context.insert(newAccount)
         context.insert(category)
+        context.insert(budget)
         context.insert(transaction)
         AccountBalanceService.apply(transaction, to: oldAccount)
 
@@ -77,6 +83,7 @@ final class TransactionEntryServiceTests: XCTestCase {
             type: .expense,
             category: category,
             account: newAccount,
+            budget: budget,
             notes: "changed",
             context: context,
             budgetAlertChecker: { _ in alertCallCount += 1 }
@@ -87,11 +94,35 @@ final class TransactionEntryServiceTests: XCTestCase {
         XCTAssertEqual(transaction.title, "Dinner")
         XCTAssertEqual(transaction.notes, "changed")
         XCTAssertEqual(transaction.account?.id, newAccount.id)
+        XCTAssertEqual(transaction.budget?.id, budget.id)
         XCTAssertEqual(alertCallCount, 1)
 
         let rules = try context.fetch(FetchDescriptor<CategoryRule>())
         XCTAssertEqual(rules.count, 1)
         XCTAssertEqual(rules.first?.normalizedPattern, "dinner")
+    }
+
+    func testUpdateTransactionClearsBudgetWhenChangingToIncome() throws {
+        let budget = Budget(name: "Dining Budget", limitAmount: 200)
+        let transaction = Transaction(title: "Refund", amount: 20, type: .expense, budget: budget)
+        context.insert(budget)
+        context.insert(transaction)
+
+        TransactionEntryService.updateTransaction(
+            transaction,
+            title: "Refund",
+            amount: 20,
+            date: Date(timeIntervalSince1970: 5_000),
+            type: .income,
+            category: nil,
+            account: nil,
+            budget: budget,
+            notes: "",
+            context: context,
+            budgetAlertChecker: { _ in }
+        )
+
+        XCTAssertNil(transaction.budget)
     }
 
     func testCreateTransferAppliesBalancesAndInsertsTransfer() throws {

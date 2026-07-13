@@ -18,6 +18,7 @@ struct AddTransactionView: View {
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
     @Query private var categoryRules: [CategoryRule]
+    @Query private var budgets: [Budget]
     @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
 
     var editingTransaction: Transaction? = nil
@@ -28,6 +29,7 @@ struct AddTransactionView: View {
     var initialDate: Date = .now
     var initialCategory: TransactionCategory? = nil
     var initialAccount: Account? = nil
+    var initialBudget: Budget? = nil
 
     @State private var title = ""
     @State private var amountText = ""
@@ -35,6 +37,7 @@ struct AddTransactionView: View {
     @State private var selectedEntryKind: EntryKind = .expense
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var selectedAccount: Account? = nil
+    @State private var selectedBudget: Budget? = nil
     @State private var fromAccount: Account? = nil
     @State private var toAccount: Account? = nil
     @State private var notes = ""
@@ -73,6 +76,12 @@ struct AddTransactionView: View {
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
+    private var availableBudgets: [Budget] {
+        budgets
+            .filter { $0.isActive || $0.id == selectedBudget?.id }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
     private var amount: Double { AmountParser.parse(amountText) ?? 0 }
 
     private var isValid: Bool {
@@ -97,6 +106,9 @@ struct AddTransactionView: View {
                     detailsSection
                     accountSection
                     categorySection
+                    if selectedEntryKind == .expense {
+                        budgetSection
+                    }
                 }
                 notesSection
             }
@@ -145,6 +157,9 @@ struct AddTransactionView: View {
                 .onChange(of: selectedEntryKind) { _, newKind in
                     if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != newKind.transactionType {
                         selectedCategory = nil
+                    }
+                    if newKind != .expense {
+                        selectedBudget = nil
                     }
                 }
             }
@@ -271,6 +286,23 @@ struct AddTransactionView: View {
         }
     }
 
+    private var budgetSection: some View {
+        Section("Budget") {
+            if availableBudgets.isEmpty {
+                Text("No active budgets")
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker("Budget", selection: $selectedBudget) {
+                    Text("Unbudgeted").tag(Optional<Budget>.none)
+                    ForEach(availableBudgets) { budget in
+                        Label(budget.name, systemImage: budget.period.icon)
+                            .tag(Optional(budget))
+                    }
+                }
+            }
+        }
+    }
+
     private var notesSection: some View {
         Section("Notes") {
             TextField("Add a note (optional)", text: $notes, axis: .vertical)
@@ -303,6 +335,7 @@ struct AddTransactionView: View {
                 type: type,
                 category: selectedCategory,
                 account: selectedAccount,
+                budget: selectedBudget,
                 notes: notes,
                 context: modelContext
             )
@@ -314,6 +347,7 @@ struct AddTransactionView: View {
                 type: type,
                 category: selectedCategory,
                 account: selectedAccount,
+                budget: selectedBudget,
                 notes: notes,
                 context: modelContext
             )
@@ -351,6 +385,7 @@ struct AddTransactionView: View {
             selectedEntryKind = tx.type == .income ? .income : .expense
             selectedCategory = tx.category
             selectedAccount = tx.account
+            selectedBudget = tx.type == .expense ? tx.budget : nil
             notes = tx.notes
         } else if let transfer = editingTransfer {
             selectedEntryKind = .transfer
@@ -366,6 +401,7 @@ struct AddTransactionView: View {
             date = initialDate
             selectedCategory = initialCategory
             selectedAccount = initialAccount
+            selectedBudget = initialEntryKind == .expense ? initialBudget : nil
             if let selectedCategory, !categoryMatchesSelectedType(selectedCategory) {
                 self.selectedCategory = nil
             }

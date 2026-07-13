@@ -7,6 +7,7 @@ struct QuickAddDraft {
     let title: String
     let category: TransactionCategory?
     let account: Account?
+    let budget: Budget?
     let date: Date
 }
 
@@ -18,6 +19,7 @@ struct QuickAddSheet: View {
     @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
     @Query private var categoryRules: [CategoryRule]
+    @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
 
     @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
 
@@ -26,6 +28,7 @@ struct QuickAddSheet: View {
     @State private var title = ""
     @State private var selectedCategory: TransactionCategory?
     @State private var selectedAccount: Account?
+    @State private var selectedBudget: Budget?
     @State private var date = Date.now
     @State private var isEnteringTitle = false
 
@@ -43,6 +46,7 @@ struct QuickAddSheet: View {
             title: title,
             category: selectedCategory,
             account: selectedAccount,
+            budget: selectedBudget,
             date: date
         )
     }
@@ -64,6 +68,10 @@ struct QuickAddSheet: View {
 
     private var availableAccounts: [Account] {
         accounts.filter { !$0.isArchived }
+    }
+
+    private var availableBudgets: [Budget] {
+        budgets.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     var body: some View {
@@ -119,6 +127,9 @@ struct QuickAddSheet: View {
             .onChange(of: entryKind) { _, newKind in
                 if let selectedCategory, selectedCategory.appliesTo != nil, selectedCategory.appliesTo != newKind.transactionType {
                     self.selectedCategory = nil
+                }
+                if newKind != .expense {
+                    selectedBudget = nil
                 }
             }
         }
@@ -210,6 +221,24 @@ struct QuickAddSheet: View {
                 }
             }
 
+            if entryKind == .expense, !availableBudgets.isEmpty {
+                Menu {
+                    Button("Unbudgeted") { selectedBudget = nil }
+                    ForEach(availableBudgets) { budget in
+                        Button {
+                            selectedBudget = budget
+                        } label: {
+                            Label(budget.name, systemImage: budget.period.icon)
+                        }
+                    }
+                } label: {
+                    QuickAddPillLabel(
+                        title: selectedBudget?.name ?? "Budget",
+                        systemImage: selectedBudget?.period.icon ?? "chart.pie"
+                    )
+                }
+            }
+
             Menu {
                 DatePicker("Date", selection: $date, displayedComponents: .date)
             } label: {
@@ -273,6 +302,7 @@ struct QuickAddSheet: View {
             type: type,
             category: selectedCategory,
             account: selectedAccount,
+            budget: selectedBudget,
             notes: "",
             context: modelContext
         )

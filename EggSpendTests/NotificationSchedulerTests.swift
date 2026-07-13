@@ -184,7 +184,7 @@ final class NotificationSchedulerTests: XCTestCase {
         let disabledBudget = Budget(name: "Disabled", limitAmount: 100, period: .monthly)
         disabledBudget.alertsEnabled = false
 
-        let tx = Transaction(title: "Spend", amount: 90, type: .expense)
+        let tx = Transaction(title: "Spend", amount: 90, type: .expense, budget: enabledBudget)
 
         BudgetAlertCoordinator.checkBudgets([enabledBudget, disabledBudget], transactions: [tx], center: mock)
 
@@ -201,7 +201,7 @@ final class NotificationSchedulerTests: XCTestCase {
 
         context.insert(eligible)
         context.insert(inactive)
-        context.insert(Transaction(title: "Spend", amount: 90, type: .expense))
+        context.insert(Transaction(title: "Spend", amount: 90, type: .expense, budget: eligible))
         try context.save()
 
         BudgetAlertCoordinator.checkBudgets(context: context, center: mock)
@@ -219,7 +219,7 @@ final class NotificationSchedulerTests: XCTestCase {
         let budgetID = budget.id
 
         context.insert(budget)
-        context.insert(Transaction(title: "Spend", amount: 90, type: .expense))
+        context.insert(Transaction(title: "Spend", amount: 90, type: .expense, budget: budget))
         try context.save()
 
         BudgetAlertCoordinator.checkBudgets(context: context, center: mock)

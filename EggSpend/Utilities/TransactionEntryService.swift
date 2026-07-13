@@ -12,6 +12,7 @@ enum TransactionEntryService {
         type: TransactionType,
         category: TransactionCategory?,
         account: Account?,
+        budget: Budget? = nil,
         notes: String,
         context: ModelContext,
         budgetAlertChecker: BudgetAlertChecker = { BudgetAlertCoordinator.checkBudgets(context: $0) }
@@ -24,6 +25,7 @@ enum TransactionEntryService {
             type: type,
             category: category,
             account: account,
+            budget: type == .expense ? budget : nil,
             notes: notes
         )
         context.insert(transaction)
@@ -41,6 +43,7 @@ enum TransactionEntryService {
         type: TransactionType,
         category: TransactionCategory?,
         account: Account?,
+        budget: Budget? = nil,
         notes: String,
         context: ModelContext,
         budgetAlertChecker: BudgetAlertChecker = { BudgetAlertCoordinator.checkBudgets(context: $0) }
@@ -55,6 +58,7 @@ enum TransactionEntryService {
         transaction.type = type
         transaction.category = category
         transaction.account = account
+        transaction.budget = type == .expense ? budget : nil
         transaction.notes = notes
 
         AccountBalanceService.apply(transaction, to: account)

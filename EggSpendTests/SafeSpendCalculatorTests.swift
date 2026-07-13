@@ -269,7 +269,7 @@ final class SafeSpendCalculatorTests: XCTestCase {
     func testOverspentBudgetContributesZeroToAllowance() {
         let checking = Account(name: "Checking", type: .checking, balance: 10_000)
         let budget = Budget(name: "Dining", limitAmount: 100, period: .monthly)
-        let overspend = Transaction(title: "Big Dinner", amount: 500, date: .now, type: .expense)
+        let overspend = Transaction(title: "Big Dinner", amount: 500, date: .now, type: .expense, budget: budget)
 
         let result = SafeSpendCalculator.calculate(
             accounts: [checking], transactions: [overspend], recurring: [], budgets: [budget], savingsGoals: []

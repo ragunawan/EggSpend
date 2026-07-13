@@ -134,9 +134,8 @@ enum DataExporter {
 
     /// Current schema version for `fullBackupJSON`'s output. Bump this (and
     /// teach `validateBackup` / a future restore path about the delta) any
-    /// time `BackupEnvelope` or a DTO's shape changes in a way that isn't
-    /// purely additive.
-    static let currentSchemaVersion = 1
+    /// time `BackupEnvelope` or a DTO's shape changes.
+    static let currentSchemaVersion = 2
 
     /// Builds a full, versioned JSON backup of all 7 persistent models.
     /// `appVersion`/`buildNumber` default to `Bundle.main`'s Info.plist
@@ -277,6 +276,8 @@ struct TransactionDTO: Codable, Equatable {
     var categoryName: String?
     var accountID: UUID?
     var accountName: String?
+    var budgetID: UUID?
+    var budgetName: String?
 
     init(_ transaction: Transaction) {
         id = transaction.id
@@ -294,6 +295,8 @@ struct TransactionDTO: Codable, Equatable {
         categoryName = transaction.category?.name
         accountID = transaction.account?.id
         accountName = transaction.account?.name
+        budgetID = transaction.budget?.id
+        budgetName = transaction.budget?.name
     }
 }
 

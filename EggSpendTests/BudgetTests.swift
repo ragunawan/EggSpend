@@ -44,30 +44,45 @@ final class BudgetTests: XCTestCase {
         context.insert(budget)
 
         let now = Date.now
-        let txInPeriod1 = Transaction(title: "Lunch", amount: 15, date: now, type: .expense, category: cat)
-        let txInPeriod2 = Transaction(title: "Dinner", amount: 45, date: now, type: .expense, category: cat)
-        let txOtherCat  = Transaction(title: "Uber", amount: 20, date: now, type: .expense)
+        let txInPeriod1 = Transaction(title: "Lunch", amount: 15, date: now, type: .expense, category: cat, budget: budget)
+        let txInPeriod2 = Transaction(title: "Dinner", amount: 45, date: now, type: .expense, category: cat, budget: budget)
+        let txOtherCat  = Transaction(title: "Uber", amount: 20, date: now, type: .expense, category: cat)
         let txOldDate   = Transaction(title: "Old meal",
                                       amount: 100,
                                       date: Calendar.current.date(byAdding: .month, value: -2, to: now)!,
-                                      type: .expense, category: cat)
+                                      type: .expense, category: cat, budget: budget)
         [txInPeriod1, txInPeriod2, txOtherCat, txOldDate].forEach { context.insert($0) }
         try context.save()
 
         let all = try context.fetch(FetchDescriptor<Transaction>())
         let spent = budget.spent(from: all)
-        XCTAssertEqual(spent, 60, accuracy: 0.001, "Only in-period, same-category transactions should count")
+        XCTAssertEqual(spent, 60, accuracy: 0.001, "Only in-period transactions explicitly linked to this budget should count")
+    }
+
+    func testBudgetSpentIgnoresSameCategoryTransactionsWithoutBudgetLink() throws {
+        let cat = TransactionCategory(name: "Food", icon: "fork.knife", colorHex: "E67E22", typeFilter: .expense)
+        let budget = Budget(name: "Food Budget", limitAmount: 300, period: .monthly, category: cat)
+        context.insert(cat)
+        context.insert(budget)
+
+        let linked = Transaction(title: "Budgeted lunch", amount: 15, type: .expense, category: cat, budget: budget)
+        let sameCategoryUnlinked = Transaction(title: "Unbudgeted lunch", amount: 45, type: .expense, category: cat)
+        [linked, sameCategoryUnlinked].forEach { context.insert($0) }
+        try context.save()
+
+        let all = try context.fetch(FetchDescriptor<Transaction>())
+        XCTAssertEqual(budget.spent(from: all), 15, accuracy: 0.001)
     }
 
     func testBudgetSpentExcludesAdjustmentTransactions() throws {
-        // nil-category budget matches nil-category transactions (catch-uncategorized semantics),
-        // so an expense-typed balance adjustment (also nil-category) must not count against it.
+        // Even when explicitly linked to a budget, an expense-typed balance adjustment
+        // must not count as spending against that budget.
         let budget = Budget(name: "Uncategorized", limitAmount: 300, period: .monthly,
                             category: nil, colorHex: "E67E22")
         context.insert(budget)
 
         let adjustment = Transaction(title: "Balance adjustment", amount: 200, type: .expense,
-                                     category: nil, isAdjustment: true)
+                                     category: nil, budget: budget, isAdjustment: true)
         context.insert(adjustment)
         try context.save()
 
@@ -86,9 +101,9 @@ final class BudgetTests: XCTestCase {
         context.insert(budget)
 
         let now = Date.now
-        let realExpense = Transaction(title: "Lunch", amount: 15, date: now, type: .expense, category: cat)
+        let realExpense = Transaction(title: "Lunch", amount: 15, date: now, type: .expense, category: cat, budget: budget)
         let adjustment  = Transaction(title: "Balance adjustment", amount: 200, date: now,
-                                      type: .expense, category: cat, isAdjustment: true)
+                                      type: .expense, category: cat, budget: budget, isAdjustment: true)
         [realExpense, adjustment].forEach { context.insert($0) }
         try context.save()
 
@@ -105,8 +120,8 @@ final class BudgetTests: XCTestCase {
                             category: nil, colorHex: "3498DB")
         context.insert(budget)
         let txs = [
-            Transaction(title: "Bus", amount: 50, type: .expense),
-            Transaction(title: "Taxi", amount: 50, type: .expense)
+            Transaction(title: "Bus", amount: 50, type: .expense, budget: budget),
+            Transaction(title: "Taxi", amount: 50, type: .expense, budget: budget)
         ]
         txs.forEach { context.insert($0) }
         try context.save()
@@ -120,7 +135,7 @@ final class BudgetTests: XCTestCase {
         let budget = Budget(name: "Small", limitAmount: 10, period: .monthly,
                             category: nil, colorHex: "FF0000")
         context.insert(budget)
-        context.insert(Transaction(title: "Overspend", amount: 999, type: .expense))
+        context.insert(Transaction(title: "Overspend", amount: 999, type: .expense, budget: budget))
         try context.save()
 
         let all = try context.fetch(FetchDescriptor<Transaction>())
@@ -132,7 +147,7 @@ final class BudgetTests: XCTestCase {
         let budget = Budget(name: "Entertainment", limitAmount: 100, period: .monthly,
                             category: nil, colorHex: "9B59B6")
         context.insert(budget)
-        context.insert(Transaction(title: "Movie", amount: 30, type: .expense))
+        context.insert(Transaction(title: "Movie", amount: 30, type: .expense, budget: budget))
         try context.save()
 
         let all = try context.fetch(FetchDescriptor<Transaction>())
@@ -180,7 +195,7 @@ final class BudgetTests: XCTestCase {
     func testEvaluateAlertFiresAtNearLimitThreshold() {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = true
-        let tx = Transaction(title: "Groceries", amount: 85, type: .expense)
+        let tx = Transaction(title: "Groceries", amount: 85, type: .expense, budget: budget)
         let result = budget.evaluateAlert(from: [tx])
         XCTAssertEqual(result, .nearLimit)
         XCTAssertEqual(budget.lastAlertedThreshold, .nearLimit)
@@ -189,7 +204,7 @@ final class BudgetTests: XCTestCase {
     func testEvaluateAlertFiresAtExceededThreshold() {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = true
-        let tx = Transaction(title: "Groceries", amount: 110, type: .expense)
+        let tx = Transaction(title: "Groceries", amount: 110, type: .expense, budget: budget)
         let result = budget.evaluateAlert(from: [tx])
         XCTAssertEqual(result, .exceeded)
     }
@@ -197,7 +212,7 @@ final class BudgetTests: XCTestCase {
     func testEvaluateAlertDoesNotRefireSameThresholdTwice() {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = true
-        let tx = Transaction(title: "Groceries", amount: 85, type: .expense)
+        let tx = Transaction(title: "Groceries", amount: 85, type: .expense, budget: budget)
         XCTAssertEqual(budget.evaluateAlert(from: [tx]), .nearLimit)
         XCTAssertNil(budget.evaluateAlert(from: [tx]))
     }
@@ -205,7 +220,7 @@ final class BudgetTests: XCTestCase {
     func testEvaluateAlertSkipsIntermediateWhenJumpingStraightToExceeded() {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = true
-        let tx = Transaction(title: "Splurge", amount: 120, type: .expense)
+        let tx = Transaction(title: "Splurge", amount: 120, type: .expense, budget: budget)
         let result = budget.evaluateAlert(from: [tx])
         XCTAssertEqual(result, .exceeded)
         XCTAssertEqual(budget.lastAlertedThreshold, .exceeded)
@@ -214,7 +229,7 @@ final class BudgetTests: XCTestCase {
     func testEvaluateAlertResetsOnNewPeriod() {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = true
-        let tx = Transaction(title: "Groceries", amount: 85, type: .expense)
+        let tx = Transaction(title: "Groceries", amount: 85, type: .expense, budget: budget)
         XCTAssertEqual(budget.evaluateAlert(from: [tx]), .nearLimit)
 
         // Simulate rollover into a new period.
@@ -225,7 +240,7 @@ final class BudgetTests: XCTestCase {
     func testEvaluateAlertReturnsNilWhenAlertsDisabled() {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = false
-        let tx = Transaction(title: "Groceries", amount: 110, type: .expense)
+        let tx = Transaction(title: "Groceries", amount: 110, type: .expense, budget: budget)
         XCTAssertNil(budget.evaluateAlert(from: [tx]))
     }
 
@@ -233,7 +248,7 @@ final class BudgetTests: XCTestCase {
         let budget = Budget(name: "Food", limitAmount: 100, period: .monthly)
         budget.alertsEnabled = true
         budget.isActive = false
-        let tx = Transaction(title: "Groceries", amount: 110, type: .expense)
+        let tx = Transaction(title: "Groceries", amount: 110, type: .expense, budget: budget)
         XCTAssertNil(budget.evaluateAlert(from: [tx]))
     }
 }

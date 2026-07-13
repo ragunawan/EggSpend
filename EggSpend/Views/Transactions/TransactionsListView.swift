@@ -217,7 +217,8 @@ struct TransactionsListView: View {
                 initialAmountText: quickAddDraft.amountText,
                 initialDate: quickAddDraft.date,
                 initialCategory: quickAddDraft.category,
-                initialAccount: quickAddDraft.account
+                initialAccount: quickAddDraft.account,
+                initialBudget: quickAddDraft.budget
             )
         } else {
             AddTransactionView()

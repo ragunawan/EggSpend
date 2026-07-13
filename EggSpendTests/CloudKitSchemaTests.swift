@@ -31,6 +31,18 @@ final class CloudKitSchemaTests: XCTestCase {
         XCTAssertEqual(fetchedCategories.first?.budgets?.first?.id, budget.id)
     }
 
+    func testBudgetTransactionInverseRelationship() throws {
+        let budget = Budget(name: "Groceries", limitAmount: 400)
+        let transaction = Transaction(title: "Market", amount: 50, type: .expense, budget: budget)
+        context.insert(budget)
+        context.insert(transaction)
+        try context.save()
+
+        let fetchedBudgets = try context.fetch(FetchDescriptor<Budget>())
+        XCTAssertEqual(fetchedBudgets.first?.transactions?.count, 1)
+        XCTAssertEqual(fetchedBudgets.first?.transactions?.first?.id, transaction.id)
+    }
+
     func testRecurringTransactionCategoryInverseRelationship() throws {
         let category = TransactionCategory(name: "Utilities", icon: "bolt.fill", colorHex: "7F8C8D")
         context.insert(category)
@@ -75,6 +87,19 @@ final class CloudKitSchemaTests: XCTestCase {
 
         XCTAssertNil(budget.category)
         XCTAssertNil(recurring.category)
+    }
+
+    func testBudgetDeletionNullifiesTransactionBudget() throws {
+        let budget = Budget(name: "Temp Budget", limitAmount: 100)
+        let transaction = Transaction(title: "Temp Spend", amount: 10, type: .expense, budget: budget)
+        context.insert(budget)
+        context.insert(transaction)
+        try context.save()
+
+        context.delete(budget)
+        try context.save()
+
+        XCTAssertNil(transaction.budget)
     }
 
     /// Regression guard: constructing a `ModelContainer` against the CloudKit-enabled
