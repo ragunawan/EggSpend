@@ -48,10 +48,15 @@ struct BudgetView: View {
                 if budgets.isEmpty {
                     emptyState
                 } else {
-                    VStack(spacing: 20) {
-                        summaryStrip
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            summaryStrip
 
-                        ScrollView {
+                            Text("Budget Eggs")
+                                .font(.largeTitle.bold())
+                                .foregroundStyle(.primary)
+                                .padding(.top, Space.xs)
+
                             VStack(spacing: 16) {
                                 if displayed.isEmpty && periodFilter != nil {
                                     filteredEmptyState
@@ -66,14 +71,14 @@ struct BudgetView: View {
                             .padding(Space.md)
                             .frame(maxWidth: .infinity)
                         }
-                        .frame(maxHeight: .infinity)
                     }
                     .padding(.horizontal)
                     .padding(.bottom, Space.xl)
                 }
             }
             .background(NestBackground())
-            .navigationTitle("Budget Eggs")
+            .navigationTitle("Budget")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {

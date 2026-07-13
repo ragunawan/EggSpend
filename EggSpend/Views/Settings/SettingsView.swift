@@ -22,9 +22,12 @@ struct SettingsView: View {
     nonisolated static let appLockStorageKey = "appLockEnabled"
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(AppLockController.self) private var appLockController: AppLockController?
     @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
     @AppStorage(SettingsView.appLockStorageKey) private var appLockEnabled = false
+    @State private var showResetConfirmation = false
+    @State private var resetErrorMessage: String?
 
     @Query private var transactions: [Transaction]
     @Query private var categories: [TransactionCategory]
@@ -116,6 +119,12 @@ struct SettingsView: View {
                             Label("Full Backup (JSON)", systemImage: "externaldrive.fill")
                         }
                     }
+
+                    Button(role: .destructive) {
+                        showResetConfirmation = true
+                    } label: {
+                        Label("Reset All Data", systemImage: "trash.fill")
+                    }
                 }
 
                 Section("Manage") {
@@ -177,6 +186,82 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .alert("Reset All Data?", isPresented: $showResetConfirmation) {
+                Button("Reset", role: .destructive) {
+                    resetAllData()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This permanently deletes transactions, accounts, budgets, goals, recurring items, category rules, transfers, and custom categories. Default categories will be restored.")
+            }
+            .alert("Reset Failed", isPresented: resetErrorBinding) {
+                Button("OK", role: .cancel) {
+                    resetErrorMessage = nil
+                }
+            } message: {
+                Text(resetErrorMessage ?? "The data reset could not be completed.")
+            }
+        }
+    }
+
+    private var resetErrorBinding: Binding<Bool> {
+        Binding(
+            get: { resetErrorMessage != nil },
+            set: { if !$0 { resetErrorMessage = nil } }
+        )
+    }
+
+    private func resetAllData() {
+        do {
+            try deleteAll(CategoryRule.self)
+            try deleteAll(BalanceSnapshot.self)
+            try deleteAll(Transfer.self)
+            try deleteAll(RecurringTransaction.self)
+            try deleteAll(SavingsGoal.self)
+            try deleteAll(Budget.self)
+            try deleteAll(Transaction.self)
+            try deleteAll(Account.self)
+            try deleteAll(TransactionCategory.self)
+            insertDefaultCategories()
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            resetErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func deleteAll<T: PersistentModel>(_ modelType: T.Type) throws {
+        for item in try modelContext.fetch(FetchDescriptor<T>()) {
+            modelContext.delete(item)
+        }
+    }
+
+    private func insertDefaultCategories() {
+        let defaults: [(String, String, String, TransactionType?)] = [
+            ("Food & Dining", "fork.knife", "E67E22", .expense),
+            ("Shopping", "bag.fill", "9B59B6", .expense),
+            ("Transport", "car.fill", "3498DB", .expense),
+            ("Housing", "house.fill", "1ABC9C", .expense),
+            ("Healthcare", "cross.fill", "E74C3C", .expense),
+            ("Entertainment", "tv.fill", "F39C12", .expense),
+            ("Education", "book.fill", "2980B9", .expense),
+            ("Utilities", "bolt.fill", "7F8C8D", .expense),
+            ("Travel", "airplane", "16A085", .expense),
+            ("Salary", "briefcase.fill", "27AE60", .income),
+            ("Freelance", "laptopcomputer", "2ECC71", .income),
+            ("Investment Return", "chart.line.uptrend.xyaxis", "F1C40F", .income),
+            ("Other", "ellipsis.circle.fill", "95A5A6", nil)
+        ]
+
+        for (index, category) in defaults.enumerated() {
+            let (name, icon, colorHex, typeFilter) = category
+            modelContext.insert(TransactionCategory(
+                name: name,
+                icon: icon,
+                colorHex: colorHex,
+                typeFilter: typeFilter,
+                sortOrder: index
+            ))
         }
     }
 }
