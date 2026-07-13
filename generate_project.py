@@ -26,6 +26,8 @@ FR = {
     "TransactionDetailView":u(1, 0x09),
     "NetWorthView":        u(1, 0x0A),
     "MetricsView":         u(1, 0x0B),
+    # Reserved for deleted AccountsView.swift; keep this slot stable so
+    # generated PBXBuildFile IDs for later files do not churn.
     "AccountsView":        u(1, 0x0C),
     "AddAccountView":      u(1, 0x0D),
     "CategoryBadgeView":   u(1, 0x0E),
@@ -234,7 +236,6 @@ APP_SOURCES = [
     ("QuickAddSheet",        "Views/QuickAdd/QuickAddSheet.swift"),
     ("NetWorthView",         "Views/NetWorth/NetWorthView.swift"),
     ("MetricsView",          "Views/Metrics/MetricsView.swift"),
-    ("AccountsView",         "Views/Accounts/AccountsView.swift"),
     ("AddAccountView",       "Views/Accounts/AddAccountView.swift"),
     ("DebtPayoffPlannerView", "Views/Accounts/DebtPayoffPlannerView.swift"),
     ("BudgetView",           "Views/Budget/BudgetView.swift"),
@@ -506,7 +507,7 @@ def pbxproj():
     simple_group("Onboarding",   "Onboarding",   ["OnboardingView"])
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
-    simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])
+    simple_group("Accounts",     "Accounts",     ["AddAccountView","DebtPayoffPlannerView"])
     simple_group("Components",   "Components",   ["DesignSystem","NestBackground","SectionHeader","AmountText","StatTile","ThinProgressBar","CompactProgressRow","LedgerRowView","EmptyStateView","EggProgressView","CategoryBadgeView","AmountLabel"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])

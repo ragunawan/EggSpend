@@ -40,7 +40,6 @@
 		AA0200000000000000000078 /* QuickAddSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000093 /* QuickAddSheet.swift */; };
 		AA020000000000000000000A /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000A /* NetWorthView.swift */; };
 		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
-		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
 		AA020000000000000000000D /* AddAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000D /* AddAccountView.swift */; };
 		AA0200000000000000000049 /* DebtPayoffPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000064 /* DebtPayoffPlannerView.swift */; };
 		AA0200000000000000000016 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000019 /* BudgetView.swift */; };
@@ -172,7 +171,6 @@
 		AA0100000000000000000093 /* QuickAddSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddSheet.swift; sourceTree = "<group>"; };
 		AA010000000000000000000A /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
-		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000D /* AddAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAccountView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000064 /* DebtPayoffPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPayoffPlannerView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000019 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
@@ -440,7 +438,6 @@
 		AA030000000000000000000A /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
-				AA010000000000000000000C /* AccountsView.swift */,
 				AA010000000000000000000D /* AddAccountView.swift */,
 				AA0100000000000000000064 /* DebtPayoffPlannerView.swift */,
 			);
@@ -738,7 +735,6 @@
 				AA0200000000000000000078 /* QuickAddSheet.swift in Sources */,
 				AA020000000000000000000A /* NetWorthView.swift in Sources */,
 				AA020000000000000000000B /* MetricsView.swift in Sources */,
-				AA020000000000000000000C /* AccountsView.swift in Sources */,
 				AA020000000000000000000D /* AddAccountView.swift in Sources */,
 				AA0200000000000000000049 /* DebtPayoffPlannerView.swift in Sources */,
 				AA0200000000000000000016 /* BudgetView.swift in Sources */,
