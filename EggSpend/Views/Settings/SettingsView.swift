@@ -118,6 +118,26 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Manage") {
+                    NavigationLink {
+                        CategoryManagementView()
+                    } label: {
+                        Label("Categories", systemImage: "tag.fill")
+                    }
+
+                    NavigationLink {
+                        RecurringTransactionsView()
+                    } label: {
+                        Label("Recurring", systemImage: "repeat.circle.fill")
+                    }
+
+                    NavigationLink {
+                        SubscriptionAuditView()
+                    } label: {
+                        Label("Subscription audit", systemImage: "magnifyingglass.circle.fill")
+                    }
+                }
+
                 // Only rendered when this device can actually evaluate
                 // device-owner authentication at all (e.g. hidden on a
                 // Simulator with no Face ID/Touch ID enrolled) — mirrors the
