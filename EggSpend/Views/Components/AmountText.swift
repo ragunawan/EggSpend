@@ -26,7 +26,7 @@ struct AmountText: View {
     var style: Style = .row
 
     init(amount: Double, sign: Sign, style: Style = .row) {
-        self.amount = abs(amount)
+        self.amount = sign == .neutral ? amount : abs(amount)
         self.sign = sign
         self.style = style
     }

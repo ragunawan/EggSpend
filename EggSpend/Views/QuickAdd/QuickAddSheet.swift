@@ -31,6 +31,7 @@ struct QuickAddSheet: View {
     @State private var selectedBudget: Budget?
     @State private var date = Date.now
     @State private var isEnteringTitle = false
+    @FocusState private var titleFocused: Bool
 
     var initialKind: EntryKind = .expense
     var onMoreOptions: ((QuickAddDraft) -> Void)?
@@ -56,7 +57,10 @@ struct QuickAddSheet: View {
     }
 
     private var suggestions: [MerchantSuggestion] {
-        MerchantSuggestion.build(from: transactions)
+        let allSuggestions = MerchantSuggestion.build(from: transactions, limit: 20)
+        let query = CSVParser.normalizedTitle(title)
+        guard !query.isEmpty else { return Array(allSuggestions.prefix(6)) }
+        return Array(allSuggestions.filter { $0.id.contains(query) }.prefix(6))
     }
 
     private var availableCategories: [TransactionCategory] {
@@ -76,38 +80,54 @@ struct QuickAddSheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: Space.md) {
-                Capsule()
-                    .fill(Color.secondary.opacity(0.25))
-                    .frame(width: 36, height: 5)
-                    .accessibilityHidden(true)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: Space.md) {
+                        Capsule()
+                            .fill(Color.secondary.opacity(0.25))
+                            .frame(width: 36, height: 5)
+                            .accessibilityHidden(true)
 
-                amountDisplay
-                typePicker
-                suggestionChips
+                        Text("Quick Add")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
 
-                if isEnteringTitle || suggestions.isEmpty {
-                    titleField
+                        amountDisplay
+                        typePicker
+                        suggestionChips
+
+                        if isEnteringTitle || suggestions.isEmpty {
+                            titleField
+                        }
+
+                        defaultsRow
+                        CurrencyKeypadView(amountText: $amountText)
+                            .id("quickAddKeypad")
+
+                        Button {
+                            onMoreOptions?(draft)
+                            dismiss()
+                        } label: {
+                            Label("More options", systemImage: "chevron.down")
+                                .font(.callout.weight(.semibold))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                        .disabled(onMoreOptions == nil)
+                    }
+                    .padding(.horizontal, Space.lg)
+                    .padding(.top, Space.sm)
+                    .padding(.bottom, titleFocused ? 320 : Space.lg)
                 }
-
-                defaultsRow
-                CurrencyKeypadView(amountText: $amountText)
-
-                Button {
-                    onMoreOptions?(draft)
-                    dismiss()
-                } label: {
-                    Label("More options", systemImage: "chevron.down")
-                        .font(.callout.weight(.semibold))
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: titleFocused) { _, isFocused in
+                    guard isFocused else { return }
+                    withAnimation(.snappy) {
+                        proxy.scrollTo("quickAddKeypad", anchor: .bottom)
+                    }
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .disabled(onMoreOptions == nil)
             }
-            .padding(.horizontal, Space.lg)
-            .padding(.top, Space.sm)
-            .padding(.bottom, Space.lg)
-            .navigationTitle("Quick Add")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -154,6 +174,7 @@ struct QuickAddSheet: View {
             HStack(spacing: Space.sm) {
                 Button {
                     isEnteringTitle = true
+                    titleFocused = true
                 } label: {
                     Label(title.isEmpty ? "Payee" : title, systemImage: "text.cursor")
                         .lineLimit(1)
@@ -179,10 +200,14 @@ struct QuickAddSheet: View {
         TextField("Payee", text: $title)
             .textInputAutocapitalization(.words)
             .submitLabel(.done)
+            .focused($titleFocused)
             .padding(.horizontal, Space.md)
             .frame(minHeight: 44)
             .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous))
-            .onSubmit { prefillCategoryForTitle() }
+            .onSubmit {
+                titleFocused = false
+                prefillCategoryForTitle()
+            }
     }
 
     private var defaultsRow: some View {
@@ -269,6 +294,7 @@ struct QuickAddSheet: View {
         title = suggestion.title
         entryKind = suggestion.type == .income ? .income : .expense
         isEnteringTitle = false
+        titleFocused = false
         selectedCategory = resolvedCategory(for: suggestion)
         if let account = suggestion.account, !account.isArchived {
             selectedAccount = account
