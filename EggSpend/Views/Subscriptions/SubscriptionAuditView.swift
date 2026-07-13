@@ -95,10 +95,17 @@ struct SubscriptionAuditView: View {
                         .foregroundStyle(item.category?.color ?? Color.yolk)
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(item.title).font(.body).foregroundStyle(.primary)
+                    Text(item.title)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
                     HStack(spacing: 6) {
                         Label(item.cadence.rawValue, systemImage: item.cadence.icon)
-                            .font(.caption).padding(.horizontal, 6).padding(.vertical, 2)
+                            .font(.caption)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
                             .background(Color.yolk.opacity(0.15), in: Capsule())
                             .foregroundStyle(Color.yolk)
                         if item.priceChanged {
@@ -111,7 +118,11 @@ struct SubscriptionAuditView: View {
                                 item.latestAmount > item.modeAmount ? "Price up" : "Price down",
                                 systemImage: item.latestAmount > item.modeAmount ? "arrow.up" : "arrow.down"
                             )
-                            .font(.caption).padding(.horizontal, 6).padding(.vertical, 2)
+                            .font(.caption)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
                             .background(Color.warningTone.opacity(0.12), in: Capsule())
                             .foregroundStyle(Color.warningTone)
                         }
