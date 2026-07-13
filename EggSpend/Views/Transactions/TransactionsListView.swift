@@ -251,58 +251,57 @@ struct TransactionsListView: View {
     }
 
     private var filterChipsRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: Space.sm) {
-                TransactionsFilterChip(
-                    label: "All",
-                    systemImage: "tray.full",
-                    isSelected: filter.type == nil && !hideTransfers && showUpcoming
-                ) {
+        WrappingFilterChipLayout(horizontalSpacing: Space.sm, verticalSpacing: Space.sm) {
+            TransactionsFilterChip(
+                label: "All",
+                systemImage: "tray.full",
+                isSelected: filter.type == nil && !hideTransfers && showUpcoming
+            ) {
+                filter.type = nil
+                hideTransfers = false
+                showUpcoming = true
+            }
+
+            TransactionsFilterChip(
+                label: "Expenses",
+                systemImage: TransactionType.expense.systemImage,
+                isSelected: filter.type == .expense
+            ) {
+                filter.type = filter.type == .expense ? nil : .expense
+            }
+
+            TransactionsFilterChip(
+                label: "Income",
+                systemImage: TransactionType.income.systemImage,
+                isSelected: filter.type == .income
+            ) {
+                filter.type = filter.type == .income ? nil : .income
+            }
+
+            TransactionsFilterChip(
+                label: "Transfers",
+                systemImage: "arrow.left.arrow.right",
+                isSelected: filter.type == nil && !hideTransfers
+            ) {
+                if filter.type != nil || hideTransfers {
                     filter.type = nil
                     hideTransfers = false
-                    showUpcoming = true
-                }
-
-                TransactionsFilterChip(
-                    label: "Expenses",
-                    systemImage: TransactionType.expense.systemImage,
-                    isSelected: filter.type == .expense
-                ) {
-                    filter.type = filter.type == .expense ? nil : .expense
-                }
-
-                TransactionsFilterChip(
-                    label: "Income",
-                    systemImage: TransactionType.income.systemImage,
-                    isSelected: filter.type == .income
-                ) {
-                    filter.type = filter.type == .income ? nil : .income
-                }
-
-                TransactionsFilterChip(
-                    label: "Transfers",
-                    systemImage: "arrow.left.arrow.right",
-                    isSelected: filter.type == nil && !hideTransfers
-                ) {
-                    if filter.type != nil || hideTransfers {
-                        filter.type = nil
-                        hideTransfers = false
-                    } else {
-                        hideTransfers = true
-                    }
-                }
-
-                TransactionsFilterChip(
-                    label: "Upcoming",
-                    systemImage: "calendar.badge.clock",
-                    isSelected: showUpcoming
-                ) {
-                    showUpcoming.toggle()
+                } else {
+                    hideTransfers = true
                 }
             }
-            .padding(.horizontal, Space.lg)
-            .padding(.vertical, Space.xs)
+
+            TransactionsFilterChip(
+                label: "Upcoming",
+                systemImage: "calendar.badge.clock",
+                isSelected: showUpcoming
+            ) {
+                showUpcoming.toggle()
+            }
         }
+        .padding(.horizontal, Space.lg)
+        .padding(.vertical, Space.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial)
     }
 
@@ -461,9 +460,90 @@ private struct TransactionsFilterChip: View {
                 .frame(minHeight: 44)
                 .background(isSelected ? Color.yolk : Color.yolk.opacity(0.12), in: Capsule())
                 .foregroundStyle(isSelected ? .white : Color.yolk)
+                .fixedSize(horizontal: true, vertical: false)
         }
         .buttonStyle(.plain)
         .animation(.quickFade, value: isSelected)
+    }
+}
+
+private struct WrappingFilterChipLayout: Layout {
+    var horizontalSpacing: CGFloat
+    var verticalSpacing: CGFloat
+
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Void
+    ) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        let rows = measuredRows(in: maxWidth, subviews: subviews)
+        let width = proposal.width ?? rows.map(\.width).max() ?? 0
+        let height = rows.reduce(0) { partial, row in
+            partial + row.height
+        } + CGFloat(max(rows.count - 1, 0)) * verticalSpacing
+
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Void
+    ) {
+        let rows = measuredRows(in: bounds.width, subviews: subviews)
+        var y = bounds.minY
+
+        for row in rows {
+            var x = bounds.minX
+            for item in row.items {
+                subviews[item.index].place(
+                    at: CGPoint(x: x, y: y + (row.height - item.size.height) / 2),
+                    proposal: ProposedViewSize(width: item.size.width, height: item.size.height)
+                )
+                x += item.size.width + horizontalSpacing
+            }
+            y += row.height + verticalSpacing
+        }
+    }
+
+    private func measuredRows(in maxWidth: CGFloat, subviews: Subviews) -> [Row] {
+        guard !subviews.isEmpty else { return [] }
+
+        var rows: [Row] = []
+        var current = Row()
+
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let additionalWidth = current.items.isEmpty ? size.width : horizontalSpacing + size.width
+
+            if current.width + additionalWidth > maxWidth, !current.items.isEmpty {
+                rows.append(current)
+                current = Row()
+            }
+
+            current.items.append(Item(index: index, size: size))
+            current.width += current.items.count == 1 ? size.width : horizontalSpacing + size.width
+            current.height = max(current.height, size.height)
+        }
+
+        if !current.items.isEmpty {
+            rows.append(current)
+        }
+
+        return rows
+    }
+
+    private struct Row {
+        var items: [Item] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private struct Item {
+        let index: Int
+        let size: CGSize
     }
 }
 
