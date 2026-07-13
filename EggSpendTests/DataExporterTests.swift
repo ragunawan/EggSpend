@@ -286,6 +286,7 @@ final class DataExporterTests: XCTestCase {
         let checking = Account(name: "Checking", type: .checking, balance: 1000)
         let visa = Account(name: "Visa", type: .credit, balance: -250)
         checking.createdAt = epochInstant(1_700_000_000)
+        checking.isDefaultChecking = true
         visa.createdAt = epochInstant(1_700_000_100)
         visa.dueDate = fixtureDate(2024, 4, 1)
         visa.annualPercentageRate = 21.99
@@ -401,6 +402,7 @@ final class DataExporterTests: XCTestCase {
         XCTAssertEqual(envelope.transactions[1].categoryName, "Groceries")
         XCTAssertEqual(envelope.transactions[1].budgetID, fixture.budgets[0].id)
         XCTAssertEqual(envelope.transactions[1].budgetName, "Groceries budget")
+        XCTAssertEqual(envelope.accounts[0].isDefaultChecking, true)
         XCTAssertEqual(envelope.budgets[0].lastAlertedThreshold, 80)
         XCTAssertEqual(envelope.transfers[0].toAccountID, nil)
         XCTAssertEqual(envelope.transfers[0].fromAccountID, fixture.accounts[0].id)

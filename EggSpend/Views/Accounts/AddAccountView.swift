@@ -5,6 +5,8 @@ struct AddAccountView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
+    @Query(sort: \Account.name) private var accounts: [Account]
+
     var editingAccount: Account? = nil
 
     @State private var name = ""
@@ -24,6 +26,7 @@ struct AddAccountView: View {
     @State private var mortgagePMIText = ""
     @State private var mortgageEscrowText = ""
     @State private var includeInNetWorth = true
+    @State private var isDefaultChecking = false
     @State private var showValidationError = false
     @State private var loadedBalance: Double = 0
     @State private var hasPopulated = false
@@ -50,6 +53,11 @@ struct AddAccountView: View {
                             extraPaymentText = ""
                             includeInNetWorth = true
                         }
+                        if newType == .checking, !hasOtherDefaultCheckingAccount {
+                            isDefaultChecking = true
+                        } else if newType != .checking {
+                            isDefaultChecking = false
+                        }
                         if newType != .mortgage {
                             mortgageOriginalPrincipalText = ""
                             mortgageTermYearsText = ""
@@ -74,6 +82,9 @@ struct AddAccountView: View {
                             DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
                         }
                         Toggle("Include in Nest Egg", isOn: $includeInNetWorth)
+                    }
+                    if selectedType == .checking {
+                        Toggle("Default Checking Account", isOn: $isDefaultChecking)
                     }
                 }
 
@@ -162,6 +173,7 @@ struct AddAccountView: View {
             account.plannedExtraPayment = selectedType.isAsset ? nil : AmountParser.parse(extraPaymentText)
             applyMortgageFields(to: account)
             account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
+            applyDefaultCheckingSelection(to: account)
         } else {
             let account = Account(
                 name: name.trimmingCharacters(in: .whitespaces),
@@ -175,13 +187,17 @@ struct AddAccountView: View {
             account.plannedExtraPayment = selectedType.isAsset ? nil : AmountParser.parse(extraPaymentText)
             applyMortgageFields(to: account)
             account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
+            applyDefaultCheckingSelection(to: account)
             modelContext.insert(account)
         }
         dismiss()
     }
 
     private func populateIfEditing() {
-        guard let account = editingAccount else { return }
+        guard let account = editingAccount else {
+            isDefaultChecking = selectedType == .checking && !hasOtherDefaultCheckingAccount
+            return
+        }
         name = account.name
         selectedType = account.type
         balanceText = abs(account.balance).formatted(.number.precision(.fractionLength(2)).grouping(.never))
@@ -200,6 +216,27 @@ struct AddAccountView: View {
         mortgagePMIText = account.mortgageMonthlyPMI.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
         mortgageEscrowText = account.mortgageMonthlyEscrow.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
         includeInNetWorth = account.includeInNetWorth
+        isDefaultChecking = account.type == .checking && account.isDefaultChecking
+    }
+
+    private var hasOtherDefaultCheckingAccount: Bool {
+        accounts.contains { account in
+            account.type == .checking
+                && account.isDefaultChecking
+                && account.id != editingAccount?.id
+        }
+    }
+
+    private func applyDefaultCheckingSelection(to account: Account) {
+        guard selectedType == .checking, isDefaultChecking else {
+            account.isDefaultChecking = false
+            return
+        }
+
+        for other in accounts where other.id != account.id && other.type == .checking {
+            other.isDefaultChecking = false
+        }
+        account.isDefaultChecking = true
     }
 
     private func applyMortgageFields(to account: Account) {

@@ -57,6 +57,20 @@ struct NetWorthView: View {
             days: 30
         )
     }
+    private var trendSundayMarks: [Date] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date.now)
+        let weekday = calendar.component(.weekday, from: today)
+        let daysSinceSunday = weekday - 1
+        guard let mostRecentSunday = calendar.date(byAdding: .day, value: -daysSinceSunday, to: today) else {
+            return []
+        }
+
+        return (0..<4).compactMap { offset in
+            calendar.date(byAdding: .day, value: -(offset * 7), to: mostRecentSunday)
+        }
+        .sorted()
+    }
 
     var body: some View {
         NavigationStack {
@@ -217,7 +231,7 @@ struct NetWorthView: View {
                 .chartYScale(domain: yDomain)
                 .chartYAxis(.hidden)
                 .chartXAxis {
-                    AxisMarks(values: .automatic(desiredCount: 3)) { _ in
+                    AxisMarks(values: trendSundayMarks) { _ in
                         AxisGridLine()
                         AxisValueLabel(format: .dateTime.month(.abbreviated).day())
                     }
@@ -241,6 +255,7 @@ struct NetWorthView: View {
                             AccountRowView(account: account, recentExpenseTotal: nil)
                         }
                         .buttonStyle(.plain)
+                        .listRowInsets(compactAccountRowInsets)
                         .swipeActions(edge: .trailing) {
                             Button("Archive", systemImage: "archivebox") {
                                 accountToArchive = account
@@ -270,6 +285,7 @@ struct NetWorthView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .listRowInsets(compactAccountRowInsets)
                         .swipeActions(edge: .leading) {
                             Button("Edit", systemImage: "pencil") {
                                 editingAccount = account
@@ -300,6 +316,7 @@ struct NetWorthView: View {
                 ForEach(archivedAccounts) { account in
                     AccountRowView(account: account, recentExpenseTotal: nil)
                         .opacity(0.55)
+                        .listRowInsets(compactAccountRowInsets)
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button("Unarchive", systemImage: "arrow.uturn.backward") {
                                 account.isArchived = false
@@ -319,6 +336,10 @@ struct NetWorthView: View {
 
     @Environment(\.modelContext) private var modelContext
 
+    private var compactAccountRowInsets: EdgeInsets {
+        EdgeInsets(top: 2, leading: Space.md, bottom: 2, trailing: Space.md)
+    }
+
     private func rollLiabilityDueDates() {
         for account in accounts where account.isLiability {
             account.rollDueDateIfNeeded()
@@ -331,18 +352,18 @@ private struct AccountRowView: View {
     let recentExpenseTotal: Double?
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             ZStack {
                 Circle()
                     .fill((account.isAsset ? Color.nestLeafGreen : Color.negative).opacity(0.15))
-                    .frame(width: 32, height: 32)
+                    .frame(width: 26, height: 26)
                 Image(systemName: account.type.icon)
-                    .font(.subheadline)
+                    .font(.caption)
                     .foregroundStyle(account.isAsset ? Color.nestLeafGreen : Color.negative)
             }
             VStack(alignment: .leading, spacing: 1) {
                 Text(account.name)
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.medium))
                     .lineLimit(1)
                 HStack(spacing: Space.xs) {
                     Text(account.type.rawValue)
@@ -369,7 +390,7 @@ private struct AccountRowView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
-        .padding(.vertical, Space.xs)
+        .padding(.vertical, 2)
     }
 }
 

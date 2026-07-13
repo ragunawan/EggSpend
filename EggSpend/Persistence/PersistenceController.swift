@@ -98,8 +98,14 @@ enum PersistenceController {
             ("Student Loan",      .loan,     -24_000),
         ]
         for (name, type, balance) in accounts {
-            context.insert(Account(name: name, type: type, balance: balance,
-                                   notes: type == .investment ? "Vanguard target-date fund" : ""))
+            let account = Account(
+                name: name,
+                type: type,
+                balance: balance,
+                notes: type == .investment ? "Vanguard target-date fund" : ""
+            )
+            account.isDefaultChecking = type == .checking
+            context.insert(account)
         }
 
         // Seed budgets (only if none exist yet)
@@ -216,7 +222,9 @@ enum PersistenceController {
             ("Student Loan", .loan, -22_000)
         ]
         for (name, type, balance) in accounts {
-            context.insert(Account(name: name, type: type, balance: balance))
+            let account = Account(name: name, type: type, balance: balance)
+            account.isDefaultChecking = type == .checking
+            context.insert(account)
         }
 
         do {

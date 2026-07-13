@@ -135,7 +135,7 @@ enum DataExporter {
     /// Current schema version for `fullBackupJSON`'s output. Bump this (and
     /// teach `validateBackup` / a future restore path about the delta) any
     /// time `BackupEnvelope` or a DTO's shape changes.
-    static let currentSchemaVersion = 2
+    static let currentSchemaVersion = 3
 
     /// Builds a full, versioned JSON backup of all 7 persistent models.
     /// `appVersion`/`buildNumber` default to `Bundle.main`'s Info.plist
@@ -340,6 +340,7 @@ struct AccountDTO: Codable, Equatable {
     var mortgageMonthlyEscrow: Double?
     var includeInNetWorth: Bool
     var isArchived: Bool
+    var isDefaultChecking: Bool
 
     init(_ account: Account) {
         id = account.id
@@ -361,6 +362,31 @@ struct AccountDTO: Codable, Equatable {
         mortgageMonthlyEscrow = account.mortgageMonthlyEscrow
         includeInNetWorth = account.includeInNetWorth
         isArchived = account.isArchived
+        isDefaultChecking = account.isDefaultChecking
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        type = try container.decode(String.self, forKey: .type)
+        balance = try container.decode(Double.self, forKey: .balance)
+        notes = try container.decode(String.self, forKey: .notes)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        dueDate = try container.decodeIfPresent(Date.self, forKey: .dueDate)
+        annualPercentageRate = try container.decodeIfPresent(Double.self, forKey: .annualPercentageRate)
+        minimumPayment = try container.decodeIfPresent(Double.self, forKey: .minimumPayment)
+        plannedExtraPayment = try container.decodeIfPresent(Double.self, forKey: .plannedExtraPayment)
+        mortgageOriginalPrincipal = try container.decodeIfPresent(Double.self, forKey: .mortgageOriginalPrincipal)
+        mortgageTermMonths = try container.decodeIfPresent(Int.self, forKey: .mortgageTermMonths)
+        mortgageFirstPaymentDate = try container.decodeIfPresent(Date.self, forKey: .mortgageFirstPaymentDate)
+        mortgageMonthlyPropertyTax = try container.decodeIfPresent(Double.self, forKey: .mortgageMonthlyPropertyTax)
+        mortgageMonthlyInsurance = try container.decodeIfPresent(Double.self, forKey: .mortgageMonthlyInsurance)
+        mortgageMonthlyPMI = try container.decodeIfPresent(Double.self, forKey: .mortgageMonthlyPMI)
+        mortgageMonthlyEscrow = try container.decodeIfPresent(Double.self, forKey: .mortgageMonthlyEscrow)
+        includeInNetWorth = try container.decode(Bool.self, forKey: .includeInNetWorth)
+        isArchived = try container.decode(Bool.self, forKey: .isArchived)
+        isDefaultChecking = try container.decodeIfPresent(Bool.self, forKey: .isDefaultChecking) ?? false
     }
 }
 

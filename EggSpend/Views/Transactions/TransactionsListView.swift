@@ -70,7 +70,9 @@ struct TransactionsListView: View {
             }
 
             let dueDay = Calendar.current.startOfDay(for: dueDate)
-            guard !hasGeneratedCreditCardPayment(for: account, dueDate: dueDay) else { return nil }
+            guard defaultCheckingAccount != nil,
+                  !hasGeneratedCreditCardPayment(for: account, dueDate: dueDay)
+            else { return nil }
 
             let events = ForecastEngine.creditCardPaymentEvents(
                 from: [account],
@@ -97,40 +99,46 @@ struct TransactionsListView: View {
     }
 
     private func hasGeneratedCreditCardPayment(for account: Account, dueDate: Date) -> Bool {
-        transactions.contains { transaction in
-            transaction.isGenerated
-                && transaction.recurringSourceID == nil
-                && transaction.account?.id == account.id
-                && Calendar.current.isDate(transaction.date, inSameDayAs: dueDate)
-                && transaction.title == "\(account.name) payment"
+        transfers.contains { transfer in
+            transfer.toAccount?.id == account.id
+                && Calendar.current.isDate(transfer.date, inSameDayAs: dueDate)
+                && transfer.notes == generatedCreditCardPaymentNotes(for: account)
         }
     }
 
-    private func generatedCreditCardPayment(from payment: UpcomingPayment) -> Transaction? {
-        guard let account = payment.account else { return nil }
-        if let existing = transactions.first(where: {
-            $0.isGenerated
-                && $0.recurringSourceID == nil
-                && $0.account?.id == account.id
+    private var defaultCheckingAccount: Account? {
+        accounts.first { !$0.isArchived && $0.type == .checking && $0.isDefaultChecking }
+    }
+
+    private func generatedCreditCardPaymentTransfer(from payment: UpcomingPayment) -> Transfer? {
+        guard let creditCard = payment.account,
+              let checking = defaultCheckingAccount
+        else { return nil }
+
+        let notes = generatedCreditCardPaymentNotes(for: creditCard)
+        if let existing = transfers.first(where: {
+            $0.toAccount?.id == creditCard.id
                 && Calendar.current.isDate($0.date, inSameDayAs: payment.dueDate)
-                && $0.title == payment.title
+                && $0.notes == notes
         }) {
             return existing
         }
 
-        let transaction = Transaction(
-            title: payment.title,
+        let transfer = Transfer(
             amount: payment.amount,
             date: payment.dueDate,
-            type: .expense,
-            account: account,
-            notes: "Auto-generated from credit card due date: \(account.name)",
-            isGenerated: true
+            fromAccount: checking,
+            toAccount: creditCard,
+            notes: notes
         )
-        modelContext.insert(transaction)
-        AccountBalanceService.apply(transaction, to: account)
+        modelContext.insert(transfer)
+        TransferBalanceService.apply(transfer)
         try? modelContext.save()
-        return transaction
+        return transfer
+    }
+
+    private func generatedCreditCardPaymentNotes(for account: Account) -> String {
+        "Auto-generated from credit card due date: \(account.name)"
     }
 
     private var rows: [LedgerRow] {
@@ -456,7 +464,7 @@ struct TransactionsListView: View {
             }
         case .upcomingPayment(let payment):
             Button {
-                editingTransaction = generatedCreditCardPayment(from: payment)
+                editingTransfer = generatedCreditCardPaymentTransfer(from: payment)
             } label: {
                 LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
             }

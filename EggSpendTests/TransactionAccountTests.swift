@@ -43,6 +43,17 @@ final class TransactionAccountTests: XCTestCase {
         XCTAssertEqual(account.balance, 900, accuracy: 0.001)
     }
 
+    func testCheckingAccountCanStoreDefaultCheckingFlag() throws {
+        let account = Account(name: "Primary Checking", type: .checking, balance: 1000)
+        account.isDefaultChecking = true
+        context.insert(account)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(fetched.first?.type, .checking)
+        XCTAssertEqual(fetched.first?.isDefaultChecking, true)
+    }
+
     // MARK: - Liability account balance rules
 
     func testIncomeReducesLiabilityBalance() throws {

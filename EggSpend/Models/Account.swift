@@ -55,6 +55,7 @@ final class Account {
     var mortgageMonthlyEscrow: Double?
     var includeInNetWorth: Bool = true
     var isArchived: Bool = false
+    var isDefaultChecking: Bool = false
 
     var type: AccountType {
         get { AccountType(rawValue: typeRaw) ?? .other }
