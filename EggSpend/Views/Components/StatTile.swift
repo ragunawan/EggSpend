@@ -52,6 +52,10 @@ struct StatTile<Destination: View>: View {
                 Text(trend)
                     .font(NestType.meta)
                     .foregroundStyle(trendColor)
+            } else {
+                Text(" ")
+                    .font(NestType.meta)
+                    .accessibilityHidden(true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

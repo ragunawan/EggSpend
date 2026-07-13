@@ -6,6 +6,7 @@ struct TransactionsListView: View {
 
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Transfer.date, order: .reverse) private var transfers: [Transfer]
+    @Query private var accounts: [Account]
     @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Query(filter: #Predicate<RecurringTransaction> { $0.isActive == true }, sort: \RecurringTransaction.nextDueDate)
     private var recurring: [RecurringTransaction]
@@ -61,11 +62,33 @@ struct TransactionsListView: View {
             }
     }
 
+    private var upcomingCreditCardPayments: [UpcomingPayment] {
+        guard showUpcoming else { return [] }
+        return ForecastEngine.creditCardPaymentEvents(from: Array(accounts)).map { event in
+            UpcomingPayment(
+                id: "credit-card-\(event.title)-\(Int(event.date.timeIntervalSince1970))",
+                title: event.title,
+                amount: abs(event.amount),
+                dueDate: event.date,
+                icon: event.categoryIcon,
+                iconColor: .info,
+                accountName: event.title.replacingOccurrences(of: " payment", with: "")
+            )
+        }
+        .filter { payment in
+            let matchesSearch = searchText.isEmpty
+                || payment.title.localizedCaseInsensitiveContains(searchText)
+                || (payment.accountName?.localizedCaseInsensitiveContains(searchText) ?? false)
+            return matchesSearch && matchesFilter(payment)
+        }
+    }
+
     private var rows: [LedgerRow] {
         (
             filteredTransactions.map(LedgerRow.transaction)
             + filteredTransfers.map(LedgerRow.transfer)
             + upcomingRecurring.map(LedgerRow.upcoming)
+            + upcomingCreditCardPayments.map(LedgerRow.upcomingPayment)
         )
             .sorted { $0.date > $1.date }
     }
@@ -381,6 +404,8 @@ struct TransactionsListView: View {
             NavigationLink(destination: RecurringTransactionsView()) {
                 LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
             }
+        case .upcomingPayment:
+            LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
         }
     }
 
@@ -400,6 +425,8 @@ struct TransactionsListView: View {
                 TransferBalanceService.reverse(transfer)
                 modelContext.delete(transfer)
             case .upcoming:
+                continue
+            case .upcomingPayment:
                 continue
             }
         }
@@ -432,6 +459,37 @@ struct TransactionsListView: View {
             return false
         }
         if let maxAmount = filter.maxAmount, occurrence.amount > maxAmount {
+            return false
+        }
+        if filter.generatedOnly {
+            return false
+        }
+        return true
+    }
+
+    private func matchesFilter(_ payment: UpcomingPayment) -> Bool {
+        if let type = filter.type, type != .expense {
+            return false
+        }
+        if !filter.categoryIDs.isEmpty || filter.uncategorizedOnly {
+            return false
+        }
+        if !filter.accountIDs.isEmpty {
+            guard let account = accounts.first(where: { $0.name == payment.accountName }),
+                  filter.accountIDs.contains(account.id) else {
+                return false
+            }
+        }
+        if let startDate = filter.startDate, payment.dueDate < Calendar.current.startOfDay(for: startDate) {
+            return false
+        }
+        if let endDate = filter.endDate, payment.dueDate > Calendar.current.endOfDay(for: endDate) {
+            return false
+        }
+        if let minAmount = filter.minAmount, payment.amount < minAmount {
+            return false
+        }
+        if let maxAmount = filter.maxAmount, payment.amount > maxAmount {
             return false
         }
         if filter.generatedOnly {

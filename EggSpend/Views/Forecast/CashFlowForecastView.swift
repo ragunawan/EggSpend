@@ -160,6 +160,7 @@ struct CashFlowForecastView: View {
                 let minBal = pts.map(\.balance).min() ?? 0
                 let maxBal = pts.map(\.balance).max() ?? 1
                 let yPad  = max((maxBal - minBal) * 0.12, 100)
+                let yDomain = (minBal - yPad)...(maxBal + yPad)
 
                 Chart {
                     ForEach(pts, id: \.date) { p in
@@ -221,13 +222,23 @@ struct CashFlowForecastView: View {
                     }
                 }
                 .chartXSelection(value: $selectedDate)
+                .chartYScale(domain: yDomain)
                 .chartYAxis {
-                    AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
+                    AxisMarks(values: .automatic(desiredCount: 5)) { value in
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel {
+                            if let balance = value.as(Double.self) {
+                                Text(CompactCurrencyAxisFormatter.string(from: balance, currencySymbol: CurrencyFormat.symbol))
+                            }
+                        }
+                    }
                 }
                 .chartXAxis {
-                    AxisMarks(values: .automatic(desiredCount: 5)) { _ in
+                    AxisMarks(values: xAxisWeekMarks(for: pts)) { _ in
                         AxisGridLine()
-                        AxisValueLabel(format: xAxisFormat, centered: true)
+                        AxisTick()
+                        AxisValueLabel(format: .dateTime.month(.abbreviated).day(), centered: true)
                     }
                 }
                 .frame(height: 220)
@@ -441,12 +452,13 @@ struct CashFlowForecastView: View {
         }
     }
 
-    // MARK: - Axis Format
+    // MARK: - Axis Marks
 
-    private var xAxisFormat: Date.FormatStyle {
-        switch horizon {
-        case .days30:        return .dateTime.month(.abbreviated).day()
-        case .days60, .days90: return .dateTime.month(.abbreviated).day()
+    private func xAxisWeekMarks(for points: [ForecastDataPoint]) -> [Date] {
+        guard let firstDate = points.first?.date else { return [] }
+        let calendar = Calendar.current
+        return (1...4).compactMap { week in
+            calendar.date(byAdding: .day, value: week * 7, to: firstDate)
         }
     }
 }

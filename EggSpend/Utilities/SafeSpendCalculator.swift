@@ -72,8 +72,12 @@ enum SafeSpendCalculator {
 
     // ASSUMPTION: Recurring income within the horizon offsets recurring expenses;
     // only a net outflow is reserved. A net inflow does not increase safe-to-spend.
-    static func upcomingNetOutflowReserve(recurring: [RecurringTransaction], horizonDays: Int) -> Double {
-        let events = ForecastEngine.upcomingEvents(from: recurring, horizonDays: horizonDays)
+    static func upcomingNetOutflowReserve(
+        recurring: [RecurringTransaction],
+        accounts: [Account] = [],
+        horizonDays: Int
+    ) -> Double {
+        let events = ForecastEngine.upcomingEvents(from: recurring, accounts: accounts, horizonDays: horizonDays)
         let net = events.reduce(0.0) { $0 + $1.amount }
         return max(0, -net)
     }
@@ -141,7 +145,7 @@ enum SafeSpendCalculator {
         let liquid = ForecastEngine.liquidBalance(from: accounts)
         let avgDailyExpenses = averageDailyExpenses(from: transactions)
         let buffer = max(minimumBuffer, avgDailyExpenses * bufferDaysOfExpenses)
-        let outflowReserve = upcomingNetOutflowReserve(recurring: recurring, horizonDays: horizonDays)
+        let outflowReserve = upcomingNetOutflowReserve(recurring: recurring, accounts: accounts, horizonDays: horizonDays)
         let (savingsReserve, unscheduledNames) = plannedSavingsReserve(savingsGoals: savingsGoals)
 
         let cashAvailable = liquid - buffer - outflowReserve - savingsReserve

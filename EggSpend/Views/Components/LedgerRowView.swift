@@ -4,12 +4,14 @@ enum LedgerRow: Identifiable {
     case transaction(Transaction)
     case transfer(Transfer)
     case upcoming(RecurringOccurrence)
+    case upcomingPayment(UpcomingPayment)
 
     var id: String {
         switch self {
         case .transaction(let transaction): "transaction-\(transaction.id.uuidString)"
         case .transfer(let transfer): "transfer-\(transfer.id.uuidString)"
         case .upcoming(let occurrence): "upcoming-\(occurrence.id)"
+        case .upcomingPayment(let payment): "upcoming-payment-\(payment.id)"
         }
     }
 
@@ -18,13 +20,25 @@ enum LedgerRow: Identifiable {
         case .transaction(let transaction): transaction.date
         case .transfer(let transfer): transfer.date
         case .upcoming(let occurrence): occurrence.dueDate
+        case .upcomingPayment(let payment): payment.dueDate
         }
     }
 
     var isUpcoming: Bool {
         if case .upcoming = self { return true }
+        if case .upcomingPayment = self { return true }
         return false
     }
+}
+
+struct UpcomingPayment: Identifiable {
+    let id: String
+    let title: String
+    let amount: Double
+    let dueDate: Date
+    let icon: String
+    let iconColor: Color
+    let accountName: String?
 }
 
 struct LedgerRowView: View {
@@ -93,6 +107,8 @@ struct LedgerRowView: View {
             AmountText(amount: transfer.amount, sign: .neutral)
         case .upcoming(let occurrence):
             AmountText(amount: occurrence.amount, type: occurrence.type)
+        case .upcomingPayment(let payment):
+            AmountText(amount: payment.amount, type: .expense)
         }
     }
 
@@ -101,6 +117,7 @@ struct LedgerRowView: View {
         case .transaction(let transaction): transaction.title
         case .transfer(let transfer): transferTitle(transfer)
         case .upcoming(let occurrence): occurrence.title
+        case .upcomingPayment(let payment): payment.title
         }
     }
 
@@ -112,6 +129,8 @@ struct LedgerRowView: View {
             "arrow.left.arrow.right"
         case .upcoming(let occurrence):
             occurrence.category?.icon ?? occurrence.source.frequency.icon
+        case .upcomingPayment(let payment):
+            payment.icon
         }
     }
 
@@ -123,6 +142,8 @@ struct LedgerRowView: View {
             .textSecondaryWarm
         case .upcoming(let occurrence):
             occurrence.category?.color ?? .info
+        case .upcomingPayment(let payment):
+            payment.iconColor
         }
     }
 
@@ -158,6 +179,15 @@ struct LedgerRowView: View {
                 values.append(occurrence.dueDate.formatted(date: .abbreviated, time: .omitted))
             }
             return values
+        case .upcomingPayment(let payment):
+            var values = [String(localized: "Upcoming")]
+            if showsMeta.contains(.account), let accountName = payment.accountName {
+                values.append(accountName)
+            }
+            if showsMeta.contains(.date) {
+                values.append(payment.dueDate.formatted(date: .abbreviated, time: .omitted))
+            }
+            return values
         }
     }
 
@@ -175,11 +205,21 @@ struct LedgerRowView: View {
     let transfer = Transfer(amount: 250, fromAccount: checking, toAccount: savings)
     let recurring = RecurringTransaction(title: "Rent", amount: 1_500, type: .expense, account: checking)
     let occurrence = RecurringOccurrence(id: "preview", source: recurring, dueDate: .now)
+    let payment = UpcomingPayment(
+        id: "card",
+        title: "Card payment",
+        amount: 125,
+        dueDate: .now,
+        icon: "creditcard",
+        iconColor: .info,
+        accountName: "Rewards Card"
+    )
 
     VStack(spacing: Space.md) {
         LedgerRowView(row: .transaction(transaction))
         LedgerRowView(row: .transfer(transfer))
         LedgerRowView(row: .upcoming(occurrence), style: .upcoming)
+        LedgerRowView(row: .upcomingPayment(payment), style: .upcoming)
     }
     .padding(Space.lg)
 }
