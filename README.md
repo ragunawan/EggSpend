@@ -7,6 +7,7 @@ A SwiftUI personal finance app for tracking transactions, budgets, accounts, and
   <img src="screenshots/iphone-6.3/02-transactions.png" width="200" alt="Transactions" />
   <img src="screenshots/iphone-6.3/03-budget.png" width="200" alt="Budget" />
   <img src="screenshots/iphone-6.3/04-net-worth.png" width="200" alt="Net Worth" />
+  <img src="screenshots/iphone-6.3/05-metrics.png" width="200" alt="Metrics" />
 </p>
 
 ## Features
