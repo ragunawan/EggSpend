@@ -7,20 +7,42 @@ struct MonthlyReviewView: View {
     @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
 
     @State private var selectedMonth: Date = Calendar.current.startOfMonth(for: .now)
+    @State private var review: MonthlyReviewData = .empty
 
     // MARK: - Derived data
 
-    private var review: MonthlyReviewData {
-        MonthlyReviewCalculator.calculate(
-            month: selectedMonth,
-            transactions: Array(transactions),
-            accounts: Array(accounts),
-            budgets: Array(budgets)
-        )
-    }
-
     private var isCurrentMonth: Bool {
         Calendar.current.startOfMonth(for: selectedMonth) == Calendar.current.startOfMonth(for: .now)
+    }
+
+    private var reviewInputSignature: Int {
+        var hasher = Hasher()
+        hasher.combine(selectedMonth.timeIntervalSinceReferenceDate)
+        for transaction in transactions {
+            hasher.combine(transaction.id)
+            hasher.combine(transaction.amount)
+            hasher.combine(transaction.date.timeIntervalSinceReferenceDate)
+            hasher.combine(transaction.typeRaw)
+            hasher.combine(transaction.isAdjustment)
+            hasher.combine(transaction.category?.id)
+            hasher.combine(transaction.account?.id)
+        }
+        for account in accounts {
+            hasher.combine(account.id)
+            hasher.combine(account.balance)
+            hasher.combine(account.typeRaw)
+            hasher.combine(account.includeInNetWorth)
+            hasher.combine(account.isArchived)
+        }
+        for budget in budgets {
+            hasher.combine(budget.id)
+            hasher.combine(budget.name)
+            hasher.combine(budget.limitAmount)
+            hasher.combine(budget.periodRaw)
+            hasher.combine(budget.isActive)
+            hasher.combine(budget.category?.id)
+        }
+        return hasher.finalize()
     }
 
     // MARK: - Body
@@ -43,6 +65,8 @@ struct MonthlyReviewView: View {
         }
         .navigationTitle("Monthly Review")
         .toolbarBackground(.hidden, for: .navigationBar)
+        .onAppear(perform: refreshReview)
+        .onChange(of: reviewInputSignature) { _, _ in refreshReview() }
     }
 
     // MARK: - Month navigation
@@ -54,14 +78,15 @@ struct MonthlyReviewView: View {
                     changeMonth(by: -1)
                 } label: {
                     Image(systemName: "chevron.left.circle.fill")
-                        .font(.title2)
+                        .font(.body.weight(.semibold))
                         .foregroundStyle(Color.yolk)
                 }
+                .buttonStyle(.plain)
 
                 Spacer()
 
                 Text(selectedMonth, format: .dateTime.month(.wide).year())
-                    .font(.headline)
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.nestBrown)
                     .contentTransition(.numericText())
 
@@ -71,21 +96,32 @@ struct MonthlyReviewView: View {
                     changeMonth(by: 1)
                 } label: {
                     Image(systemName: "chevron.right.circle.fill")
-                        .font(.title2)
+                        .font(.body.weight(.semibold))
                         .foregroundStyle(isCurrentMonth ? Color.twig.opacity(0.4) : Color.yolk)
                 }
+                .buttonStyle(.plain)
                 .disabled(isCurrentMonth)
             }
-            .padding(.vertical, 6)
+            .padding(.vertical, 1)
         }
         .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: 2, leading: 20, bottom: 2, trailing: 20))
     }
 
     private func changeMonth(by value: Int) {
         guard let newMonth = Calendar.current.date(byAdding: .month, value: value, to: selectedMonth) else { return }
-        withAnimation(.easeInOut(duration: 0.25)) {
+        withAnimation(.easeInOut(duration: 0.16)) {
             selectedMonth = Calendar.current.startOfMonth(for: newMonth)
         }
+    }
+
+    private func refreshReview() {
+        review = MonthlyReviewCalculator.calculate(
+            month: selectedMonth,
+            transactions: Array(transactions),
+            accounts: Array(accounts),
+            budgets: Array(budgets)
+        )
     }
 
     // MARK: - Summary

@@ -17,6 +17,19 @@ struct NetWorthView: View {
     private var liabilities: [Account] { accounts.filter { !$0.isAsset && !$0.isArchived } }
     private var includedLiabilities: [Account] { liabilities.filter(\.includeInNetWorth) }
     private var archivedAccounts: [Account] { accounts.filter(\.isArchived) }
+    private var creditCardExpenseTotals: [UUID: Double] {
+        let calendar = Calendar.current
+        guard let start = calendar.date(byAdding: .day, value: -30, to: Date.now) else { return [:] }
+        return transactions.reduce(into: [:]) { totals, transaction in
+            guard transaction.type == .expense,
+                  !transaction.isAdjustment,
+                  transaction.date >= start,
+                  let account = transaction.account,
+                  account.type == .credit
+            else { return }
+            totals[account.id, default: 0] += transaction.amount
+        }
+    }
 
     private var totalAssets: Double { NetWorthCalculator.totals(accounts: Array(accounts)).assets }
     private var totalLiabilities: Double { NetWorthCalculator.totals(accounts: Array(accounts)).liabilities }
@@ -204,7 +217,7 @@ struct NetWorthView: View {
                 } else {
                     ForEach(assets) { account in
                         Button { editingAccount = account } label: {
-                            AccountRowView(account: account)
+                            AccountRowView(account: account, recentExpenseTotal: nil)
                         }
                         .buttonStyle(.plain)
                         .swipeActions(edge: .trailing) {
@@ -227,9 +240,13 @@ struct NetWorthView: View {
                     Text("No liabilities added yet")
                         .foregroundStyle(.secondary)
                 } else {
+                    let recentExpenseTotals = creditCardExpenseTotals
                     ForEach(liabilities) { account in
                         Button { editingAccount = account } label: {
-                            AccountRowView(account: account)
+                            AccountRowView(
+                                account: account,
+                                recentExpenseTotal: account.type == .credit ? recentExpenseTotals[account.id, default: 0] : nil
+                            )
                         }
                         .buttonStyle(.plain)
                         .swipeActions(edge: .leading) {
@@ -260,7 +277,7 @@ struct NetWorthView: View {
         if !archivedAccounts.isEmpty {
             Section("Archived") {
                 ForEach(archivedAccounts) { account in
-                    AccountRowView(account: account)
+                    AccountRowView(account: account, recentExpenseTotal: nil)
                         .opacity(0.55)
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button("Unarchive", systemImage: "arrow.uturn.backward") {
@@ -284,6 +301,7 @@ struct NetWorthView: View {
 
 private struct AccountRowView: View {
     let account: Account
+    let recentExpenseTotal: Double?
 
     var body: some View {
         HStack(spacing: 10) {
@@ -304,6 +322,10 @@ private struct AccountRowView: View {
                     if let dueDate = account.dueDate {
                         Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
                             .foregroundStyle(Color.warningTone)
+                    }
+                    if let recentExpenseTotal {
+                        Text("30d \(recentExpenseTotal, format: .currency(code: CurrencyFormat.code))")
+                            .foregroundStyle(Color.negative)
                     }
                     if account.isLiability && !account.includeInNetWorth {
                         Text("Excluded")
