@@ -35,6 +35,22 @@ enum CompactCurrencyAxisFormatter {
     }
 }
 
+enum ChartYAxisDomain {
+    static func range(for values: [Double], fallback: ClosedRange<Double> = 0...1) -> ClosedRange<Double> {
+        let finiteValues = values.filter(\.isFinite)
+        guard let minValue = finiteValues.min(), let maxValue = finiteValues.max() else {
+            return fallback
+        }
+
+        guard minValue != maxValue else {
+            let padding = max(abs(minValue) * 0.01, 1)
+            return (minValue - padding)...(maxValue + padding)
+        }
+
+        return minValue...maxValue
+    }
+}
+
 struct MetricsView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var accounts: [Account]
@@ -199,15 +215,14 @@ struct MetricsView: View {
 
             let data = netWorthTimeline
             let minWorth = data.map(\.worth).min() ?? 0
-            let maxWorth = data.map(\.worth).max() ?? 1
-            let yPad    = (maxWorth - minWorth) * 0.1
+            let yDomain = ChartYAxisDomain.range(for: data.map(\.worth))
 
             Chart {
                 // Gradient area fill
                 ForEach(data, id: \.date) { point in
                     AreaMark(
                         x: .value("Date", point.date),
-                        yStart: .value("Base", minWorth - yPad),
+                        yStart: .value("Base", minWorth),
                         yEnd:   .value("Worth", point.worth)
                     )
                     .foregroundStyle(
@@ -259,6 +274,7 @@ struct MetricsView: View {
                 }
             }
             .chartXSelection(value: $selectedNetWorthDate)
+            .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
                     AxisGridLine()
@@ -325,6 +341,8 @@ struct MetricsView: View {
                 .foregroundStyle(Color.nestBrown)
 
             let data = cashFlowData
+            let yValues = data.flatMap { [0.0, $0.income, -$0.expenses] }
+            let yDomain = ChartYAxisDomain.range(for: yValues)
 
             Chart {
                 ForEach(data, id: \.date) { point in
@@ -375,6 +393,7 @@ struct MetricsView: View {
                 }
             }
             .chartXSelection(value: $selectedCashFlowDate)
+            .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks { value in
                     AxisGridLine()

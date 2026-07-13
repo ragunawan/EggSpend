@@ -135,6 +135,27 @@ final class MetricsCalculationTests: XCTestCase {
         XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: .nan), "$0")
     }
 
+    func testChartYAxisDomainUsesExactFiniteMinimumAndMaximum() {
+        let range = ChartYAxisDomain.range(for: [500, -125, 250, 900])
+
+        XCTAssertEqual(range.lowerBound, -125, accuracy: 0.001)
+        XCTAssertEqual(range.upperBound, 900, accuracy: 0.001)
+    }
+
+    func testChartYAxisDomainIgnoresNonFiniteValues() {
+        let range = ChartYAxisDomain.range(for: [.nan, 12, .infinity, -8])
+
+        XCTAssertEqual(range.lowerBound, -8, accuracy: 0.001)
+        XCTAssertEqual(range.upperBound, 12, accuracy: 0.001)
+    }
+
+    func testChartYAxisDomainExpandsFlatSeriesForChartScale() {
+        let range = ChartYAxisDomain.range(for: [250, 250])
+
+        XCTAssertLessThan(range.lowerBound, 250)
+        XCTAssertGreaterThan(range.upperBound, 250)
+    }
+
     private func insertTransactions(_ data: [(String, Double, TransactionType)]) {
         for (title, amount, type) in data {
             context.insert(Transaction(title: title, amount: amount, type: type))

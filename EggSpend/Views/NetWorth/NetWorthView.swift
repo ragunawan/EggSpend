@@ -181,6 +181,7 @@ struct NetWorthView: View {
                     }
                 }
 
+                let yDomain = ChartYAxisDomain.range(for: netWorthTimeline.map(\.worth))
                 Chart {
                     ForEach(netWorthTimeline, id: \.date) { point in
                         LineMark(
@@ -194,6 +195,7 @@ struct NetWorthView: View {
                         .accessibilityValue(CurrencyFormat.money(point.worth))
                     }
                 }
+                .chartYScale(domain: yDomain)
                 .chartYAxis(.hidden)
                 .chartXAxis {
                     AxisMarks(values: .automatic(desiredCount: 3)) { _ in
