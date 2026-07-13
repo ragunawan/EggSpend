@@ -28,6 +28,7 @@ struct SettingsView: View {
     @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
     @AppStorage(SettingsView.appLockStorageKey) private var appLockEnabled = false
     @AppStorage(SettingsView.appearanceStorageKey) private var appearanceRawValue = AppAppearance.system.rawValue
+    @State private var showImport = false
     @State private var showResetConfirmation = false
     @State private var resetErrorMessage: String?
 
@@ -124,6 +125,12 @@ struct SettingsView: View {
                 }
 
                 Section("Data") {
+                    Button {
+                        showImport = true
+                    } label: {
+                        Label("Import CSV", systemImage: "square.and.arrow.down.fill")
+                    }
+
                     ShareLink(item: transactionsFile, preview: SharePreview(transactionsFile.filename)) {
                         Label("Export Transactions (CSV)", systemImage: "list.bullet.rectangle.fill")
                     }
@@ -200,6 +207,9 @@ struct SettingsView: View {
                         Text("Rewrites the \"What changed this month?\" summary in a more natural tone. Processing happens entirely on this device — nothing is ever sent anywhere — and every number always comes from your actual data.")
                     }
                 }
+            }
+            .sheet(isPresented: $showImport) {
+                CSVImportView(importType: .transactions)
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)

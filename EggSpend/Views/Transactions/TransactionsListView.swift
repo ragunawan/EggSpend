@@ -16,7 +16,6 @@ struct TransactionsListView: View {
     @State private var showUpcoming = true
     @State private var showAddTransaction = false
     @State private var showQuickAdd = false
-    @State private var showImport = false
     @State private var showFilterSheet = false
     @State private var editingTransaction: Transaction?
     @State private var editingTransfer: Transfer?
@@ -240,14 +239,6 @@ struct TransactionsListView: View {
                         NavigationLink(destination: RecurringTransactionsView()) {
                             Label("Recurring", systemImage: "arrow.clockwise.circle")
                         }
-
-                        NavigationLink(destination: CategoryManagementView()) {
-                            Label("Categories", systemImage: "tag.circle")
-                        }
-
-                        Button { showImport = true } label: {
-                            Label("Import CSV", systemImage: "square.and.arrow.down")
-                        }
                     } label: {
                         Label("Menu", systemImage: filter.isActive
                             ? "ellipsis.circle.fill"
@@ -264,9 +255,6 @@ struct TransactionsListView: View {
                     }
                     .accessibilityLabel("Add transaction")
                 }
-            }
-            .sheet(isPresented: $showImport) {
-                CSVImportView(importType: .transactions)
             }
             .sheet(isPresented: $showAddTransaction) {
                 addTransactionSheet
