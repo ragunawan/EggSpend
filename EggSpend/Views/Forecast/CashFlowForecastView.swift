@@ -271,14 +271,22 @@ struct CashFlowForecastView: View {
     private func balanceCallout(date: Date, balance: Double) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: .dateTime.month(.abbreviated).day())
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption2)
+                .foregroundStyle(Color.primary.opacity(0.72))
             Text(balance, format: .currency(code: CurrencyFormat.code))
                 .font(.caption).fontWeight(.semibold)
-                .foregroundStyle(balance >= 0 ? Color.nestBrown : Color.negative)
+                .foregroundStyle(balance >= 0 ? Color.primary : Color.negative)
         }
         .padding(.horizontal, 8).padding(.vertical, 5)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.control))
-        .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+        .background(
+            Color(lightHex: "FFFFFF", darkHex: "1E1A16"),
+            in: RoundedRectangle(cornerRadius: Radius.control)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.control)
+                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.16), radius: 6, y: 3)
     }
 
     private func labeledAmount(label: String, value: Double, alignment: HorizontalAlignment) -> some View {

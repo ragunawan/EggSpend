@@ -128,9 +128,10 @@ struct RecurringTransactionsView: View {
                             .font(.caption).padding(.horizontal, 6).padding(.vertical, 2)
                             .background(accent.opacity(0.15), in: Capsule())
                             .foregroundStyle(accent)
-                        Text("Next: \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))")
-                            .font(.caption).foregroundStyle(.secondary)
                     }
+                    Text("Next: \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     if let account = item.account {
                         Label(account.name, systemImage: account.type.icon)
                             .font(.caption).foregroundStyle(.secondary)

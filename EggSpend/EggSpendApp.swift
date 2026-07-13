@@ -36,6 +36,11 @@ struct EggSpendApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var appLock = AppLockController()
     @AppStorage(OnboardingView.hasCompletedOnboardingKey) private var hasCompletedOnboarding = false
+    @AppStorage(SettingsView.appearanceStorageKey) private var appearanceRawValue = AppAppearance.system.rawValue
+
+    private var selectedAppearance: AppAppearance {
+        AppAppearance(rawValue: appearanceRawValue) ?? .system
+    }
 
     init() {
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
@@ -166,6 +171,7 @@ struct EggSpendApp: App {
             )) {
                 OnboardingView()
             }
+            .preferredColorScheme(selectedAppearance.colorScheme)
         }
         .modelContainer(Self.modelContainer)
     }

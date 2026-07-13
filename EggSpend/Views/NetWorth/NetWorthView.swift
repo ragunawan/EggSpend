@@ -14,7 +14,22 @@ struct NetWorthView: View {
     @State private var accountToDelete: Account? = nil
 
     private var assets: [Account] { accounts.filter { $0.isAsset && !$0.isArchived } }
-    private var liabilities: [Account] { accounts.filter { !$0.isAsset && !$0.isArchived } }
+    private var liabilities: [Account] {
+        accounts
+            .filter { !$0.isAsset && !$0.isArchived }
+            .sorted { lhs, rhs in
+                switch (lhs.nextDueDate, rhs.nextDueDate) {
+                case let (left?, right?) where left != right:
+                    return left < right
+                case (_?, nil):
+                    return true
+                case (nil, _?):
+                    return false
+                default:
+                    return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+                }
+            }
+    }
     private var includedLiabilities: [Account] { liabilities.filter(\.includeInNetWorth) }
     private var archivedAccounts: [Account] { accounts.filter(\.isArchived) }
     private var creditCardExpenseTotals: [UUID: Double] {
@@ -84,6 +99,10 @@ struct NetWorthView: View {
             }
             .navigationDestination(item: $plannerAccount) { account in
                 DebtPayoffPlannerView(account: account)
+            }
+            .onAppear(perform: rollLiabilityDueDates)
+            .onChange(of: accounts.map(\.dueDate)) { _, _ in
+                rollLiabilityDueDates()
             }
             .confirmationDialog(
                 "Archive Account",
@@ -299,6 +318,12 @@ struct NetWorthView: View {
     }
 
     @Environment(\.modelContext) private var modelContext
+
+    private func rollLiabilityDueDates() {
+        for account in accounts where account.isLiability {
+            account.rollDueDateIfNeeded()
+        }
+    }
 }
 
 private struct AccountRowView: View {

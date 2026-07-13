@@ -64,6 +64,10 @@ final class Account {
     var isAsset: Bool { type.isAsset }
     var isLiability: Bool { type == .credit || type == .loan || type == .mortgage }
     var countsTowardNetWorth: Bool { isAsset || includeInNetWorth }
+    var nextDueDate: Date? {
+        guard isLiability, let dueDate else { return nil }
+        return Self.rolledDueDate(from: dueDate)
+    }
 
     @Relationship(deleteRule: .nullify, inverse: \Transaction.account)
     var transactions: [Transaction]? = []
@@ -92,5 +96,28 @@ final class Account {
         self.transfersOut = []
         self.transfersIn = []
         self.recurringTransactions = []
+    }
+
+    @discardableResult
+    func rollDueDateIfNeeded(asOf date: Date = .now, calendar: Calendar = .current) -> Bool {
+        guard isLiability, let dueDate else { return false }
+        let rolled = Self.rolledDueDate(from: dueDate, asOf: date, calendar: calendar)
+        guard rolled != dueDate else { return false }
+        self.dueDate = rolled
+        return true
+    }
+
+    static func rolledDueDate(from dueDate: Date, asOf date: Date = .now, calendar: Calendar = .current) -> Date {
+        let today = calendar.startOfDay(for: date)
+        var resolved = dueDate
+
+        while calendar.startOfDay(for: resolved) < today {
+            guard let next = calendar.date(byAdding: .month, value: 1, to: resolved) else {
+                return resolved
+            }
+            resolved = next
+        }
+
+        return resolved
     }
 }

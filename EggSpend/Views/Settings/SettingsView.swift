@@ -20,12 +20,14 @@ struct SettingsView: View {
     /// context) reads it directly; `SettingsView` itself infers `@MainActor`
     /// isolation from `View`, which a plain `static let` would otherwise inherit.
     nonisolated static let appLockStorageKey = "appLockEnabled"
+    nonisolated static let appearanceStorageKey = "appAppearance"
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(AppLockController.self) private var appLockController: AppLockController?
     @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
     @AppStorage(SettingsView.appLockStorageKey) private var appLockEnabled = false
+    @AppStorage(SettingsView.appearanceStorageKey) private var appearanceRawValue = AppAppearance.system.rawValue
     @State private var showResetConfirmation = false
     @State private var resetErrorMessage: String?
 
@@ -98,9 +100,29 @@ struct SettingsView: View {
         }
     }
 
+    private var selectedAppearance: Binding<AppAppearance> {
+        Binding(
+            get: { AppAppearance(rawValue: appearanceRawValue) ?? .system },
+            set: { appearanceRawValue = $0.rawValue }
+        )
+    }
+
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Picker("Appearance", selection: selectedAppearance) {
+                        ForEach(AppAppearance.allCases) { appearance in
+                            Text(appearance.title).tag(appearance)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("Display")
+                } footer: {
+                    Text("Auto matches this device's light or dark appearance.")
+                }
+
                 Section("Data") {
                     ShareLink(item: transactionsFile, preview: SharePreview(transactionsFile.filename)) {
                         Label("Export Transactions (CSV)", systemImage: "list.bullet.rectangle.fill")
