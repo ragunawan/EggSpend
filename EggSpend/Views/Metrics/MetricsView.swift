@@ -87,7 +87,9 @@ struct MetricsView: View {
         var timelineDays: Int {
             switch self {
             case .week: return 8
-            case .month: return 31
+            case .month:
+                let cal = Calendar.current
+                return (cal.dateComponents([.day], from: dateStart, to: .now).day ?? 30) + 1
             case .year: return 366
             }
         }
@@ -106,7 +108,7 @@ struct MetricsView: View {
             case .week:
                 start = cal.startOfDay(for: interval.start)
             case .month:
-                start = cal.dateInterval(of: .weekOfYear, for: interval.start)?.start ?? interval.start
+                start = interval.start
             case .year:
                 start = cal.dateInterval(of: .month, for: interval.start)?.start ?? interval.start
             }
@@ -126,7 +128,7 @@ struct MetricsView: View {
 
         var xAxisDomain: ClosedRange<Date> {
             let interval = dateInterval
-            return (xAxisDates.first ?? interval.start)...interval.end
+            return interval.start...interval.end
         }
 
         func bucketStart(for date: Date) -> Date {
@@ -135,7 +137,9 @@ struct MetricsView: View {
             case .week:
                 return cal.startOfDay(for: date)
             case .month:
-                return cal.dateInterval(of: .weekOfYear, for: date)?.start ?? date
+                let start = dateStart
+                let daysFromStart = max(0, cal.dateComponents([.day], from: start, to: date).day ?? 0)
+                return cal.date(byAdding: .day, value: (daysFromStart / 7) * 7, to: start) ?? start
             case .year:
                 return cal.dateInterval(of: .month, for: date)?.start ?? date
             }
@@ -190,7 +194,23 @@ struct MetricsView: View {
     }
 
     private var netWorthTimeline: [(date: Date, worth: Double)] {
-        NetWorthCalculator.timeline(
+        if selectedPeriod == .month {
+            let start = selectedPeriod.dateStart
+            let exactStart = (
+                date: start,
+                worth: NetWorthCalculator.at(date: start, accounts: accounts, transactions: transactions, snapshots: snapshots)
+            )
+            let dailyPoints = NetWorthCalculator.timeline(
+                accounts: accounts,
+                transactions: transactions,
+                snapshots: snapshots,
+                days: selectedPeriod.timelineDays
+            )
+            .filter { $0.date > start }
+            return [exactStart] + dailyPoints
+        }
+
+        return NetWorthCalculator.timeline(
             accounts: accounts,
             transactions: transactions,
             snapshots: snapshots,
@@ -200,9 +220,15 @@ struct MetricsView: View {
 
     // Cash flow: income and expenses bucketed over the selected period
     private var cashFlowData: [(date: Date, income: Double, expenses: Double)] {
-        var dict = Dictionary(uniqueKeysWithValues: selectedPeriod.xAxisDates.map { ($0, (0.0, 0.0)) })
+        let xAxisDates = selectedPeriod.xAxisDates
+        var dict = Dictionary(uniqueKeysWithValues: xAxisDates.map { ($0, (0.0, 0.0)) })
         for tx in filtered where !tx.isAdjustment {
-            let key = selectedPeriod.bucketStart(for: tx.date)
+            let key: Date
+            if selectedPeriod == .month {
+                key = xAxisDates.last(where: { $0 <= tx.date }) ?? selectedPeriod.dateStart
+            } else {
+                key = selectedPeriod.bucketStart(for: tx.date)
+            }
             var pair = dict[key] ?? (0, 0)
             if tx.type == .income  { pair.0 += tx.amount }
             else                   { pair.1 += tx.amount }
@@ -402,13 +428,17 @@ struct MetricsView: View {
     private func netWorthCallout(date: Date, worth: Double) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption2).foregroundStyle(Color.secondary)
             Text(worth, format: .currency(code: CurrencyFormat.code))
-                .font(.caption).fontWeight(.semibold).foregroundStyle(Color.nestBrown)
+                .font(.caption).fontWeight(.semibold).foregroundStyle(Color.primary)
         }
         .padding(.horizontal, Space.sm)
         .padding(.vertical, Space.xs)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.control))
+        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: Radius.control))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.control)
+                .stroke(Color.nestBrown.opacity(0.12), lineWidth: 1)
+        }
         .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
     }
 
@@ -506,7 +536,7 @@ struct MetricsView: View {
     private func cashFlowCallout(date: Date, income: Double, expenses: Double) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption2).foregroundStyle(Color.secondary)
             HStack(spacing: 8) {
                 Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                       systemImage: "arrow.down.circle.fill")
@@ -518,7 +548,11 @@ struct MetricsView: View {
         }
         .padding(.horizontal, Space.sm)
         .padding(.vertical, Space.xs)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.control))
+        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: Radius.control))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.control)
+                .stroke(Color.nestBrown.opacity(0.12), lineWidth: 1)
+        }
         .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
     }
 
