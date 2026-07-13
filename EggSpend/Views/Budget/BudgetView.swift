@@ -4,10 +4,14 @@ import SwiftData
 struct BudgetView: View {
     @Query(sort: \Budget.createdAt) private var budgets: [Budget]
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query(sort: \SavingsGoal.createdAt) private var savingsGoals: [SavingsGoal]
+    @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Environment(\.modelContext) private var modelContext
 
     @State private var showAddBudget  = false
+    @State private var showAddSavingsGoal = false
     @State private var editingBudget: Budget? = nil
+    @State private var editingSavingsGoal: SavingsGoal? = nil
     @State private var periodFilter: BudgetPeriod? = nil
 
     // MARK: – Derived
@@ -32,6 +36,13 @@ struct BudgetView: View {
     private var healthyBudgets: [Budget] {
         displayed.filter { $0.progress(from: transactions) < 0.8 }
     }
+    private var activeSavingsGoals: [SavingsGoal] { savingsGoals.filter(\.isActive) }
+    private var budgetCategories: [TransactionCategory] {
+        categories.filter { !$0.isArchived && ($0.appliesTo == nil || $0.appliesTo == .expense) }
+    }
+    private var uncategorizedBudgets: [Budget] {
+        displayed.filter { $0.category == nil }
+    }
 
     private var totalBudgeted: Double { displayed.reduce(0) { $0 + $1.limitAmount } }
     private var totalSpent: Double    { displayed.reduce(0) { $0 + $1.spent(from: transactions) } }
@@ -45,35 +56,14 @@ struct BudgetView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if budgets.isEmpty {
-                    emptyState
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            Text("Budget Eggs")
-                                .font(.largeTitle.bold())
-                                .foregroundStyle(.primary)
-                                .padding(.top, Space.xs)
-
-                            summaryStrip
-
-                            VStack(spacing: 16) {
-                                if displayed.isEmpty && periodFilter != nil {
-                                    filteredEmptyState
-
-                                } else {
-                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .negative) }
-                                    if !warningBudgets.isEmpty { budgetGroup("Watch Out", warningBudgets, accent: .yolk) }
-                                    if !healthyBudgets.isEmpty { budgetGroup("On Track",   healthyBudgets, accent: .nestLeafGreen) }
-                                    inactiveBudgetsSection
-                                }
-                            }
-                            .padding(Space.md)
-                            .frame(maxWidth: .infinity)
-                        }
+                if budgets.isEmpty && budgetCategories.isEmpty {
+                    if activeSavingsGoals.isEmpty {
+                        emptyState
+                    } else {
+                        budgetContent
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, Space.xl)
+                } else {
+                    budgetContent
                 }
             }
             .background(NestBackground())
@@ -106,8 +96,38 @@ struct BudgetView: View {
                 }
             }
             .sheet(isPresented: $showAddBudget) { AddBudgetView() }
+            .sheet(isPresented: $showAddSavingsGoal) { AddSavingsGoalView() }
             .sheet(item: $editingBudget) { budget in AddBudgetView(editingBudget: budget) }
+            .sheet(item: $editingSavingsGoal) { goal in AddSavingsGoalView(editingGoal: goal) }
         }
+    }
+
+    private var budgetContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Budget Eggs")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.primary)
+                    .padding(.top, Space.xs)
+
+                summaryStrip
+
+                VStack(spacing: 16) {
+                    if displayed.isEmpty && periodFilter != nil && budgetCategories.isEmpty {
+                        filteredEmptyState
+
+                    } else {
+                        categoryBudgetGroups
+                        inactiveBudgetsSection
+                    }
+                    savingsGoalsSection
+                }
+                .padding(Space.md)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom, Space.xl)
     }
 
     // MARK: – Summary strip
@@ -137,14 +157,91 @@ struct BudgetView: View {
 
     // MARK: – Budget groups
 
-    private func budgetGroup(_ title: String, _ items: [Budget], accent: Color) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.subheadline).fontWeight(.semibold)
-                .foregroundStyle(accent)
+    private var categoryBudgetGroups: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(budgetCategories) { category in
+                let items = displayed.filter { $0.category?.id == category.id }
+                categoryBudgetGroup(
+                    title: category.name,
+                    icon: category.icon,
+                    accent: category.color,
+                    items: items,
+                    emptyMessage: "No active budgets"
+                )
+            }
 
-            ForEach(items) { budget in
-                budgetRowLink(for: budget)
+            if !uncategorizedBudgets.isEmpty || budgetCategories.isEmpty {
+                categoryBudgetGroup(
+                    title: "Uncategorized",
+                    icon: "tray",
+                    accent: .secondary,
+                    items: uncategorizedBudgets,
+                    emptyMessage: "No uncategorized budgets"
+                )
+            }
+        }
+    }
+
+    private func categoryBudgetGroup(
+        title: String,
+        icon: String,
+        accent: Color,
+        items: [Budget],
+        emptyMessage: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: Space.xs) {
+                Image(systemName: icon)
+                    .font(.caption)
+                    .foregroundStyle(accent)
+                    .frame(width: 18)
+                Text(title)
+                    .font(.subheadline).fontWeight(.semibold)
+                    .foregroundStyle(accent)
+                Spacer()
+                Text("\(items.count)")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+
+            if items.isEmpty {
+                Text(emptyMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, Space.md)
+                    .padding(.vertical, Space.sm)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            } else {
+                ForEach(items) { budget in
+                    budgetRowLink(for: budget)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var savingsGoalsSection: some View {
+        if !activeSavingsGoals.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Savings Goals")
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundStyle(Color.nestLeafGreen)
+                    Spacer()
+                    Button { showAddSavingsGoal = true } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.nestLeafGreen)
+                    }
+                    .accessibilityLabel("Add savings goal")
+                }
+
+                ForEach(activeSavingsGoals) { goal in
+                    SavingsGoalRowView(goal: goal)
+                        .onTapGesture { editingSavingsGoal = goal }
+                        .accessibilityAddTraits(.isButton)
+                }
             }
         }
     }
