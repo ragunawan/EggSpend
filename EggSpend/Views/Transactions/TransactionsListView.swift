@@ -64,15 +64,28 @@ struct TransactionsListView: View {
 
     private var upcomingCreditCardPayments: [UpcomingPayment] {
         guard showUpcoming else { return [] }
-        return ForecastEngine.creditCardPaymentEvents(from: Array(accounts)).map { event in
-            UpcomingPayment(
-                id: "credit-card-\(event.title)-\(Int(event.date.timeIntervalSince1970))",
+        return Array(accounts).compactMap { account in
+            guard !account.isArchived, account.type == .credit, let dueDate = account.nextDueDate else {
+                return nil
+            }
+
+            let dueDay = Calendar.current.startOfDay(for: dueDate)
+            guard !hasGeneratedCreditCardPayment(for: account, dueDate: dueDay) else { return nil }
+
+            let events = ForecastEngine.creditCardPaymentEvents(
+                from: [account],
+                transactions: Array(transactions)
+            )
+            guard let event = events.first else { return nil }
+
+            return UpcomingPayment(
+                id: "credit-card-\(account.id.uuidString)-\(Int(event.date.timeIntervalSince1970))",
                 title: event.title,
                 amount: abs(event.amount),
                 dueDate: event.date,
                 icon: event.categoryIcon,
                 iconColor: .info,
-                accountName: event.title.replacingOccurrences(of: " payment", with: "")
+                account: account
             )
         }
         .filter { payment in
@@ -81,6 +94,43 @@ struct TransactionsListView: View {
                 || (payment.accountName?.localizedCaseInsensitiveContains(searchText) ?? false)
             return matchesSearch && matchesFilter(payment)
         }
+    }
+
+    private func hasGeneratedCreditCardPayment(for account: Account, dueDate: Date) -> Bool {
+        transactions.contains { transaction in
+            transaction.isGenerated
+                && transaction.recurringSourceID == nil
+                && transaction.account?.id == account.id
+                && Calendar.current.isDate(transaction.date, inSameDayAs: dueDate)
+                && transaction.title == "\(account.name) payment"
+        }
+    }
+
+    private func generatedCreditCardPayment(from payment: UpcomingPayment) -> Transaction? {
+        guard let account = payment.account else { return nil }
+        if let existing = transactions.first(where: {
+            $0.isGenerated
+                && $0.recurringSourceID == nil
+                && $0.account?.id == account.id
+                && Calendar.current.isDate($0.date, inSameDayAs: payment.dueDate)
+                && $0.title == payment.title
+        }) {
+            return existing
+        }
+
+        let transaction = Transaction(
+            title: payment.title,
+            amount: payment.amount,
+            date: payment.dueDate,
+            type: .expense,
+            account: account,
+            notes: "Auto-generated from credit card due date: \(account.name)",
+            isGenerated: true
+        )
+        modelContext.insert(transaction)
+        AccountBalanceService.apply(transaction, to: account)
+        try? modelContext.save()
+        return transaction
     }
 
     private var rows: [LedgerRow] {
@@ -404,8 +454,13 @@ struct TransactionsListView: View {
             NavigationLink(destination: RecurringTransactionsView()) {
                 LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
             }
-        case .upcomingPayment:
-            LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
+        case .upcomingPayment(let payment):
+            Button {
+                editingTransaction = generatedCreditCardPayment(from: payment)
+            } label: {
+                LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -475,8 +530,7 @@ struct TransactionsListView: View {
             return false
         }
         if !filter.accountIDs.isEmpty {
-            guard let account = accounts.first(where: { $0.name == payment.accountName }),
-                  filter.accountIDs.contains(account.id) else {
+            guard let accountID = payment.account?.id, filter.accountIDs.contains(accountID) else {
                 return false
             }
         }

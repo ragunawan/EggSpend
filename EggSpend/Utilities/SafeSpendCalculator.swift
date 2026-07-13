@@ -75,9 +75,15 @@ enum SafeSpendCalculator {
     static func upcomingNetOutflowReserve(
         recurring: [RecurringTransaction],
         accounts: [Account] = [],
+        transactions: [Transaction] = [],
         horizonDays: Int
     ) -> Double {
-        let events = ForecastEngine.upcomingEvents(from: recurring, accounts: accounts, horizonDays: horizonDays)
+        let events = ForecastEngine.upcomingEvents(
+            from: recurring,
+            accounts: accounts,
+            transactions: transactions,
+            horizonDays: horizonDays
+        )
         let net = events.reduce(0.0) { $0 + $1.amount }
         return max(0, -net)
     }
@@ -145,7 +151,12 @@ enum SafeSpendCalculator {
         let liquid = ForecastEngine.liquidBalance(from: accounts)
         let avgDailyExpenses = averageDailyExpenses(from: transactions)
         let buffer = max(minimumBuffer, avgDailyExpenses * bufferDaysOfExpenses)
-        let outflowReserve = upcomingNetOutflowReserve(recurring: recurring, accounts: accounts, horizonDays: horizonDays)
+        let outflowReserve = upcomingNetOutflowReserve(
+            recurring: recurring,
+            accounts: accounts,
+            transactions: transactions,
+            horizonDays: horizonDays
+        )
         let (savingsReserve, unscheduledNames) = plannedSavingsReserve(savingsGoals: savingsGoals)
 
         let cashAvailable = liquid - buffer - outflowReserve - savingsReserve

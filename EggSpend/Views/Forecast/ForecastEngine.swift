@@ -66,6 +66,7 @@ struct ForecastEngine {
     static func upcomingEvents(
         from recurring: [RecurringTransaction],
         accounts: [Account] = [],
+        transactions: [Transaction] = [],
         horizonDays: Int
     ) -> [ForecastEvent] {
         let recurringEvents = RecurringProjection.occurrences(from: recurring, start: .now, days: horizonDays)
@@ -78,7 +79,7 @@ struct ForecastEngine {
                 )
             }
 
-        return (recurringEvents + creditCardPaymentEvents(from: accounts))
+        return (recurringEvents + creditCardPaymentEvents(from: accounts, transactions: transactions))
             .sorted { lhs, rhs in
                 if lhs.date == rhs.date { return lhs.title < rhs.title }
                 return lhs.date < rhs.date
@@ -87,6 +88,7 @@ struct ForecastEngine {
 
     static func creditCardPaymentEvents(
         from accounts: [Account],
+        transactions: [Transaction] = [],
         asOf date: Date = .now,
         calendar: Calendar = .current
     ) -> [ForecastEvent] {
@@ -105,7 +107,13 @@ struct ForecastEngine {
                 && calendar.isDate(dueDay, equalTo: today, toGranularity: .year)
             guard dueThisMonth || dueDay <= twoWeeksOut else { return nil }
 
-            let paymentAmount = max(account.minimumPayment ?? 0, 0)
+            let recentSpendAmount = creditCardRecentSpendAmount(
+                for: account,
+                transactions: transactions,
+                asOf: date,
+                calendar: calendar
+            )
+            let paymentAmount = max(recentSpendAmount, account.minimumPayment ?? 0, 0)
             let fallbackAmount = max(abs(account.balance), 0)
             let amount = paymentAmount > 0 ? paymentAmount : fallbackAmount
             guard amount > 0 else { return nil }
@@ -117,6 +125,25 @@ struct ForecastEngine {
                 categoryIcon: account.type.icon
             )
         }
+    }
+
+    static func creditCardRecentSpendAmount(
+        for account: Account,
+        transactions: [Transaction],
+        asOf date: Date = .now,
+        calendar: Calendar = .current
+    ) -> Double {
+        guard let start = calendar.date(byAdding: .day, value: -30, to: date) else { return 0 }
+        return transactions
+            .filter {
+                $0.account?.id == account.id
+                    && $0.type == .expense
+                    && !$0.isAdjustment
+                    && !$0.isGenerated
+                    && $0.date >= start
+                    && $0.date <= date
+            }
+            .reduce(0.0) { $0 + $1.amount }
     }
 
     // Builds one data point per day (today + horizonDays).
@@ -133,7 +160,7 @@ struct ForecastEngine {
 
         let startBalance = liquidBalance(from: accounts)
         let dailyDrift = averageDailyNetFlow(from: transactions)
-        let events = upcomingEvents(from: recurring, accounts: accounts, horizonDays: horizonDays)
+        let events = upcomingEvents(from: recurring, accounts: accounts, transactions: transactions, horizonDays: horizonDays)
         let eventDeltasByDay = Dictionary(grouping: events, by: { calendar.startOfDay(for: $0.date) })
             .mapValues { dayEvents in
                 dayEvents.reduce(0.0) { $0 + $1.amount }
