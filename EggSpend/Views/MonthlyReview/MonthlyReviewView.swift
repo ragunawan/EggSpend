@@ -52,7 +52,6 @@ struct MonthlyReviewView: View {
             NestBackground()
 
             List {
-                monthNavigationSection
                 summarySection
                 savingsRateSection
                 if !review.topCategories.isEmpty { topCategoriesSection }
@@ -64,48 +63,53 @@ struct MonthlyReviewView: View {
             .background(Color.clear)
         }
         .navigationTitle("Monthly Review")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            monthNavigationBar
+        }
         .onAppear(perform: refreshReview)
         .onChange(of: reviewInputSignature) { _, _ in refreshReview() }
     }
 
     // MARK: - Month navigation
 
-    private var monthNavigationSection: some View {
-        Section {
-            HStack {
-                Button {
-                    changeMonth(by: -1)
-                } label: {
-                    Image(systemName: "chevron.left.circle.fill")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(Color.yolk)
-                }
-                .buttonStyle(.plain)
-
-                Spacer()
-
-                Text(selectedMonth, format: .dateTime.month(.wide).year())
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.nestBrown)
-                    .contentTransition(.numericText())
-
-                Spacer()
-
-                Button {
-                    changeMonth(by: 1)
-                } label: {
-                    Image(systemName: "chevron.right.circle.fill")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(isCurrentMonth ? Color.twig.opacity(0.4) : Color.yolk)
-                }
-                .buttonStyle(.plain)
-                .disabled(isCurrentMonth)
+    private var monthNavigationBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                changeMonth(by: -1)
+            } label: {
+                Image(systemName: "chevron.left.circle.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color.yolk)
             }
-            .padding(.vertical, 1)
+            .buttonStyle(.plain)
+            .frame(width: 32, height: 32)
+
+            Spacer(minLength: 8)
+
+            Text(selectedMonth, format: .dateTime.month(.wide).year())
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.nestBrown)
+                .contentTransition(.numericText())
+                .lineLimit(1)
+
+            Spacer(minLength: 8)
+
+            Button {
+                changeMonth(by: 1)
+            } label: {
+                Image(systemName: "chevron.right.circle.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(isCurrentMonth ? Color.twig.opacity(0.4) : Color.yolk)
+            }
+            .buttonStyle(.plain)
+            .disabled(isCurrentMonth)
+            .frame(width: 32, height: 32)
         }
-        .listRowBackground(Color.clear)
-        .listRowInsets(EdgeInsets(top: 2, leading: 20, bottom: 2, trailing: 20))
+        .padding(.horizontal, 20)
+        .frame(height: 36)
+        .background(.thinMaterial)
     }
 
     private func changeMonth(by value: Int) {
@@ -152,7 +156,8 @@ struct MonthlyReviewView: View {
                 .minimumScaleFactor(0.6).lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
+        .padding(8)
+        .frame(height: 72, alignment: .topLeading)
         .nestCard()
     }
 
