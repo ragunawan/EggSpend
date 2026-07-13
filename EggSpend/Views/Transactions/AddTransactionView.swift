@@ -210,10 +210,11 @@ struct AddTransactionView: View {
                         }
                         .foregroundStyle(.secondary)
                     }
-                    .frame(maxWidth: 180, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                     .accessibilityLabel("Account")
                     .accessibilityValue(selectedAccount?.name ?? "None")
                 }
+                .frame(minHeight: 44)
             }
         }
     }

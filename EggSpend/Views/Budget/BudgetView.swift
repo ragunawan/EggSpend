@@ -289,7 +289,7 @@ private struct BudgetSummaryStrip: View {
 
     var body: some View {
         HStack(spacing: Space.md) {
-            EggProgressView(progress: progress, size: 44)
+            EggProgressView(progress: progress, size: 44, showsPercentage: false)
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: Space.sm) {

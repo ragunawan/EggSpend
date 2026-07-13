@@ -24,11 +24,15 @@ public struct EggProgressView: View {
     /// Diameter of the bounding square the egg is drawn into.
     public var size: CGFloat = 60
 
+    /// Whether to draw the centered percentage label inside the egg.
+    public var showsPercentage: Bool = true
+
     // MARK: Init
 
-    public init(progress: Double, size: CGFloat = 60) {
+    public init(progress: Double, size: CGFloat = 60, showsPercentage: Bool = true) {
         self.progress = progress
         self.size = size
+        self.showsPercentage = showsPercentage
     }
 
     // MARK: Derived
@@ -83,10 +87,11 @@ public struct EggProgressView: View {
                     .blendMode(.overlay)
             }
 
-            // Percentage label
-            Text(percentText)
-                .font(NestType.amount)
-                .foregroundStyle(labelColor)
+            if showsPercentage {
+                Text(percentText)
+                    .font(NestType.amount)
+                    .foregroundStyle(labelColor)
+            }
         }
         .frame(width: size * 0.72, height: size)
         // Animate fill color transitions

@@ -155,7 +155,7 @@ struct BudgetDetailView: View {
     private var eggHeroSection: some View {
         VStack(spacing: 16) {
             // Large animated egg
-            EggProgressView(progress: progress, size: 120)
+            EggProgressView(progress: progress, size: 120, showsPercentage: false)
                 .scaleEffect(eggVisible ? 1 : 0.6)
                 .opacity(eggVisible ? 1 : 0)
                 .accessibilityElement(children: .ignore)
