@@ -128,7 +128,7 @@ struct AddTransactionView: View {
             } message: {
                 Text(selectedEntryKind == .transfer
                      ? "Please choose two different accounts and an amount greater than zero."
-                     : "Please enter a title and an amount greater than zero.")
+                     : "Please enter a payee and an amount greater than zero.")
             }
             .onAppear { populateIfEditing() }
         }
@@ -168,7 +168,7 @@ struct AddTransactionView: View {
 
     private var detailsSection: some View {
         Section("Details") {
-            TextField("Title", text: $title)
+            TextField("Payee", text: $title)
                 .onSubmit { prefillCategoryForTitle() }
             HStack {
                 Text(CurrencyFormat.symbol)

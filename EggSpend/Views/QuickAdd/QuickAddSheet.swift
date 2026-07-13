@@ -155,7 +155,7 @@ struct QuickAddSheet: View {
                 Button {
                     isEnteringTitle = true
                 } label: {
-                    Label(title.isEmpty ? "Title" : title, systemImage: "text.cursor")
+                    Label(title.isEmpty ? "Payee" : title, systemImage: "text.cursor")
                         .lineLimit(1)
                 }
                 .buttonStyle(QuickAddChipStyle(isSelected: isEnteringTitle || !title.isEmpty))
@@ -168,7 +168,7 @@ struct QuickAddSheet: View {
                             .lineLimit(1)
                     }
                     .buttonStyle(QuickAddChipStyle(isSelected: CSVParser.normalizedTitle(title) == suggestion.id))
-                    .accessibilityHint("Fills title and category")
+                    .accessibilityHint("Fills payee and category")
                 }
             }
             .padding(.vertical, 1)
@@ -176,7 +176,7 @@ struct QuickAddSheet: View {
     }
 
     private var titleField: some View {
-        TextField("Title", text: $title)
+        TextField("Payee", text: $title)
             .textInputAutocapitalization(.words)
             .submitLabel(.done)
             .padding(.horizontal, Space.md)

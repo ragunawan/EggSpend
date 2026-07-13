@@ -86,7 +86,6 @@ struct TransactionsListView: View {
                 NestBackground()
 
                 VStack(spacing: 0) {
-                    activeFilterBanner
                     filterChipsRow
 
                     Group {
@@ -238,7 +237,7 @@ struct TransactionsListView: View {
             ForEach(rows) { row in
                 rowView(for: row, showsCardBackground: false)
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: Space.md))
             }
         }
         .listStyle(.plain)
@@ -252,57 +251,65 @@ struct TransactionsListView: View {
     }
 
     private var filterChipsRow: some View {
-        WrappingFilterChipLayout(horizontalSpacing: Space.sm, verticalSpacing: Space.sm) {
-            TransactionsFilterChip(
-                label: "All",
-                systemImage: "tray.full",
-                isSelected: filter.type == nil && !hideTransfers && showUpcoming
-            ) {
-                filter.type = nil
-                hideTransfers = false
-                showUpcoming = true
-            }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Space.xs) {
+                if filter.isActive {
+                    TransactionsFilterStatusChip(count: filter.activeCount) {
+                        filter.reset()
+                    }
+                }
 
-            TransactionsFilterChip(
-                label: "Expenses",
-                systemImage: TransactionType.expense.systemImage,
-                isSelected: filter.type == .expense
-            ) {
-                filter.type = filter.type == .expense ? nil : .expense
-            }
-
-            TransactionsFilterChip(
-                label: "Income",
-                systemImage: TransactionType.income.systemImage,
-                isSelected: filter.type == .income
-            ) {
-                filter.type = filter.type == .income ? nil : .income
-            }
-
-            TransactionsFilterChip(
-                label: "Transfers",
-                systemImage: "arrow.left.arrow.right",
-                isSelected: filter.type == nil && !hideTransfers
-            ) {
-                if filter.type != nil || hideTransfers {
+                TransactionsFilterChip(
+                    label: "All",
+                    systemImage: "tray.full",
+                    isSelected: filter.type == nil && !hideTransfers && showUpcoming
+                ) {
                     filter.type = nil
                     hideTransfers = false
-                } else {
-                    hideTransfers = true
+                    showUpcoming = true
+                }
+
+                TransactionsFilterChip(
+                    label: "Expenses",
+                    systemImage: TransactionType.expense.systemImage,
+                    isSelected: filter.type == .expense
+                ) {
+                    filter.type = filter.type == .expense ? nil : .expense
+                }
+
+                TransactionsFilterChip(
+                    label: "Income",
+                    systemImage: TransactionType.income.systemImage,
+                    isSelected: filter.type == .income
+                ) {
+                    filter.type = filter.type == .income ? nil : .income
+                }
+
+                TransactionsFilterChip(
+                    label: "Transfers",
+                    systemImage: "arrow.left.arrow.right",
+                    isSelected: filter.type == nil && !hideTransfers
+                ) {
+                    if filter.type != nil || hideTransfers {
+                        filter.type = nil
+                        hideTransfers = false
+                    } else {
+                        hideTransfers = true
+                    }
+                }
+
+                TransactionsFilterChip(
+                    label: "Upcoming",
+                    systemImage: "calendar.badge.clock",
+                    isSelected: showUpcoming
+                ) {
+                    showUpcoming.toggle()
                 }
             }
-
-            TransactionsFilterChip(
-                label: "Upcoming",
-                systemImage: "calendar.badge.clock",
-                isSelected: showUpcoming
-            ) {
-                showUpcoming.toggle()
-            }
+            .padding(.horizontal, Space.lg)
+            .padding(.vertical, Space.xs)
         }
-        .padding(.horizontal, Space.lg)
-        .padding(.vertical, Space.sm)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 46, alignment: .leading)
         .background(.regularMaterial)
     }
 
@@ -375,28 +382,6 @@ struct TransactionsListView: View {
         topCategories.filter { $0.appliesTo == nil || $0.appliesTo == transaction.type }
     }
 
-    @ViewBuilder
-    private var activeFilterBanner: some View {
-        if filter.isActive {
-            HStack(spacing: Space.sm) {
-                Image(systemName: "line.3.horizontal.decrease.circle.fill")
-                    .foregroundStyle(Color.yolk)
-                Text(filter.activeCount == 1 ? "1 filter active" : "\(filter.activeCount) filters active")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.nestBrown)
-                Spacer()
-                Button("Clear") { filter.reset() }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.yolk)
-            }
-            .padding(.horizontal, Space.md)
-            .padding(.vertical, Space.md)
-            .nestCard()
-            .padding(.horizontal)
-            .padding(.top, Space.sm)
-        }
-    }
-
     @Environment(\.modelContext) private var modelContext
 
     private func deleteRows(_ items: [LedgerRow], at offsets: IndexSet) {
@@ -456,9 +441,9 @@ private struct TransactionsFilterChip: View {
     var body: some View {
         Button(action: action) {
             Label(label, systemImage: systemImage)
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal, Space.md)
-                .frame(minHeight: 44)
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, Space.sm)
+                .frame(height: 32)
                 .background(isSelected ? Color.yolk : Color.yolk.opacity(0.12), in: Capsule())
                 .foregroundStyle(isSelected ? .white : Color.yolk)
                 .fixedSize(horizontal: true, vertical: false)
@@ -468,83 +453,28 @@ private struct TransactionsFilterChip: View {
     }
 }
 
-private struct WrappingFilterChipLayout: Layout {
-    var horizontalSpacing: CGFloat
-    var verticalSpacing: CGFloat
+private struct TransactionsFilterStatusChip: View {
+    let count: Int
+    let clear: () -> Void
 
-    func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout Void
-    ) -> CGSize {
-        let maxWidth = proposal.width ?? .infinity
-        let rows = measuredRows(in: maxWidth, subviews: subviews)
-        let width = proposal.width ?? rows.map(\.width).max() ?? 0
-        let height = rows.reduce(0) { partial, row in
-            partial + row.height
-        } + CGFloat(max(rows.count - 1, 0)) * verticalSpacing
+    var body: some View {
+        HStack(spacing: Space.xs) {
+            Label(count == 1 ? "1 active" : "\(count) active", systemImage: "line.3.horizontal.decrease.circle.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.nestBrown)
 
-        return CGSize(width: width, height: height)
-    }
-
-    func placeSubviews(
-        in bounds: CGRect,
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout Void
-    ) {
-        let rows = measuredRows(in: bounds.width, subviews: subviews)
-        var y = bounds.minY
-
-        for row in rows {
-            var x = bounds.minX
-            for item in row.items {
-                subviews[item.index].place(
-                    at: CGPoint(x: x, y: y + (row.height - item.size.height) / 2),
-                    proposal: ProposedViewSize(width: item.size.width, height: item.size.height)
-                )
-                x += item.size.width + horizontalSpacing
+            Button(action: clear) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.caption)
+                    .foregroundStyle(Color.yolk)
             }
-            y += row.height + verticalSpacing
+            .buttonStyle(.plain)
+            .accessibilityLabel("Clear filters")
         }
-    }
-
-    private func measuredRows(in maxWidth: CGFloat, subviews: Subviews) -> [Row] {
-        guard !subviews.isEmpty else { return [] }
-
-        var rows: [Row] = []
-        var current = Row()
-
-        for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
-            let additionalWidth = current.items.isEmpty ? size.width : horizontalSpacing + size.width
-
-            if current.width + additionalWidth > maxWidth, !current.items.isEmpty {
-                rows.append(current)
-                current = Row()
-            }
-
-            current.items.append(Item(index: index, size: size))
-            current.width += current.items.count == 1 ? size.width : horizontalSpacing + size.width
-            current.height = max(current.height, size.height)
-        }
-
-        if !current.items.isEmpty {
-            rows.append(current)
-        }
-
-        return rows
-    }
-
-    private struct Row {
-        var items: [Item] = []
-        var width: CGFloat = 0
-        var height: CGFloat = 0
-    }
-
-    private struct Item {
-        let index: Int
-        let size: CGSize
+        .padding(.horizontal, Space.sm)
+        .frame(height: 32)
+        .background(Color.yolk.opacity(0.12), in: Capsule())
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
 

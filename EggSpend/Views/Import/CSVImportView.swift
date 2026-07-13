@@ -170,7 +170,7 @@ struct CSVImportView: View {
             if importType == .transactions {
                 Section {
                     columnPicker("Date *",        selection: $mapping.dateColumn)
-                    columnPicker("Title / Desc *", selection: $mapping.titleColumn)
+                    columnPicker("Payee / Desc *", selection: $mapping.titleColumn)
                     columnPicker("Amount *",       selection: $mapping.amountColumn)
                 } header: { Text("Required") }
 

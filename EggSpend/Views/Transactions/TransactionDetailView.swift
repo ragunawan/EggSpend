@@ -86,7 +86,7 @@ struct TransactionDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            detailRow("Title") {
+            detailRow("Payee") {
                 Text(transaction.title)
                     .lineLimit(1)
             }

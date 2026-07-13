@@ -286,37 +286,41 @@ private struct AccountRowView: View {
     let account: Account
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             ZStack {
                 Circle()
                     .fill((account.isAsset ? Color.nestLeafGreen : Color.negative).opacity(0.15))
-                    .frame(width: 40, height: 40)
+                    .frame(width: 32, height: 32)
                 Image(systemName: account.type.icon)
+                    .font(.subheadline)
                     .foregroundStyle(account.isAsset ? Color.nestLeafGreen : Color.negative)
             }
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(account.name)
-                    .font(.body)
-                Text(account.type.rawValue)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let dueDate = account.dueDate {
-                    Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
-                        .font(.caption2)
-                        .foregroundStyle(Color.warningTone)
+                    .font(.subheadline)
+                    .lineLimit(1)
+                HStack(spacing: Space.xs) {
+                    Text(account.type.rawValue)
+                    if let dueDate = account.dueDate {
+                        Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
+                            .foregroundStyle(Color.warningTone)
+                    }
+                    if account.isLiability && !account.includeInNetWorth {
+                        Text("Excluded")
+                    }
                 }
-                if account.isLiability && !account.includeInNetWorth {
-                    Text("Excluded from net worth")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
             }
             Spacer()
             Text(abs(account.balance), format: .currency(code: CurrencyFormat.code))
-                .font(NestType.amount)
+                .font(.subheadline.weight(.semibold).monospacedDigit())
                 .foregroundStyle(account.isAsset ? Color.nestLeafGreen : Color.negative)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
-        .padding(.vertical, Space.sm)
+        .padding(.vertical, Space.xs)
     }
 }
 

@@ -50,12 +50,12 @@ struct BudgetView: View {
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
-                            summaryStrip
-
                             Text("Budget Eggs")
                                 .font(.largeTitle.bold())
                                 .foregroundStyle(.primary)
                                 .padding(.top, Space.xs)
+
+                            summaryStrip
 
                             VStack(spacing: 16) {
                                 if displayed.isEmpty && periodFilter != nil {

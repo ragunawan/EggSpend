@@ -99,7 +99,7 @@ struct CategoryManagementView: View {
                             } header: {
                                 Text("Auto-Categorization Rules")
                             } footer: {
-                                Text("Rules are learned automatically when you categorize a transaction. Deleting a rule stops future auto-assignment for that title.")
+                                Text("Rules are learned automatically when you categorize a transaction. Deleting a rule stops future auto-assignment for that payee.")
                             }
                         }
                     }
@@ -163,7 +163,7 @@ struct CategoryManagementView: View {
                 rulePatternToDelete = nil
             }
         } message: {
-            Text("This title will no longer be auto-categorized. Future transactions with this title will start uncategorized again.")
+            Text("This payee will no longer be auto-categorized. Future transactions with this payee will start uncategorized again.")
         }
     }
 

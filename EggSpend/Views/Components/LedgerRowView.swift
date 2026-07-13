@@ -64,9 +64,11 @@ struct LedgerRowView: View {
                         .lineLimit(1)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer(minLength: Space.sm)
             amount
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(1)
         }
         .padding(.vertical, verticalPadding)
         .padding(.horizontal, Space.md)
