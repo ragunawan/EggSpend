@@ -122,7 +122,7 @@ struct CashFlowCalendarView: View {
 
     private func transactionLine(_ transaction: Transaction) -> some View {
         line(
-            icon: transaction.category?.icon ?? transaction.type.systemImage,
+            icon: resolvedIcon(transaction.category?.icon, fallback: transaction.type.systemImage),
             title: transaction.title,
             subtitle: transaction.category?.name ?? "Actual transaction",
             amount: transaction.signedAmount,
@@ -132,7 +132,7 @@ struct CashFlowCalendarView: View {
 
     private func recurringLine(_ occurrence: RecurringOccurrence) -> some View {
         line(
-            icon: occurrence.category?.icon ?? occurrence.source.frequency.icon,
+            icon: resolvedIcon(occurrence.category?.icon, fallback: occurrence.source.frequency.icon),
             title: occurrence.title,
             subtitle: "Upcoming recurring",
             amount: occurrence.signedAmount,
@@ -148,6 +148,13 @@ struct CashFlowCalendarView: View {
             amount: 0,
             color: Color.yolk
         )
+    }
+
+    private func resolvedIcon(_ icon: String?, fallback: String) -> String {
+        guard let icon, !icon.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return fallback
+        }
+        return icon
     }
 
     private func line(icon: String, title: String, subtitle: String, amount: Double, color: Color) -> some View {
