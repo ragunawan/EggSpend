@@ -3,35 +3,31 @@ import SwiftData
 import Charts
 
 enum CompactCurrencyAxisFormatter {
-    // Symbol-prefix layout ("$1.2K") and English K/M/B/T suffixes are accepted v1
-    // imprecision for locales that place the symbol after the number or use
-    // different magnitude abbreviations — this is a compact chart axis label, not
-    // a currency-accurate display.
+    // Symbol-prefix layout ("$1.2K") and English K suffixes are accepted v1
+    // imprecision for locales that place the symbol after the number — this is
+    // a compact chart axis label, not a currency-accurate display.
     static func string(from value: Double, currencySymbol: String = "$") -> String {
         guard value.isFinite else { return "\(currencySymbol)0" }
 
         let sign = value < 0 ? "-" : ""
         let magnitude = abs(value)
-        let units: [(threshold: Double, divisor: Double, suffix: String)] = [
-            (1_000_000_000_000, 1_000_000_000_000, "T"),
-            (1_000_000_000, 1_000_000_000, "B"),
-            (1_000_000, 1_000_000, "M"),
-            (1_000, 1_000, "K")
-        ]
-
-        for unit in units where magnitude >= unit.threshold {
-            return "\(sign)\(currencySymbol)\(compactNumber(magnitude / unit.divisor))\(unit.suffix)"
+        if magnitude >= 1_000 {
+            return "\(sign)\(currencySymbol)\(compactNumber(magnitude / 1_000))K"
         }
 
-        return "\(sign)\(currencySymbol)\(compactNumber(magnitude.rounded()))"
+        return "\(sign)\(currencySymbol)\(compactNumber(magnitude))"
     }
 
     private static func compactNumber(_ value: Double) -> String {
-        let roundedToTenth = (value * 10).rounded() / 10
-        if roundedToTenth.rounded() == roundedToTenth {
-            return String(format: "%.0f", roundedToTenth)
+        let integerDigits = max(1, Int(floor(log10(max(abs(value), 1)))) + 1)
+        let fractionDigits = max(0, 4 - integerDigits)
+        let formatted = String(format: "%.\(fractionDigits)f", value)
+        if formatted.contains(".") {
+            return formatted
+                .replacingOccurrences(of: #"0+$"#, with: "", options: .regularExpression)
+                .replacingOccurrences(of: #"\.$"#, with: "", options: .regularExpression)
         }
-        return String(format: "%.1f", roundedToTenth)
+        return formatted
     }
 }
 
@@ -42,8 +38,9 @@ enum ChartYAxisDomain {
             return fallback
         }
 
-        var lowerBound = minValue - abs(minValue * 0.2)
-        var upperBound = maxValue + abs(maxValue * 0.2)
+        let dataRange = maxValue - minValue
+        var lowerBound = minValue - dataRange * 0.2
+        var upperBound = maxValue + dataRange * 0.2
 
         if lowerBound == upperBound {
             let padding = max(abs(minValue) * 0.2, 1)
@@ -283,7 +280,7 @@ struct MetricsView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let worth = value.as(Double.self) {
-                            Text(worth, format: .currency(code: CurrencyFormat.code).precision(.fractionLength(2)))
+                            Text(CompactCurrencyAxisFormatter.string(from: worth, currencySymbol: CurrencyFormat.symbol))
                         }
                     }
                 }
@@ -402,7 +399,7 @@ struct MetricsView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(abs(v), format: .currency(code: CurrencyFormat.code).precision(.fractionLength(2)))
+                            Text(CompactCurrencyAxisFormatter.string(from: abs(v), currencySymbol: CurrencyFormat.symbol))
                                 .font(.caption2)
                                 .foregroundStyle(v >= 0 ? Color.nestLeafGreen : Color.negative)
                         }
