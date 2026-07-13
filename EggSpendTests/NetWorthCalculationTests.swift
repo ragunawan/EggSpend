@@ -98,6 +98,7 @@ final class NetWorthCalculationTests: XCTestCase {
         XCTAssertTrue(AccountType.other.isAsset)
         XCTAssertFalse(AccountType.credit.isAsset)
         XCTAssertFalse(AccountType.loan.isAsset)
+        XCTAssertFalse(AccountType.mortgage.isAsset)
     }
 
     func testAccountBalancePersistence() throws {

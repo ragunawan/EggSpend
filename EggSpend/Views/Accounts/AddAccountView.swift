@@ -16,6 +16,13 @@ struct AddAccountView: View {
     @State private var aprText = ""
     @State private var minimumPaymentText = ""
     @State private var extraPaymentText = ""
+    @State private var mortgageOriginalPrincipalText = ""
+    @State private var mortgageTermYearsText = ""
+    @State private var mortgageFirstPaymentDate = Date.now
+    @State private var mortgagePropertyTaxText = ""
+    @State private var mortgageInsuranceText = ""
+    @State private var mortgagePMIText = ""
+    @State private var mortgageEscrowText = ""
     @State private var includeInNetWorth = true
     @State private var showValidationError = false
     @State private var loadedBalance: Double = 0
@@ -36,12 +43,20 @@ struct AddAccountView: View {
                         }
                     }
                     .onChange(of: selectedType) { _, newType in
-                        if newType != .credit && newType != .loan {
+                        if !newType.isLiability {
                             hasDueDate = false
                             aprText = ""
                             minimumPaymentText = ""
                             extraPaymentText = ""
                             includeInNetWorth = true
+                        }
+                        if newType != .mortgage {
+                            mortgageOriginalPrincipalText = ""
+                            mortgageTermYearsText = ""
+                            mortgagePropertyTaxText = ""
+                            mortgageInsuranceText = ""
+                            mortgagePMIText = ""
+                            mortgageEscrowText = ""
                         }
                     }
                     HStack {
@@ -53,7 +68,7 @@ struct AddAccountView: View {
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
-                    if selectedType == .credit || selectedType == .loan {
+                    if selectedType.isLiability {
                         Toggle("Has Due Date", isOn: $hasDueDate)
                         if hasDueDate {
                             DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
@@ -62,7 +77,7 @@ struct AddAccountView: View {
                     }
                 }
 
-                if selectedType == .credit || selectedType == .loan {
+                if selectedType.isLiability {
                     Section("Payoff Planning") {
                         HStack {
                             Text("APR")
@@ -76,6 +91,27 @@ struct AddAccountView: View {
                         }
                         currencyField("Minimum Payment", text: $minimumPaymentText)
                         currencyField("Extra Payment", text: $extraPaymentText)
+                    }
+                }
+
+                if selectedType == .mortgage {
+                    Section("Mortgage Details") {
+                        currencyField("Original Principal", text: $mortgageOriginalPrincipalText)
+                        HStack {
+                            Text("Term")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            TextField("30", text: $mortgageTermYearsText)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                            Text("years")
+                                .foregroundStyle(.secondary)
+                        }
+                        DatePicker("First Payment", selection: $mortgageFirstPaymentDate, displayedComponents: .date)
+                        currencyField("Property Tax / Month", text: $mortgagePropertyTaxText)
+                        currencyField("Insurance / Month", text: $mortgageInsuranceText)
+                        currencyField("PMI / Month", text: $mortgagePMIText)
+                        currencyField("Other Escrow / Month", text: $mortgageEscrowText)
                     }
                 }
 
@@ -114,7 +150,7 @@ struct AddAccountView: View {
             return
         }
         let stored = selectedType.isAsset ? abs(balance) : -abs(balance)
-        let resolvedDueDate = (selectedType == .credit || selectedType == .loan) && hasDueDate ? dueDate : nil
+        let resolvedDueDate = selectedType.isLiability && hasDueDate ? dueDate : nil
         if let account = editingAccount {
             account.name = name.trimmingCharacters(in: .whitespaces)
             account.type = selectedType
@@ -124,6 +160,7 @@ struct AddAccountView: View {
             account.annualPercentageRate = selectedType.isAsset ? nil : AmountParser.parse(aprText)
             account.minimumPayment = selectedType.isAsset ? nil : AmountParser.parse(minimumPaymentText)
             account.plannedExtraPayment = selectedType.isAsset ? nil : AmountParser.parse(extraPaymentText)
+            applyMortgageFields(to: account)
             account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
         } else {
             let account = Account(
@@ -136,6 +173,7 @@ struct AddAccountView: View {
             account.annualPercentageRate = selectedType.isAsset ? nil : AmountParser.parse(aprText)
             account.minimumPayment = selectedType.isAsset ? nil : AmountParser.parse(minimumPaymentText)
             account.plannedExtraPayment = selectedType.isAsset ? nil : AmountParser.parse(extraPaymentText)
+            applyMortgageFields(to: account)
             account.includeInNetWorth = selectedType.isAsset ? true : includeInNetWorth
             modelContext.insert(account)
         }
@@ -154,7 +192,39 @@ struct AddAccountView: View {
         aprText = account.annualPercentageRate.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
         minimumPaymentText = account.minimumPayment.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
         extraPaymentText = account.plannedExtraPayment.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        mortgageOriginalPrincipalText = account.mortgageOriginalPrincipal.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        mortgageTermYearsText = account.mortgageTermMonths.map { String($0 / 12) } ?? ""
+        mortgageFirstPaymentDate = account.mortgageFirstPaymentDate ?? Date.now
+        mortgagePropertyTaxText = account.mortgageMonthlyPropertyTax.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        mortgageInsuranceText = account.mortgageMonthlyInsurance.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        mortgagePMIText = account.mortgageMonthlyPMI.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
+        mortgageEscrowText = account.mortgageMonthlyEscrow.map { $0.formatted(.number.precision(.fractionLength(2)).grouping(.never)) } ?? ""
         includeInNetWorth = account.includeInNetWorth
+    }
+
+    private func applyMortgageFields(to account: Account) {
+        guard selectedType == .mortgage else {
+            account.mortgageOriginalPrincipal = nil
+            account.mortgageTermMonths = nil
+            account.mortgageFirstPaymentDate = nil
+            account.mortgageMonthlyPropertyTax = nil
+            account.mortgageMonthlyInsurance = nil
+            account.mortgageMonthlyPMI = nil
+            account.mortgageMonthlyEscrow = nil
+            return
+        }
+
+        account.mortgageOriginalPrincipal = AmountParser.parse(mortgageOriginalPrincipalText)
+        if let years = Int(mortgageTermYearsText.trimmingCharacters(in: .whitespaces)), years > 0 {
+            account.mortgageTermMonths = years * 12
+        } else {
+            account.mortgageTermMonths = nil
+        }
+        account.mortgageFirstPaymentDate = mortgageFirstPaymentDate
+        account.mortgageMonthlyPropertyTax = AmountParser.parse(mortgagePropertyTaxText)
+        account.mortgageMonthlyInsurance = AmountParser.parse(mortgageInsuranceText)
+        account.mortgageMonthlyPMI = AmountParser.parse(mortgagePMIText)
+        account.mortgageMonthlyEscrow = AmountParser.parse(mortgageEscrowText)
     }
 
     private func currencyField(_ label: String, text: Binding<String>) -> some View {

@@ -131,8 +131,8 @@ extension CSVParser {
             || s.contains("401") || s.contains("ira")
             || s.contains("pension")                                { return .investment }
         if s.contains("credit")                                     { return .credit }
-        if s.contains("loan") || s.contains("mortgage")
-            || s.contains("debt")                                   { return .loan }
+        if s.contains("mortgage")                                   { return .mortgage }
+        if s.contains("loan") || s.contains("debt")                 { return .loan }
         return .other
     }
 }

@@ -7,6 +7,7 @@ enum AccountType: String, Codable, CaseIterable, Identifiable {
     case investment = "Investment"
     case credit = "Credit Card"
     case loan = "Loan"
+    case mortgage = "Mortgage"
     case other = "Other"
 
     var id: String { rawValue }
@@ -14,9 +15,11 @@ enum AccountType: String, Codable, CaseIterable, Identifiable {
     var isAsset: Bool {
         switch self {
         case .checking, .savings, .investment, .other: return true
-        case .credit, .loan: return false
+        case .credit, .loan, .mortgage: return false
         }
     }
+
+    var isLiability: Bool { !isAsset }
 
     var icon: String {
         switch self {
@@ -25,6 +28,7 @@ enum AccountType: String, Codable, CaseIterable, Identifiable {
         case .investment: return "chart.line.uptrend.xyaxis"
         case .credit: return "creditcard"
         case .loan: return "doc.text.fill"
+        case .mortgage: return "house.fill"
         case .other: return "wallet.pass.fill"
         }
     }
@@ -42,6 +46,13 @@ final class Account {
     var annualPercentageRate: Double?
     var minimumPayment: Double?
     var plannedExtraPayment: Double?
+    var mortgageOriginalPrincipal: Double?
+    var mortgageTermMonths: Int?
+    var mortgageFirstPaymentDate: Date?
+    var mortgageMonthlyPropertyTax: Double?
+    var mortgageMonthlyInsurance: Double?
+    var mortgageMonthlyPMI: Double?
+    var mortgageMonthlyEscrow: Double?
     var includeInNetWorth: Bool = true
     var isArchived: Bool = false
 
@@ -51,7 +62,7 @@ final class Account {
     }
 
     var isAsset: Bool { type.isAsset }
-    var isLiability: Bool { type == .credit || type == .loan }
+    var isLiability: Bool { type == .credit || type == .loan || type == .mortgage }
     var countsTowardNetWorth: Bool { isAsset || includeInNetWorth }
 
     @Relationship(deleteRule: .nullify, inverse: \Transaction.account)

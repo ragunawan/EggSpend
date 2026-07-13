@@ -328,6 +328,13 @@ struct AccountDTO: Codable, Equatable {
     var annualPercentageRate: Double?
     var minimumPayment: Double?
     var plannedExtraPayment: Double?
+    var mortgageOriginalPrincipal: Double?
+    var mortgageTermMonths: Int?
+    var mortgageFirstPaymentDate: Date?
+    var mortgageMonthlyPropertyTax: Double?
+    var mortgageMonthlyInsurance: Double?
+    var mortgageMonthlyPMI: Double?
+    var mortgageMonthlyEscrow: Double?
     var includeInNetWorth: Bool
     var isArchived: Bool
 
@@ -342,6 +349,13 @@ struct AccountDTO: Codable, Equatable {
         annualPercentageRate = account.annualPercentageRate
         minimumPayment = account.minimumPayment
         plannedExtraPayment = account.plannedExtraPayment
+        mortgageOriginalPrincipal = account.mortgageOriginalPrincipal
+        mortgageTermMonths = account.mortgageTermMonths
+        mortgageFirstPaymentDate = account.mortgageFirstPaymentDate
+        mortgageMonthlyPropertyTax = account.mortgageMonthlyPropertyTax
+        mortgageMonthlyInsurance = account.mortgageMonthlyInsurance
+        mortgageMonthlyPMI = account.mortgageMonthlyPMI
+        mortgageMonthlyEscrow = account.mortgageMonthlyEscrow
         includeInNetWorth = account.includeInNetWorth
         isArchived = account.isArchived
     }
