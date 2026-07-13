@@ -96,6 +96,50 @@ struct MetricsView: View {
             let start = dateStart
             return DateInterval(start: start, end: .now)
         }
+
+        var xAxisDates: [Date] {
+            let cal = Calendar.current
+            let interval = dateInterval
+            let start: Date
+
+            switch self {
+            case .week:
+                start = cal.startOfDay(for: interval.start)
+            case .month:
+                start = cal.dateInterval(of: .weekOfYear, for: interval.start)?.start ?? interval.start
+            case .year:
+                start = cal.dateInterval(of: .month, for: interval.start)?.start ?? interval.start
+            }
+
+            var dates: [Date] = []
+            var cursor = start
+            while cursor <= interval.end {
+                dates.append(cursor)
+                guard let next = cal.date(byAdding: bucketUnit, value: 1, to: cursor), next > cursor else {
+                    break
+                }
+                cursor = next
+            }
+
+            return dates
+        }
+
+        var xAxisDomain: ClosedRange<Date> {
+            let interval = dateInterval
+            return (xAxisDates.first ?? interval.start)...interval.end
+        }
+
+        func bucketStart(for date: Date) -> Date {
+            let cal = Calendar.current
+            switch self {
+            case .week:
+                return cal.startOfDay(for: date)
+            case .month:
+                return cal.dateInterval(of: .weekOfYear, for: date)?.start ?? date
+            case .year:
+                return cal.dateInterval(of: .month, for: date)?.start ?? date
+            }
+        }
     }
 
     // MARK: - Derived data
@@ -156,11 +200,9 @@ struct MetricsView: View {
 
     // Cash flow: income and expenses bucketed over the selected period
     private var cashFlowData: [(date: Date, income: Double, expenses: Double)] {
-        let cal  = Calendar.current
-        let unit = selectedPeriod.bucketUnit
-        var dict: [Date: (Double, Double)] = [:]
+        var dict = Dictionary(uniqueKeysWithValues: selectedPeriod.xAxisDates.map { ($0, (0.0, 0.0)) })
         for tx in filtered where !tx.isAdjustment {
-            let key = cal.dateInterval(of: unit, for: tx.date)?.start ?? tx.date
+            let key = selectedPeriod.bucketStart(for: tx.date)
             var pair = dict[key] ?? (0, 0)
             if tx.type == .income  { pair.0 += tx.amount }
             else                   { pair.1 += tx.amount }
@@ -312,6 +354,7 @@ struct MetricsView: View {
                 }
             }
             .chartXSelection(value: $selectedNetWorthDate)
+            .chartXScale(domain: selectedPeriod.xAxisDomain)
             .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
@@ -324,7 +367,7 @@ struct MetricsView: View {
                 }
             }
             .chartXAxis {
-                AxisMarks(values: .automatic) { value in
+                AxisMarks(values: selectedPeriod.xAxisDates) { value in
                     AxisGridLine()
                     AxisValueLabel(format: xAxisFormat, centered: true)
                 }
@@ -431,6 +474,7 @@ struct MetricsView: View {
                 }
             }
             .chartXSelection(value: $selectedCashFlowDate)
+            .chartXScale(domain: selectedPeriod.xAxisDomain)
             .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks { value in
@@ -445,7 +489,7 @@ struct MetricsView: View {
                 }
             }
             .chartXAxis {
-                AxisMarks(values: .automatic) { value in
+                AxisMarks(values: selectedPeriod.xAxisDates) { value in
                     AxisGridLine()
                     AxisValueLabel(format: xAxisFormat, centered: true)
                 }
@@ -545,7 +589,7 @@ struct MetricsView: View {
                                 : CurrencyFormat.money(category.amount)
                         )
                 }
-                .chartLegend(position: .overlay, alignment: .trailing, spacing: Space.xs)
+                .chartLegend(position: .bottom, alignment: .center, spacing: Space.xs)
                 .frame(height: 150)
                 .padding(.vertical, Space.xs)
 
