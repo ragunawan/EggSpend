@@ -64,10 +64,6 @@ struct TransactionsListView: View {
             .sorted { $0.date > $1.date }
     }
 
-    private var grouped: [(day: Date, rows: [LedgerRow])] {
-        TransactionGrouping.groupByDay(rows)
-    }
-
     private var topCategories: [TransactionCategory] {
         let activeCategories = categories.filter { !$0.isArchived }
         let usageCounts = Dictionary(grouping: transactions.compactMap(\.category?.id), by: { $0 })
@@ -140,9 +136,10 @@ struct TransactionsListView: View {
                 .padding(.bottom, Space.lg)
             }
             .navigationTitle("Transactions")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .searchable(text: $searchText, prompt: "Search transactions")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search transactions")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
@@ -237,62 +234,19 @@ struct TransactionsListView: View {
 
     private var transactionList: some View {
         List {
-            ForEach(grouped, id: \.day) { section in
-                let items = section.rows
-                let groupable = items.filter { !$0.isUpcoming }
-                let upcoming = items.filter { $0.isUpcoming }
-
-                Section {
-                    ForEach(groupable) { row in
-                        rowView(for: row, showsCardBackground: false)
-                            .listRowBackground(Color.clear)
-                    }
-                    .onDelete { indexSet in
-                        deleteRows(groupable, at: indexSet)
-                    }
-
-                    ForEach(upcoming) { row in
-                        rowView(for: row)
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                    }
-                } header: {
-                    HStack {
-                        Text(compactSectionTitle(for: section.day))
-                            .font(NestType.overline)
-                            .foregroundStyle(Color.textSecondaryWarm)
-                        Spacer()
-                        if !groupable.isEmpty {
-                            let total = dailyNetTotal(groupable)
-                            Text(total, format: .currency(code: CurrencyFormat.code).sign(strategy: .always()))
-                                .font(NestType.overline)
-                                .fontDesign(.rounded)
-                                .foregroundStyle(total >= 0 ? Color.positive : Color.negative)
-                        }
-                    }
-                    .textCase(nil)
-                }
-                .listSectionSeparator(.visible)
+            ForEach(rows) { row in
+                rowView(for: row, showsCardBackground: false)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(Color.clear)
         .padding(.horizontal, Space.md)
-        .padding(.top, Space.sm)
+        .padding(.top, Space.xs)
         .safeAreaInset(edge: .bottom) {
             Color.clear.frame(height: 72)
-        }
-    }
-
-    private func compactSectionTitle(for date: Date) -> String {
-        date.formatted(.dateTime.month(.abbreviated).day()).uppercased()
-    }
-
-    private func dailyNetTotal(_ items: [LedgerRow]) -> Double {
-        items.reduce(0) { total, row in
-            if case .transaction(let tx) = row { return total + tx.signedAmount }
-            return total
         }
     }
 
@@ -347,7 +301,7 @@ struct TransactionsListView: View {
                 }
             }
             .padding(.horizontal, Space.lg)
-            .padding(.vertical, Space.sm)
+            .padding(.vertical, Space.xs)
         }
         .background(.regularMaterial)
     }
@@ -357,7 +311,7 @@ struct TransactionsListView: View {
         switch row {
         case .transaction(let tx):
             NavigationLink(destination: TransactionDetailView(transaction: tx)) {
-                LedgerRowView(row: row, showsMeta: [.category, .account])
+                LedgerRowView(row: row, showsMeta: [.category, .account, .date], verticalPadding: Space.xs)
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
@@ -392,7 +346,7 @@ struct TransactionsListView: View {
             }
         case .transfer(let transfer):
             NavigationLink(destination: TransferDetailView(transfer: transfer)) {
-                LedgerRowView(row: row, showsMeta: [.date])
+                LedgerRowView(row: row, showsMeta: [.date], verticalPadding: Space.xs)
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
@@ -412,7 +366,7 @@ struct TransactionsListView: View {
             }
         case .upcoming:
             NavigationLink(destination: RecurringTransactionsView()) {
-                LedgerRowView(row: row, style: .upcoming)
+                LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
             }
         }
     }
@@ -504,7 +458,7 @@ private struct TransactionsFilterChip: View {
             Label(label, systemImage: systemImage)
                 .font(.subheadline.weight(.semibold))
                 .padding(.horizontal, Space.md)
-                .padding(.vertical, Space.sm)
+                .frame(minHeight: 44)
                 .background(isSelected ? Color.yolk : Color.yolk.opacity(0.12), in: Capsule())
                 .foregroundStyle(isSelected ? .white : Color.yolk)
         }

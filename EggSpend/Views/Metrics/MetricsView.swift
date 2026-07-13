@@ -334,7 +334,7 @@ struct MetricsView: View {
                     )
                     .foregroundStyle(Color.nestLeafGreen.gradient)
                     .position(by: .value("Series", "Income"))
-                    .cornerRadius(4)
+                    .cornerRadius(Radius.control)
                     .accessibilityLabel("\(point.date.formatted(calloutDateFormat)) income")
                     .accessibilityValue(CurrencyFormat.money(point.income))
 
@@ -344,7 +344,7 @@ struct MetricsView: View {
                     )
                     .foregroundStyle(Color.negative.opacity(0.8).gradient)
                     .position(by: .value("Series", "Expenses"))
-                    .cornerRadius(4)
+                    .cornerRadius(Radius.control)
                     .accessibilityLabel("\(point.date.formatted(calloutDateFormat)) expenses")
                     .accessibilityValue(CurrencyFormat.money(point.expenses))
                 }
@@ -480,7 +480,7 @@ struct MetricsView: View {
                                innerRadius: .ratio(0.55),
                                angularInset: 2)
                         .foregroundStyle(by: .value("Category", name))
-                        .cornerRadius(4)
+                        .cornerRadius(Radius.control)
                         .accessibilityLabel(name)
                         .accessibilityValue(
                             totalExpenses > 0

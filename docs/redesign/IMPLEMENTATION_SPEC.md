@@ -341,21 +341,21 @@ Rollback points: every phase boundary is a safe tag (`redesign-r0` … `redesign
 
 ## Section 14 — Success Metrics (fill in at R6)
 
-| Metric | Baseline | Target | Measure |
-|---|---|---|---|
-| Taps to log repeat merchant | ~10 | ≤4 | manual count |
-| Transactions rows/screenful (preview data, 6.3″) | 4 | ≥9 | screenshot |
-| Home above-fold: hero+4 stats+insight+3 recent | no | yes | screenshot |
-| Budget rows visible with summary | 2 | ≥4 | screenshot |
-| `.system(size:` in Views/ | 13 | 0 | grep |
-| Distinct corner radii | 7 | 3 | grep |
-| Raw `.red/.green/.blue/.orange` in Views/ | ~20 | 0 | grep |
-| Card/shadow treatments | ≥3 | 1 | code review |
-| Names for net-worth number | 3 | 1 (+metric label) | review |
-| DashboardView line count | 701 | <400 | wc -l |
-| Row components for ledger entries | 3 | 1 | review |
-| Scrolling to reach any Home datum | ~2.5 screens | ≤1.5 | screenshot |
-| Existing test classes green | 29 | 29 (+3 new) | xcodebuild test |
+| Metric | Baseline | Target | R6 Result | Measure |
+|---|---|---|---|---|
+| Taps to log repeat merchant | ~10 | ≤4 | 3 | manual count: Transactions FAB -> repeat merchant chip -> save |
+| Transactions rows/screenful (preview data, 6.3″) | 4 | ≥9 | ≥9 | `screenshots/iphone-6.3/02-transactions.png` |
+| Home above-fold: hero+4 stats+insight+3 recent | no | yes | yes | `screenshots/iphone-6.3/01-home.png` |
+| Budget rows visible with summary | 2 | ≥4 | ≥4 | `screenshots/iphone-6.3/03-budget.png` |
+| `.system(size:` in Views/ | 13 | 0 | 0 | `rg "\.system\(size:" EggSpend/Views` |
+| Distinct corner radii | 7 | 3 | 3 tokens | `Radius.control`, `Radius.card`, `Radius.sheet`; no raw radius literals in Views |
+| Raw `.red/.green/.blue/.orange` in Views/ | ~20 | 0 | 0 | `rg "\.(red\|green\|blue\|orange)\b" EggSpend/Views` |
+| Card/shadow treatments | ≥3 | 1 | 1 primary card modifier | code review: `.nestCard()` is the shared card treatment |
+| Names for net-worth number | 3 | 1 (+metric label) | 1 (+metric label) | review: root tab uses "Nest Egg"; metric labels use "Net worth" |
+| DashboardView line count | 701 | <400 | 379 | `wc -l EggSpend/Views/Dashboard/DashboardView.swift` |
+| Row components for ledger entries | 3 | 1 | 1 | review: `LedgerRowView` covers transactions, transfers, upcoming rows |
+| Scrolling to reach any Home datum | ~2.5 screens | ≤1.5 | ≤1.5 | `screenshots/iphone-6.3/01-home.png` |
+| Existing test classes green | 29 | 29 (+3 new) | 31 test files green | `xcodebuild test` on iPhone 17 |
 
 ---
 

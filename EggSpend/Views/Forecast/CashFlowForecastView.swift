@@ -277,7 +277,7 @@ struct CashFlowForecastView: View {
                 .foregroundStyle(balance >= 0 ? Color.nestBrown : Color.negative)
         }
         .padding(.horizontal, 8).padding(.vertical, 5)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.control))
         .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
     }
 

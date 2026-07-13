@@ -42,6 +42,7 @@ struct LedgerRowView: View {
     let row: LedgerRow
     var showsMeta: Set<MetaField> = [.category, .account, .date]
     var style: Style = .plain
+    var verticalPadding: CGFloat = Space.sm
 
     var body: some View {
         HStack(spacing: Space.md) {
@@ -67,7 +68,7 @@ struct LedgerRowView: View {
             Spacer(minLength: Space.sm)
             amount
         }
-        .padding(.vertical, Space.sm)
+        .padding(.vertical, verticalPadding)
         .padding(.horizontal, Space.md)
         .background {
             if style == .upcoming {

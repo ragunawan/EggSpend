@@ -79,6 +79,8 @@ Domain logic lives outside views in:
 
 **Theme.** All colors, gradients, and the `.nestCard()` view modifier are in `EggSpendTheme.swift`. Semantic colors: `.nestBrown` (brand), `.yolk` (primary interactive), `.eggBlue` (income/assets), `.nestLeafGreen` (positive), `.twig` (muted secondary), `.nestCream` (background tint). Use these — don't add one-off color literals.
 
+**Redesign structure.** The five-tab UI is Home, Transactions, Budget, Nest Egg, and Metrics. `LedgerRowView` is the single ledger row component for transactions, transfers, and upcoming recurring occurrences. The old standalone `AccountsView.swift` root screen was retired; account and liability management now lives under Nest Egg plus Settings -> Manage links.
+
 ## Development Notes
 
 - When adding Swift files, keep both `EggSpend.xcodeproj/project.pbxproj` and `generate_project.py` in sync (now also registers resources: PrivacyInfo.xcprivacy, Localizable.xcstrings).

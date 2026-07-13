@@ -271,9 +271,9 @@ struct SavingsGoalRowView: View {
 
             AnimatedProgressBar(progress: goal.progress, color: goal.statusColor, height: 3)
         }
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous)
                 .stroke(goal.statusColor.opacity(0.2), lineWidth: 1)
         )
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
