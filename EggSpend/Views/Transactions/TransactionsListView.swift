@@ -19,6 +19,9 @@ struct TransactionsListView: View {
     @State private var showFilterSheet = false
     @State private var editingTransaction: Transaction?
     @State private var editingTransfer: Transfer?
+    @State private var selectedTransaction: Transaction?
+    @State private var selectedTransfer: Transfer?
+    @State private var showRecurringTransactions = false
     @State private var quickAddDraft: QuickAddDraft?
 
     init(initialFilter: TransactionFilter = TransactionFilter(), hideTransfers: Bool = false, showUpcoming: Bool = true) {
@@ -272,6 +275,15 @@ struct TransactionsListView: View {
             .sheet(isPresented: $showFilterSheet) {
                 TransactionFilterView(filter: $filter, hideTransfers: $hideTransfers)
             }
+            .navigationDestination(item: $selectedTransaction) { transaction in
+                TransactionDetailView(transaction: transaction)
+            }
+            .navigationDestination(item: $selectedTransfer) { transfer in
+                TransferDetailView(transfer: transfer)
+            }
+            .navigationDestination(isPresented: $showRecurringTransactions) {
+                RecurringTransactionsView()
+            }
             .onAppear {
                 processRecurringTransactions(Array(recurring), context: modelContext)
             }
@@ -312,13 +324,16 @@ struct TransactionsListView: View {
             ForEach(rows) { row in
                 rowView(for: row, showsCardBackground: false)
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: Space.md))
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .alignmentGuide(.listRowSeparatorLeading) { _ in 0 }
+                    .alignmentGuide(.listRowSeparatorTrailing) { dimension in
+                        dimension[.trailing]
+                    }
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(Color.clear)
-        .padding(.horizontal, Space.md)
         .padding(.top, Space.xs)
         .safeAreaInset(edge: .bottom) {
             Color.clear.frame(height: 72)
@@ -392,9 +407,12 @@ struct TransactionsListView: View {
     private func rowView(for row: LedgerRow, showsCardBackground: Bool = true) -> some View {
         switch row {
         case .transaction(let tx):
-            NavigationLink(destination: TransactionDetailView(transaction: tx)) {
+            Button {
+                selectedTransaction = tx
+            } label: {
                 LedgerRowView(row: row, showsMeta: [.category, .account, .date], verticalPadding: Space.xs)
             }
+            .buttonStyle(.plain)
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
                     AccountBalanceService.reverse(tx, from: tx.account)
@@ -427,9 +445,12 @@ struct TransactionsListView: View {
                 }
             }
         case .transfer(let transfer):
-            NavigationLink(destination: TransferDetailView(transfer: transfer)) {
+            Button {
+                selectedTransfer = transfer
+            } label: {
                 LedgerRowView(row: row, showsMeta: [.date], verticalPadding: Space.xs)
             }
+            .buttonStyle(.plain)
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
                     TransferBalanceService.reverse(transfer)
@@ -447,9 +468,12 @@ struct TransactionsListView: View {
                 .tint(.yolk)
             }
         case .upcoming:
-            NavigationLink(destination: RecurringTransactionsView()) {
+            Button {
+                showRecurringTransactions = true
+            } label: {
                 LedgerRowView(row: row, style: .upcoming, verticalPadding: Space.xs)
             }
+            .buttonStyle(.plain)
         case .upcomingPayment(let payment):
             Button {
                 editingTransfer = generatedCreditCardPaymentTransfer(from: payment)

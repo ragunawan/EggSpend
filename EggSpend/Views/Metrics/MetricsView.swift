@@ -545,6 +545,7 @@ struct MetricsView: View {
                                 : CurrencyFormat.money(category.amount)
                         )
                 }
+                .chartLegend(position: .overlay, alignment: .trailing, spacing: Space.xs)
                 .frame(height: 150)
                 .padding(.vertical, Space.xs)
 

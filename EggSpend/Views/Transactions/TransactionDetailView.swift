@@ -44,11 +44,16 @@ struct TransactionDetailView: View {
             HStack {
                 Spacer()
                 VStack(spacing: 8) {
-                    Image(systemName: transaction.type.systemImage)
-                        .font(.largeTitle)
-                        .foregroundStyle(transaction.type == .income ? Color.positive : Color.negative)
-                    Text(transaction.amount, format: .currency(code: CurrencyFormat.code))
-                        .font(NestType.hero)
+                    HStack(spacing: Space.sm) {
+                        Image(systemName: transaction.type.systemImage)
+                            .font(.title.weight(.semibold))
+                            .foregroundStyle(transaction.type == .income ? Color.positive : Color.negative)
+
+                        Text(transaction.amount, format: .currency(code: CurrencyFormat.code))
+                            .font(NestType.hero)
+                    }
+                    .fixedSize(horizontal: true, vertical: false)
+
                     Text(transaction.type.rawValue)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)

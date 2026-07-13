@@ -103,6 +103,7 @@ struct LedgerRowView: View {
         .background {
             if style == .upcoming {
                 RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                    .inset(by: 1)
                     .stroke(
                         Color.info,
                         style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [5, 4])
