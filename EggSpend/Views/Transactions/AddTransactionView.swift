@@ -17,7 +17,6 @@ struct AddTransactionView: View {
 
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
-    @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
     @Query private var categoryRules: [CategoryRule]
     @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
 
@@ -36,7 +35,6 @@ struct AddTransactionView: View {
     @State private var selectedEntryKind: EntryKind = .expense
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var selectedAccount: Account? = nil
-    @State private var selectedBudget: Budget? = nil
     @State private var fromAccount: Account? = nil
     @State private var toAccount: Account? = nil
     @State private var notes = ""
@@ -75,11 +73,6 @@ struct AddTransactionView: View {
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
-    // Budgets only ever track expense spend, so the selector is expense-only.
-    private var availableBudgets: [Budget] {
-        budgets.sorted { $0.name < $1.name }
-    }
-
     private var amount: Double { AmountParser.parse(amountText) ?? 0 }
 
     private var isValid: Bool {
@@ -103,7 +96,6 @@ struct AddTransactionView: View {
                 } else {
                     detailsSection
                     accountSection
-                    if selectedEntryKind == .expense { budgetSection }
                     categorySection
                 }
                 notesSection
@@ -154,7 +146,6 @@ struct AddTransactionView: View {
                     if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != newKind.transactionType {
                         selectedCategory = nil
                     }
-                    if newKind != .expense { selectedBudget = nil }
                 }
             }
         }
@@ -262,29 +253,6 @@ struct AddTransactionView: View {
         }
     }
 
-    private var budgetSection: some View {
-        Section {
-            if availableBudgets.isEmpty {
-                Text("No budgets added yet")
-                    .foregroundStyle(.secondary)
-            } else {
-                Picker("Budget", selection: $selectedBudget) {
-                    Text("None").tag(Optional<Budget>.none)
-                    ForEach(availableBudgets) { budget in
-                        Text(budget.name).tag(Optional(budget))
-                    }
-                }
-                .onChange(of: selectedBudget) { _, newBudget in
-                    if let newBudget { selectedCategory = newBudget.category }
-                }
-            }
-        } header: {
-            Text("Budget")
-        } footer: {
-            Text("Assigns this transaction's category to match the selected budget.")
-        }
-    }
-
     private var categorySection: some View {
         Section("Category") {
             if availableCategories.isEmpty {
@@ -297,11 +265,6 @@ struct AddTransactionView: View {
                             .tag(Optional(cat))
                     }
                     Text("None").tag(Optional<TransactionCategory>.none)
-                }
-                .onChange(of: selectedCategory) { _, newCategory in
-                    if let selectedBudget, selectedBudget.category?.id != newCategory?.id {
-                        self.selectedBudget = nil
-                    }
                 }
             }
         }
@@ -387,9 +350,6 @@ struct AddTransactionView: View {
             selectedEntryKind = tx.type == .income ? .income : .expense
             selectedCategory = tx.category
             selectedAccount = tx.account
-            if tx.type == .expense {
-                selectedBudget = availableBudgets.first { $0.category?.id == tx.category?.id }
-            }
             notes = tx.notes
         } else if let transfer = editingTransfer {
             selectedEntryKind = .transfer
@@ -417,9 +377,6 @@ struct AddTransactionView: View {
               categoryMatchesSelectedType(category)
         else { return }
         selectedCategory = category
-        if let selectedBudget, selectedBudget.category?.id != category.id {
-            self.selectedBudget = nil
-        }
     }
 
     private func categoryMatchesSelectedType(_ category: TransactionCategory) -> Bool {
