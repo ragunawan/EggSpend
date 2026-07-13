@@ -21,6 +21,12 @@ struct TransactionsListView: View {
     @State private var editingTransfer: Transfer?
     @State private var quickAddDraft: QuickAddDraft?
 
+    init(initialFilter: TransactionFilter = TransactionFilter(), hideTransfers: Bool = false, showUpcoming: Bool = true) {
+        _filter = State(initialValue: initialFilter)
+        _hideTransfers = State(initialValue: hideTransfers)
+        _showUpcoming = State(initialValue: showUpcoming)
+    }
+
     private var filteredTransactions: [Transaction] {
         transactions.filter { tx in
             let matchesSearch = searchText.isEmpty
@@ -407,6 +413,9 @@ struct TransactionsListView: View {
             guard let categoryID = occurrence.category?.id, filter.categoryIDs.contains(categoryID) else {
                 return false
             }
+        }
+        if filter.uncategorizedOnly && occurrence.category != nil {
+            return false
         }
         if !filter.accountIDs.isEmpty {
             guard let accountID = occurrence.account?.id, filter.accountIDs.contains(accountID) else {

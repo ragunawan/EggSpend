@@ -5,6 +5,7 @@ import Foundation
 struct TransactionFilter: Equatable {
     var type: TransactionType? = nil
     var categoryIDs: Set<UUID> = []
+    var uncategorizedOnly: Bool = false
     var accountIDs: Set<UUID> = []
     var startDate: Date? = nil
     var endDate: Date? = nil
@@ -16,6 +17,7 @@ struct TransactionFilter: Equatable {
     var isActive: Bool {
         type != nil
             || !categoryIDs.isEmpty
+            || uncategorizedOnly
             || !accountIDs.isEmpty
             || startDate != nil
             || endDate != nil
@@ -29,6 +31,7 @@ struct TransactionFilter: Equatable {
         var count = 0
         if type != nil { count += 1 }
         if !categoryIDs.isEmpty { count += 1 }
+        if uncategorizedOnly { count += 1 }
         if !accountIDs.isEmpty { count += 1 }
         if startDate != nil || endDate != nil { count += 1 }
         if minAmount != nil || maxAmount != nil { count += 1 }
@@ -48,6 +51,9 @@ struct TransactionFilter: Equatable {
             guard let categoryID = transaction.category?.id, categoryIDs.contains(categoryID) else {
                 return false
             }
+        }
+        if uncategorizedOnly && transaction.category != nil {
+            return false
         }
         if !accountIDs.isEmpty {
             guard let accountID = transaction.account?.id, accountIDs.contains(accountID) else {

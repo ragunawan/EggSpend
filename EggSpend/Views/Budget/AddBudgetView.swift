@@ -30,12 +30,14 @@ struct AddBudgetView: View {
                         Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
                         TextField("0.00", text: $amountText).keyboardType(.decimalPad)
                     }
-                    Picker("Period", selection: $period) {
-                        ForEach(BudgetPeriod.allCases, id: \.self) { p in
-                            Label(p.rawValue, systemImage: p.icon).tag(p)
+                    if !createAsSavingsGoal {
+                        Picker("Period", selection: $period) {
+                            ForEach(BudgetPeriod.allCases, id: \.self) { p in
+                                Label(p.rawValue, systemImage: p.icon).tag(p)
+                            }
                         }
+                        .pickerStyle(.segmented)
                     }
-                    .pickerStyle(.segmented)
                 }
 
                 if !isEditing {

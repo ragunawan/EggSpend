@@ -117,6 +117,20 @@ struct TransactionFilterView: View {
                             selected: draft.categoryIDs.contains(category.id)
                         ) {
                             toggle(category.id, in: &draft.categoryIDs)
+                            if !draft.categoryIDs.isEmpty {
+                                draft.uncategorizedOnly = false
+                            }
+                        }
+                    }
+
+                    FilterOptionChip(
+                        label: "Uncategorized",
+                        icon: "questionmark.circle",
+                        selected: draft.uncategorizedOnly
+                    ) {
+                        draft.uncategorizedOnly.toggle()
+                        if draft.uncategorizedOnly {
+                            draft.categoryIDs.removeAll()
                         }
                     }
                 }

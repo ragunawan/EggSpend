@@ -91,6 +91,11 @@ struct MetricsView: View {
             case .year: return 366
             }
         }
+
+        var dateInterval: DateInterval {
+            let start = dateStart
+            return DateInterval(start: start, end: .now)
+        }
     }
 
     // MARK: - Derived data
@@ -102,14 +107,42 @@ struct MetricsView: View {
     private var totalIncome:   Double { filtered.filter { $0.type == .income  && !$0.isAdjustment }.reduce(0) { $0 + $1.amount } }
     private var totalExpenses: Double { filtered.filter { $0.type == .expense && !$0.isAdjustment }.reduce(0) { $0 + $1.amount } }
 
-    private var expensesByCategory: [(String, Double, String)] {
-        var dict: [String: (Double, String)] = [:]
+    private var expensesByCategory: [CategorySpending] {
+        var dict: [UUID: CategorySpending] = [:]
+        var uncategorized: CategorySpending?
+
         for tx in filtered where tx.type == .expense && !tx.isAdjustment {
-            let key  = tx.category?.name ?? "Uncategorized"
-            let icon = tx.category?.icon ?? "questionmark.circle"
-            dict[key] = ((dict[key]?.0 ?? 0) + tx.amount, icon)
+            if let category = tx.category {
+                let existing = dict[category.id] ?? CategorySpending(
+                    id: category.id,
+                    name: category.name,
+                    amount: 0,
+                    icon: category.icon
+                )
+                dict[category.id] = CategorySpending(
+                    id: existing.id,
+                    name: existing.name,
+                    amount: existing.amount + tx.amount,
+                    icon: existing.icon
+                )
+            } else {
+                let existing = uncategorized ?? CategorySpending(
+                    id: nil,
+                    name: "Uncategorized",
+                    amount: 0,
+                    icon: "questionmark.circle"
+                )
+                uncategorized = CategorySpending(
+                    id: nil,
+                    name: existing.name,
+                    amount: existing.amount + tx.amount,
+                    icon: existing.icon
+                )
+            }
         }
-        return dict.map { ($0.key, $0.value.0, $0.value.1) }.sorted { $0.1 > $1.1 }
+
+        return (Array(dict.values) + Array([uncategorized].compactMap { $0 }))
+            .sorted { $0.amount > $1.amount }
     }
 
     private var netWorthTimeline: [(date: Date, worth: Double)] {
@@ -144,7 +177,6 @@ struct MetricsView: View {
                 NestBackground()
 
                 List {
-                    periodPickerSection
                     if accounts.isEmpty && transactions.isEmpty {
                         noDataSection
                     } else {
@@ -155,6 +187,9 @@ struct MetricsView: View {
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
                 .background(Color.clear)
+                .safeAreaInset(edge: .bottom) {
+                    periodPickerNav
+                }
             }
             .navigationTitle("Metrics")
             .toolbarBackground(.hidden, for: .navigationBar)
@@ -181,28 +216,31 @@ struct MetricsView: View {
 
     // MARK: - Period picker
 
-    private var periodPickerSection: some View {
-        Section {
-            Picker("Period", selection: $selectedPeriod) {
+    private var periodPickerNav: some View {
+        VStack(spacing: 0) {
+            Divider()
+            Picker("Period", selection: $selectedPeriod.animation(.quickFade)) {
                 ForEach(Period.allCases, id: \.self) { Text($0.rawValue).tag($0) }
             }
             .pickerStyle(.segmented)
             .tint(Color.yolk)
+            .padding(.horizontal, Space.lg)
+            .padding(.vertical, Space.sm)
+            .background(.regularMaterial)
         }
-        .listRowBackground(Color.clear)
     }
 
     // MARK: - Charts
 
     private var timelineSection: some View {
         Section {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 12) {
                 netWorthChart
                 Divider()
                 cashFlowChart
                 cashFlowSummaryStats
             }
-            .padding(.vertical, Space.sm)
+            .padding(.vertical, Space.xs)
         }
         .listRowBackground(Color.clear)
     }
@@ -291,7 +329,7 @@ struct MetricsView: View {
                     AxisValueLabel(format: xAxisFormat, centered: true)
                 }
             }
-            .frame(height: 200)
+            .frame(height: 150)
 
             // Summary row
             if let first = data.first, let last = data.last {
@@ -419,7 +457,7 @@ struct MetricsView: View {
                 }
                 .font(.caption)
             }
-            .frame(height: 180)
+            .frame(height: 140)
         }
     }
 
@@ -494,31 +532,39 @@ struct MetricsView: View {
     private var categoryBreakdownSection: some View {
         Section("Spending by Category") {
             Group {
-                Chart(expensesByCategory.prefix(6), id: \.0) { name, amount, _ in
-                    SectorMark(angle: .value("Amount", amount),
+                Chart(expensesByCategory.prefix(6)) { category in
+                    SectorMark(angle: .value("Amount", category.amount),
                                innerRadius: .ratio(0.55),
                                angularInset: 2)
-                        .foregroundStyle(by: .value("Category", name))
+                        .foregroundStyle(by: .value("Category", category.name))
                         .cornerRadius(Radius.control)
-                        .accessibilityLabel(name)
+                        .accessibilityLabel(category.name)
                         .accessibilityValue(
                             totalExpenses > 0
-                                ? "\(CurrencyFormat.money(amount)), \(Int(amount / totalExpenses * 100))%"
-                                : CurrencyFormat.money(amount)
+                                ? "\(CurrencyFormat.money(category.amount)), \(Int(category.amount / totalExpenses * 100))%"
+                                : CurrencyFormat.money(category.amount)
                         )
                 }
-                .frame(height: 200)
-                .padding(.vertical, Space.sm)
+                .frame(height: 150)
+                .padding(.vertical, Space.xs)
 
-                ForEach(expensesByCategory.prefix(6), id: \.0) { name, amount, icon in
-                    HStack {
-                        Image(systemName: icon).frame(width: 24).foregroundStyle(.secondary)
-                        Text(name)
-                        Spacer()
-                        Text(amount, format: .currency(code: CurrencyFormat.code)).foregroundStyle(.secondary)
-                        if totalExpenses > 0 {
-                            Text("(\(Int(amount / totalExpenses * 100))%)")
-                                .font(.caption).foregroundStyle(.tertiary)
+                ForEach(expensesByCategory.prefix(6)) { category in
+                    NavigationLink {
+                        TransactionsListView(
+                            initialFilter: transactionFilter(for: category),
+                            hideTransfers: true,
+                            showUpcoming: false
+                        )
+                    } label: {
+                        HStack {
+                            Image(systemName: category.icon).frame(width: 24).foregroundStyle(.secondary)
+                            Text(category.name)
+                            Spacer()
+                            Text(category.amount, format: .currency(code: CurrencyFormat.code)).foregroundStyle(.secondary)
+                            if totalExpenses > 0 {
+                                Text("(\(Int(category.amount / totalExpenses * 100))%)")
+                                    .font(.caption).foregroundStyle(.tertiary)
+                            }
                         }
                     }
                 }
@@ -527,6 +573,23 @@ struct MetricsView: View {
         }
         .listRowBackground(Color.clear)
     }
+
+    private func transactionFilter(for category: CategorySpending) -> TransactionFilter {
+        TransactionFilter(
+            type: .expense,
+            categoryIDs: category.id.map { Set([$0]) } ?? [],
+            uncategorizedOnly: category.id == nil,
+            startDate: selectedPeriod.dateInterval.start,
+            endDate: selectedPeriod.dateInterval.end
+        )
+    }
+}
+
+private struct CategorySpending: Identifiable {
+    let id: UUID?
+    let name: String
+    let amount: Double
+    let icon: String
 }
 
 #Preview {
