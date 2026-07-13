@@ -4,9 +4,12 @@ import Charts
 
 struct NetWorthView: View {
     @Query(sort: \Account.createdAt) private var accounts: [Account]
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query private var snapshots: [BalanceSnapshot]
     @State private var showAddAccount = false
     @State private var showImport = false
     @State private var editingAccount: Account? = nil
+    @State private var plannerAccount: Account? = nil
     @State private var accountToArchive: Account? = nil
     @State private var accountToDelete: Account? = nil
 
@@ -18,6 +21,14 @@ struct NetWorthView: View {
     private var totalAssets: Double { NetWorthCalculator.totals(accounts: Array(accounts)).assets }
     private var totalLiabilities: Double { NetWorthCalculator.totals(accounts: Array(accounts)).liabilities }
     private var netWorth: Double { totalAssets - totalLiabilities }
+    private var netWorthTimeline: [(date: Date, worth: Double)] {
+        NetWorthCalculator.timeline(
+            accounts: accounts,
+            transactions: transactions,
+            snapshots: snapshots,
+            days: 30
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -26,7 +37,7 @@ struct NetWorthView: View {
 
                 List {
                     summarySection
-                    chartSection
+                    sparklineSection
                     assetsSection
                     liabilitiesSection
                     archivedSection
@@ -57,6 +68,9 @@ struct NetWorthView: View {
             }
             .sheet(item: $editingAccount) { account in
                 AddAccountView(editingAccount: account)
+            }
+            .navigationDestination(item: $plannerAccount) { account in
+                DebtPayoffPlannerView(account: account)
             }
             .confirmationDialog(
                 "Archive Account",
@@ -135,26 +149,47 @@ struct NetWorthView: View {
         }
     }
 
-    private var chartSection: some View {
+    private var sparklineSection: some View {
         Section {
-            Chart {
-                BarMark(
-                    x: .value("Type", "Assets"),
-                    y: .value("Amount", totalAssets)
-                )
-                .foregroundStyle(Color.nestLeafGreen)
-                .accessibilityLabel("Assets")
-                .accessibilityValue(CurrencyFormat.money(totalAssets))
+            VStack(alignment: .leading, spacing: Space.sm) {
+                HStack {
+                    Label("30-day trend", systemImage: "chart.xyaxis.line")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.nestBrown)
+                    Spacer()
+                    if let first = netWorthTimeline.first, let last = netWorthTimeline.last {
+                        let change = last.worth - first.worth
+                        Label(
+                            CurrencyFormat.money(abs(change)),
+                            systemImage: change >= 0 ? "arrow.up.right" : "arrow.down.right"
+                        )
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(change >= 0 ? Color.nestLeafGreen : Color.negative)
+                    }
+                }
 
-                BarMark(
-                    x: .value("Type", "Liabilities"),
-                    y: .value("Amount", totalLiabilities)
-                )
-                .foregroundStyle(Color.negative)
-                .accessibilityLabel("Liabilities")
-                .accessibilityValue(CurrencyFormat.money(totalLiabilities))
+                Chart {
+                    ForEach(netWorthTimeline, id: \.date) { point in
+                        LineMark(
+                            x: .value("Date", point.date),
+                            y: .value("Net worth", point.worth)
+                        )
+                        .foregroundStyle(Color.eggBlue)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                        .interpolationMethod(.catmullRom)
+                        .accessibilityLabel(point.date.formatted(.dateTime.month(.abbreviated).day()))
+                        .accessibilityValue(CurrencyFormat.money(point.worth))
+                    }
+                }
+                .chartYAxis(.hidden)
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 3)) { _ in
+                        AxisGridLine()
+                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    }
+                }
+                .frame(height: 96)
             }
-            .frame(height: 180)
             .padding(.vertical, Space.sm)
         }
         .listRowBackground(Color.clear)
@@ -193,21 +228,10 @@ struct NetWorthView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(liabilities) { account in
-                        HStack(spacing: 8) {
-                            NavigationLink(destination: DebtPayoffPlannerView(account: account)) {
-                                AccountRowView(account: account)
-                            }
-                            .buttonStyle(.plain)
-
-                            Button {
-                                editingAccount = account
-                            } label: {
-                                Image(systemName: "pencil.circle.fill")
-                                    .foregroundStyle(Color.yolk)
-                                    .accessibilityLabel("Edit \(account.name)")
-                            }
-                            .buttonStyle(.plain)
+                        Button { editingAccount = account } label: {
+                            AccountRowView(account: account)
                         }
+                        .buttonStyle(.plain)
                         .swipeActions(edge: .leading) {
                             Button("Edit", systemImage: "pencil") {
                                 editingAccount = account
@@ -215,6 +239,10 @@ struct NetWorthView: View {
                             .tint(Color.yolk)
                         }
                         .swipeActions(edge: .trailing) {
+                            Button("Payoff planner", systemImage: "calendar.badge.clock") {
+                                plannerAccount = account
+                            }
+                            .tint(Color.eggBlue)
                             Button("Archive", systemImage: "archivebox") {
                                 accountToArchive = account
                             }

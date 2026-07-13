@@ -67,6 +67,13 @@ struct MetricsView: View {
             case .year:  return cal.date(byAdding: .year,  value: -1,  to: now) ?? now
             }
         }
+        var timelineDays: Int {
+            switch self {
+            case .week: return 8
+            case .month: return 31
+            case .year: return 366
+            }
+        }
     }
 
     // MARK: - Derived data
@@ -88,26 +95,13 @@ struct MetricsView: View {
         return dict.map { ($0.key, $0.value.0, $0.value.1) }.sorted { $0.1 > $1.1 }
     }
 
-    // Net worth timeline: reconstruct historical net worth from current account balances
-    // by reversing every transaction that happened after each bucket boundary.
     private var netWorthTimeline: [(date: Date, worth: Double)] {
-        let cal   = Calendar.current
-        let now   = Date.now
-        let start = selectedPeriod.dateStart
-        let unit  = selectedPeriod.bucketUnit
-
-        // Build evenly-spaced bucket dates from start → now
-        var buckets: [Date] = []
-        var cursor = start
-        while cursor <= now {
-            buckets.append(cursor)
-            cursor = cal.date(byAdding: unit, value: 1, to: cursor) ?? now.addingTimeInterval(1)
-        }
-        if buckets.last.map({ $0 < now }) ?? true { buckets.append(now) }
-
-        return buckets.map { bucket in
-            (bucket, NetWorthCalculator.at(date: bucket, accounts: accounts, transactions: transactions, snapshots: snapshots))
-        }
+        NetWorthCalculator.timeline(
+            accounts: accounts,
+            transactions: transactions,
+            snapshots: snapshots,
+            days: selectedPeriod.timelineDays
+        )
     }
 
     // Cash flow: income and expenses bucketed over the selected period

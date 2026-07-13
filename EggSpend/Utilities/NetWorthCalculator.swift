@@ -9,6 +9,8 @@ import Foundation
 /// - Liability balances are stored as negative values; both `current` and
 ///   `totals` treat them via `abs(balance)` so a debt always reduces net worth.
 enum NetWorthCalculator {
+    typealias TimelinePoint = (date: Date, worth: Double)
+
     /// Net worth = included account balances, with liabilities subtracted.
     static func current(accounts: [Account]) -> Double {
         accounts.reduce(0) { total, account in
@@ -81,5 +83,27 @@ enum NetWorthCalculator {
             .filter { $0.date > date && !($0.account?.isArchived ?? false) && ($0.account?.countsTowardNetWorth ?? false) }
             .reduce(0.0) { $0 + $1.signedAmount }
         return currentNetWorth - delta
+    }
+
+    /// Daily net-worth buckets ending today, newest balance reconstructed through `at(date:)`.
+    static func timeline(
+        accounts: [Account],
+        transactions: [Transaction],
+        snapshots: [BalanceSnapshot] = [],
+        days: Int,
+        calendar: Calendar = .current
+    ) -> [TimelinePoint] {
+        guard days > 0 else { return [] }
+
+        let today = calendar.startOfDay(for: Date.now)
+        let start = calendar.date(byAdding: .day, value: -(days - 1), to: today) ?? today
+
+        return (0..<days).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: offset, to: start) else { return nil }
+            return (
+                date,
+                at(date: date, accounts: accounts, transactions: transactions, snapshots: snapshots, calendar: calendar)
+            )
+        }
     }
 }
