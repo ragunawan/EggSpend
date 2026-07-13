@@ -61,22 +61,27 @@ struct TransactionDetailView: View {
 
     private var detailsSection: some View {
         Section("Details") {
-            LabeledContent("Date") {
+            detailRow("Date") {
                 Text(transaction.date, style: .date)
             }
             if let account = transaction.account {
-                LabeledContent("Account") {
-                    Label(account.name, systemImage: account.type.icon)
-                        .foregroundStyle(.secondary)
+                detailRow("Account") {
+                    HStack(spacing: Space.sm) {
+                        Image(systemName: account.type.icon)
+                        Text(account.name)
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(.secondary)
                 }
             }
             if let category = transaction.category {
-                LabeledContent("Category") {
+                detailRow("Category") {
                     CategoryBadgeView(category: category)
                 }
             }
-            LabeledContent("Title") {
+            detailRow("Title") {
                 Text(transaction.title)
+                    .lineLimit(1)
             }
         }
     }
@@ -90,11 +95,25 @@ struct TransactionDetailView: View {
 
     private var metaSection: some View {
         Section {
-            LabeledContent("Added") {
+            detailRow("Added") {
                 Text(transaction.createdAt, style: .date)
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private func detailRow<Value: View>(
+        _ title: LocalizedStringKey,
+        @ViewBuilder value: () -> Value
+    ) -> some View {
+        HStack(alignment: .center, spacing: Space.md) {
+            Text(title)
+                .foregroundStyle(.primary)
+            Spacer(minLength: Space.md)
+            value()
+                .multilineTextAlignment(.trailing)
+        }
+        .frame(minHeight: 28)
     }
 
     private func deleteAndDismiss() {
