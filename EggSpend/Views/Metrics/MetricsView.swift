@@ -324,8 +324,6 @@ struct MetricsView: View {
                     .foregroundStyle(Color.eggBlue)
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
                     .interpolationMethod(.catmullRom)
-                    .symbol(Circle().strokeBorder(lineWidth: 1.5))
-                    .symbolSize(20)
                     .accessibilityLabel(point.date.formatted(calloutDateFormat))
                     .accessibilityValue(CurrencyFormat.money(point.worth))
                 }

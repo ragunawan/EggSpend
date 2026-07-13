@@ -28,7 +28,8 @@ struct SettingsView: View {
     @AppStorage(SettingsView.aiNarrativeStorageKey) private var aiNarrativeEnabled = false
     @AppStorage(SettingsView.appLockStorageKey) private var appLockEnabled = false
     @AppStorage(SettingsView.appearanceStorageKey) private var appearanceRawValue = AppAppearance.system.rawValue
-    @State private var showImport = false
+    @State private var showTransactionImport = false
+    @State private var showAccountImport = false
     @State private var showBackupImporter = false
     @State private var pendingBackupImportData: Data?
     @State private var pendingResetMode: ResetMode?
@@ -130,9 +131,15 @@ struct SettingsView: View {
 
                 Section("Data") {
                     Button {
-                        showImport = true
+                        showTransactionImport = true
                     } label: {
-                        Label("Import CSV", systemImage: "square.and.arrow.down.fill")
+                        Label("Import Transactions (CSV)", systemImage: "square.and.arrow.down.fill")
+                    }
+
+                    Button {
+                        showAccountImport = true
+                    } label: {
+                        Label("Import Accounts (CSV)", systemImage: "building.columns.badge.plus")
                     }
 
                     ShareLink(item: transactionsFile, preview: SharePreview(transactionsFile.filename)) {
@@ -224,8 +231,11 @@ struct SettingsView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showImport) {
+            .sheet(isPresented: $showTransactionImport) {
                 CSVImportView(importType: .transactions)
+            }
+            .sheet(isPresented: $showAccountImport) {
+                CSVImportView(importType: .accounts)
             }
             .fileImporter(
                 isPresented: $showBackupImporter,

@@ -7,7 +7,6 @@ struct NetWorthView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var snapshots: [BalanceSnapshot]
     @State private var showAddAccount = false
-    @State private var showImport = false
     @State private var editingAccount: Account? = nil
     @State private var plannerAccount: Account? = nil
     @State private var accountToArchive: Account? = nil
@@ -97,17 +96,8 @@ struct NetWorthView: View {
                             .foregroundStyle(Color.yolk)
                     }
                 }
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { showImport = true } label: {
-                        Image(systemName: "square.and.arrow.down")
-                    }
-                    .foregroundStyle(Color.yolk)
-                }
             }
             .sheet(isPresented: $showAddAccount) { AddAccountView() }
-            .sheet(isPresented: $showImport) {
-                CSVImportView(importType: .accounts)
-            }
             .sheet(item: $editingAccount) { account in
                 AddAccountView(editingAccount: account)
             }

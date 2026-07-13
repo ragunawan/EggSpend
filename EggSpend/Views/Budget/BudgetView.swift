@@ -238,7 +238,7 @@ struct BudgetView: View {
                 }
 
                 ForEach(activeSavingsGoals) { goal in
-                    SavingsGoalRowView(goal: goal)
+                    SavingsGoalRowView(goal: goal, showsProgressPercentage: false)
                         .onTapGesture { editingSavingsGoal = goal }
                         .accessibilityAddTraits(.isButton)
                 }

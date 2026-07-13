@@ -205,6 +205,7 @@ struct SavingsGoalsView: View {
 
 struct SavingsGoalRowView: View {
     let goal: SavingsGoal
+    var showsProgressPercentage = true
 
     private var goalColor: Color { Color(hex: goal.colorHex) ?? .yolk }
 
@@ -215,7 +216,7 @@ struct SavingsGoalRowView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
-                EggProgressView(progress: goal.progress, size: 56)
+                EggProgressView(progress: goal.progress, size: 56, showsPercentage: showsProgressPercentage)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(goal.name)
                     .accessibilityValue(progressAccessibilityValue)
