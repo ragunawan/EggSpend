@@ -183,11 +183,20 @@ struct BudgetDetailView: View {
                 }
 
                 // Period badge
-                Label(budget.period.rawValue, systemImage: budget.period.icon)
-                    .font(.caption)
-                    .foregroundStyle(Color.twig)
-                    .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
-                    .background(Color.twig.opacity(0.12), in: Capsule())
+                HStack(spacing: Space.sm) {
+                    Label(budget.period.rawValue, systemImage: budget.period.icon)
+                        .foregroundStyle(Color.twig)
+                        .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
+                        .background(Color.twig.opacity(0.12), in: Capsule())
+
+                    if let category = budget.category {
+                        Label(category.name, systemImage: category.icon)
+                            .foregroundStyle(category.color)
+                            .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
+                            .background(category.color.opacity(0.12), in: Capsule())
+                    }
+                }
+                .font(.caption)
             }
         }
         .frame(maxWidth: .infinity)

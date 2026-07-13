@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import Charts
 
 struct BudgetView: View {
     @Query(sort: \Budget.createdAt) private var budgets: [Budget]
@@ -50,8 +49,7 @@ struct BudgetView: View {
                     emptyState
                 } else {
                     VStack(spacing: 20) {
-                        summaryHeroCard
-                        periodPicker
+                        summaryStrip
 
                         ScrollView {
                             VStack(spacing: 16) {
@@ -69,8 +67,6 @@ struct BudgetView: View {
                             .frame(maxWidth: .infinity)
                         }
                         .frame(maxHeight: .infinity)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
                     }
                     .padding(.horizontal)
                     .padding(.bottom, Space.xl)
@@ -79,6 +75,24 @@ struct BudgetView: View {
             .background(NestBackground())
             .navigationTitle("Budget Eggs")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button {
+                            periodFilter = nil
+                        } label: {
+                            Label("All Periods", systemImage: periodFilter == nil ? "checkmark" : "line.3.horizontal.decrease.circle")
+                        }
+                        ForEach(BudgetPeriod.allCases, id: \.self) { period in
+                            Button {
+                                periodFilter = period
+                            } label: {
+                                Label(period.rawValue, systemImage: periodFilter == period ? "checkmark" : period.icon)
+                            }
+                        }
+                    } label: {
+                        Label(periodFilter?.rawValue ?? "All Periods", systemImage: "line.3.horizontal.decrease.circle")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button { showAddBudget = true } label: {
                         Image(systemName: "plus.circle.fill")
@@ -91,76 +105,7 @@ struct BudgetView: View {
         }
     }
 
-    // MARK: – Summary hero card
-
-    private var summaryHeroCard: some View {
-        VStack(spacing: 16) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Label("Nest Overview", systemImage: "bird.fill")
-                        .font(.headline).foregroundStyle(Color.nestBrown)
-                    Text(Date.now, format: .dateTime.month(.wide).year())
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                overallHealthBadge
-            }
-
-            // Spent vs budgeted
-            HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Spent").font(.caption).foregroundStyle(.secondary)
-                    Text(totalSpent, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundStyle(totalSpent > totalBudgeted ? .negative : Color.nestBrown)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Budgeted").font(.caption).foregroundStyle(.secondary)
-                    Text(totalBudgeted, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundStyle(Color.nestBrown.opacity(0.6))
-                }
-            }
-
-            // Animated progress bar
-            AnimatedProgressBar(progress: overallProgress,
-                                color: overallProgressColor)
-
-            HStack {
-                Text("\(Int(min(overallProgress, 9.99) * 100))% used")
-                    .font(.caption2).foregroundStyle(.secondary)
-                Spacer()
-                let rem = totalBudgeted - totalSpent
-                Text(rem >= 0
-                     ? "\(rem.formatted(.currency(code: CurrencyFormat.code))) remaining"
-                     : "\(abs(rem).formatted(.currency(code: CurrencyFormat.code))) over")
-                    .font(.caption2)
-                    .foregroundStyle(rem >= 0 ? Color.positive : .negative)
-            }
-
-            // Mini donut chart of budget health distribution
-            if displayed.count > 1 { budgetHealthDonut }
-        }
-        .padding(Space.lg)
-        .nestCard()
-        .padding(.top, Space.xs)
-    }
-
-    private var overallHealthBadge: some View {
-        let (label, color) = overallHealthLabel
-        return Text(label)
-            .font(.caption).fontWeight(.semibold)
-            .foregroundStyle(color)
-            .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
-            .background(color.opacity(0.12), in: Capsule())
-    }
-
-    private var overallHealthLabel: (String, Color) {
-        if !overBudget.isEmpty   { return ("Over budget",  .negative) }
-        if !warningBudgets.isEmpty { return ("Watch out", .yolk) }
-        return ("Healthy", .nestLeafGreen)
-    }
+    // MARK: – Summary strip
 
     private var overallProgressColor: Color {
         switch overallProgress {
@@ -171,52 +116,18 @@ struct BudgetView: View {
         }
     }
 
-    private var budgetHealthDonut: some View {
-        HStack(spacing: 12) {
-            Chart {
-                let o = Double(overBudget.count)
-                let w = Double(warningBudgets.count)
-                let h = Double(healthyBudgets.count)
-                let total = max(o + w + h, 1)
-                SectorMark(angle: .value("Over",    o / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.negative)
-                SectorMark(angle: .value("Warning", w / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.yolk)
-                SectorMark(angle: .value("Good",    h / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.nestLeafGreen)
-            }
-            .frame(width: 52, height: 52)
-            .animation(.spring(), value: displayed.count)
-            // The adjacent legend already conveys this breakdown accessibly;
-            // hide the chart itself to avoid a redundant, hard-to-parse VoiceOver stop.
-            .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 3) {
-                if !overBudget.isEmpty    { donutLegend("Over budget", count: overBudget.count, color: .negative) }
-                if !warningBudgets.isEmpty { donutLegend("Warning",    count: warningBudgets.count, color: .yolk) }
-                if !healthyBudgets.isEmpty { donutLegend("Healthy",    count: healthyBudgets.count, color: .nestLeafGreen) }
-            }
-            Spacer()
-        }
-    }
-
-    private func donutLegend(_ label: String, count: Int, color: Color) -> some View {
-        HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 8, height: 8)
-            Text("\(count) \(label)").font(.caption2).foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: – Period picker
-
-    private var periodPicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                FilterChip(label: "All",      selected: periodFilter == nil) { periodFilter = nil }
-                ForEach(BudgetPeriod.allCases, id: \.self) { period in
-                    FilterChip(label: period.rawValue, icon: period.icon,
-                               selected: periodFilter == period) { periodFilter = period }
-                }
-            }
-            .padding(.horizontal, Space.xs)
-        }
+    private var summaryStrip: some View {
+        BudgetSummaryStrip(
+            spent: totalSpent,
+            budgeted: totalBudgeted,
+            progress: overallProgress,
+            progressColor: overallProgressColor,
+            periodLabel: periodFilter?.rawValue ?? "All periods",
+            overCount: overBudget.count,
+            warningCount: warningBudgets.count,
+            healthyCount: healthyBudgets.count
+        )
+        .padding(.top, Space.xs)
     }
 
     // MARK: – Budget groups
@@ -228,35 +139,7 @@ struct BudgetView: View {
                 .foregroundStyle(accent)
 
             ForEach(items) { budget in
-                NavigationLink(destination: BudgetDetailView(budget: budget)) {
-                    BudgetRowView(budget: budget, transactions: Array(transactions))
-                }
-                .buttonStyle(.plain)
-                .swipeActions(edge: .trailing) {
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        modelContext.delete(budget)
-                    }
-                    Button("Edit", systemImage: "pencil") {
-                        editingBudget = budget
-                    }
-                    .tint(.info)
-                }
-                .swipeActions(edge: .leading) {
-                    Button(budget.isActive ? "Pause" : "Resume",
-                           systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
-                        budget.isActive.toggle()
-                    }
-                    .tint(budget.isActive ? .warningTone : .positive)
-                }
-                .contextMenu {
-                    Button("Edit", systemImage: "pencil") { editingBudget = budget }
-                    Button(budget.isActive ? "Pause" : "Resume",
-                           systemImage: "power") { budget.isActive.toggle() }
-                    Divider()
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        modelContext.delete(budget)
-                    }
-                }
+                budgetRowLink(for: budget)
             }
         }
     }
@@ -288,19 +171,8 @@ struct BudgetView: View {
 
                 if showInactive {
                     ForEach(inactiveBudgets) { budget in
-                        NavigationLink(destination: BudgetDetailView(budget: budget)) {
-                            BudgetRowView(budget: budget, transactions: Array(transactions))
-                                .opacity(0.55)
-                        }
-                        .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing) {
-                            Button("Delete", systemImage: "trash", role: .destructive) { modelContext.delete(budget) }
-                            Button("Edit", systemImage: "pencil") { editingBudget = budget }.tint(.info)
-                        }
-                        .swipeActions(edge: .leading) {
-                            Button("Resume", systemImage: "play.circle.fill") { budget.isActive.toggle() }
-                                .tint(.nestLeafGreen)
-                        }
+                        budgetRowLink(for: budget)
+                            .opacity(0.55)
                     }
                 }
             }
@@ -349,92 +221,102 @@ struct BudgetView: View {
         }
         return "No Budgets"
     }
+
+    private func budgetRowLink(for budget: Budget) -> some View {
+        CompactProgressRow(
+            name: budget.name,
+            leftAmount: budget.remaining(from: transactions),
+            progress: budget.progress(from: transactions),
+            statusColor: budget.statusColor(progress: budget.progress(from: transactions))
+        ) {
+            BudgetDetailView(budget: budget)
+        }
+        .padding(.horizontal, Space.md)
+        .padding(.vertical, Space.sm)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .contextMenu {
+            Button("Edit", systemImage: "pencil") { editingBudget = budget }
+            Button(budget.isActive ? "Pause" : "Resume",
+                   systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
+                budget.isActive.toggle()
+            }
+            Divider()
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                modelContext.delete(budget)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                modelContext.delete(budget)
+            }
+            Button("Edit", systemImage: "pencil") {
+                editingBudget = budget
+            }
+            .tint(.info)
+        }
+        .swipeActions(edge: .leading) {
+            Button(budget.isActive ? "Pause" : "Resume",
+                   systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
+                budget.isActive.toggle()
+            }
+            .tint(budget.isActive ? .warningTone : .positive)
+        }
+    }
 }
 
-// MARK: – Budget row card
+// MARK: – Summary strip
 
-struct BudgetRowView: View {
-    let budget: Budget
-    let transactions: [Transaction]
+private struct BudgetSummaryStrip: View {
+    let spent: Double
+    let budgeted: Double
+    let progress: Double
+    let progressColor: Color
+    let periodLabel: String
+    let overCount: Int
+    let warningCount: Int
+    let healthyCount: Int
 
-    private var spent:      Double { budget.spent(from: transactions) }
-    private var progress:   Double { budget.progress(from: transactions) }
-    private var remaining:  Double { budget.remaining(from: transactions) }
-    private var statusColor: Color { budget.statusColor(progress: progress) }
-
-    private var progressAccessibilityValue: String {
-        let base = "\(Int(progress * 100))% used, \(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budget.limitAmount))"
-        return progress > 1 ? base + ", over budget" : base
+    private var remaining: Double { budgeted - spent }
+    private var statusCaption: String {
+        [
+            overCount > 0 ? "\(overCount) over" : nil,
+            warningCount > 0 ? "\(warningCount) watch" : nil,
+            healthyCount > 0 ? "\(healthyCount) on track" : nil
+        ]
+        .compactMap(\.self)
+        .joined(separator: " · ")
     }
 
     var body: some View {
-        HStack(spacing: 14) {
-            EggProgressView(progress: progress, size: 56)
-                .layoutPriority(1)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(budget.name)
-                .accessibilityValue(progressAccessibilityValue)
+        HStack(spacing: Space.md) {
+            EggProgressView(progress: progress, size: 44)
+                .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    if let cat = budget.category {
-                        Image(systemName: cat.icon).font(.caption).foregroundStyle(cat.color)
-                    }
-                    Text(budget.name)
-                        .font(.system(.body, design: .rounded, weight: .semibold))
-                        .lineLimit(2)
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                HStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: Space.sm) {
+                HStack(alignment: .firstTextBaseline, spacing: Space.xs) {
                     Text(spent, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.subheadline, design: .rounded, weight: .medium))
-                        .foregroundStyle(.primary)
-                    Text("of").font(.caption).foregroundStyle(.secondary)
-                    Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.subheadline, design: .rounded, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
-
-                HStack(spacing: 4) {
-                    Image(systemName: remaining >= 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .font(.caption2).foregroundStyle(remaining >= 0 ? Color.positive : .negative)
-                    Text(remaining >= 0
-                         ? "\(remaining, format: .currency(code: CurrencyFormat.code)) left"
-                         : "\(abs(remaining), format: .currency(code: CurrencyFormat.code)) over")
+                        .font(NestType.amount)
+                        .foregroundStyle(spent > budgeted ? Color.negative : Color.nestBrown)
+                    Text("of \(budgeted, format: .currency(code: CurrencyFormat.code)) · \(periodLabel)")
                         .font(.caption)
-                        .foregroundStyle(remaining >= 0 ? Color.positive : .negative)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
 
-                AnimatedProgressBar(progress: progress, color: statusColor, height: 3)
-                    .padding(.top, Space.xs)
-            }
-            .layoutPriority(2)
+                ThinProgressBar(progress: progress, color: progressColor)
 
-            Spacer(minLength: 0)
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Image(systemName: budget.period.icon).font(.caption).foregroundStyle(.secondary)
-                Text(budget.period.compactLabel)
+                Text(statusCaption.isEmpty ? "No active budgets" : statusCaption)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
             }
-            .frame(width: 48, alignment: .trailing)
-            .fixedSize(horizontal: true, vertical: false)
         }
-        .padding(.horizontal, Space.md)
-        .padding(.vertical, Space.md)
+        .padding(Space.md)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                .stroke(statusColor.opacity(0.2), lineWidth: 1)
-        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Budget summary")
+        .accessibilityValue("\(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budgeted)), \(Int(progress * 100))% used, \(remaining >= 0 ? CurrencyFormat.money(remaining) + " remaining" : CurrencyFormat.money(abs(remaining)) + " over")")
     }
 }
 
@@ -447,38 +329,6 @@ struct AnimatedProgressBar: View {
 
     var body: some View {
         ThinProgressBar(progress: progress, color: color, height: height)
-    }
-}
-
-private struct FilterChip: View {
-    let label: String
-    var icon: String? = nil
-    let selected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                if let icon { Image(systemName: icon).font(.caption2) }
-                Text(label).font(.subheadline)
-            }
-            .padding(.horizontal, Space.md).padding(.vertical, Space.sm)
-            .background(selected ? Color.nestBrown : Color.nestBrown.opacity(0.08),
-                        in: Capsule())
-            .foregroundStyle(selected ? .white : Color.nestBrown)
-        }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.3), value: selected)
-    }
-}
-
-private extension BudgetPeriod {
-    var compactLabel: String {
-        switch self {
-        case .weekly: return "Week"
-        case .monthly: return "Month"
-        case .yearly: return "Year"
-        }
     }
 }
 
