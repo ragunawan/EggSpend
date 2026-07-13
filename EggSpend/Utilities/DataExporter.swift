@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 /// Exports app data as plain CSV (spreadsheet-friendly) or a versioned JSON
 /// backup (full-fidelity, all 7 models). Pure data transformation only — no
@@ -182,6 +183,169 @@ enum DataExporter {
             )
         }
         return envelope
+    }
+
+    /// Replaces the local store with the models contained in a full JSON
+    /// backup previously produced by `fullBackupJSON`.
+    @MainActor
+    static func restoreFullBackup(from data: Data, in context: ModelContext) throws {
+        let envelope = try validateBackup(data)
+        try restore(envelope, in: context)
+    }
+
+    @MainActor
+    private static func restore(_ envelope: BackupEnvelope, in context: ModelContext) throws {
+        try deleteAll(CategoryRule.self, in: context)
+        try deleteAll(BalanceSnapshot.self, in: context)
+        try deleteAll(Transfer.self, in: context)
+        try deleteAll(RecurringTransaction.self, in: context)
+        try deleteAll(SavingsGoal.self, in: context)
+        try deleteAll(Budget.self, in: context)
+        try deleteAll(Transaction.self, in: context)
+        try deleteAll(Account.self, in: context)
+        try deleteAll(TransactionCategory.self, in: context)
+
+        var categoriesByID: [UUID: TransactionCategory] = [:]
+        for dto in envelope.categories {
+            let category = TransactionCategory(
+                name: dto.name,
+                icon: dto.icon,
+                colorHex: dto.colorHex,
+                typeFilter: dto.typeFilter.flatMap(TransactionType.init(rawValue:)),
+                sortOrder: dto.sortOrder
+            )
+            category.id = dto.id
+            category.isArchived = dto.isArchived
+            context.insert(category)
+            categoriesByID[dto.id] = category
+        }
+
+        var accountsByID: [UUID: Account] = [:]
+        for dto in envelope.accounts {
+            let account = Account(
+                name: dto.name,
+                type: AccountType(rawValue: dto.type) ?? .other,
+                balance: dto.balance,
+                notes: dto.notes
+            )
+            account.id = dto.id
+            account.createdAt = dto.createdAt
+            account.dueDate = dto.dueDate
+            account.annualPercentageRate = dto.annualPercentageRate
+            account.minimumPayment = dto.minimumPayment
+            account.plannedExtraPayment = dto.plannedExtraPayment
+            account.mortgageOriginalPrincipal = dto.mortgageOriginalPrincipal
+            account.mortgageTermMonths = dto.mortgageTermMonths
+            account.mortgageFirstPaymentDate = dto.mortgageFirstPaymentDate
+            account.mortgageMonthlyPropertyTax = dto.mortgageMonthlyPropertyTax
+            account.mortgageMonthlyInsurance = dto.mortgageMonthlyInsurance
+            account.mortgageMonthlyPMI = dto.mortgageMonthlyPMI
+            account.mortgageMonthlyEscrow = dto.mortgageMonthlyEscrow
+            account.includeInNetWorth = dto.includeInNetWorth
+            account.isArchived = dto.isArchived
+            account.isDefaultChecking = dto.isDefaultChecking
+            context.insert(account)
+            accountsByID[dto.id] = account
+        }
+
+        var budgetsByID: [UUID: Budget] = [:]
+        for dto in envelope.budgets {
+            let budget = Budget(
+                name: dto.name,
+                limitAmount: dto.limitAmount,
+                period: BudgetPeriod(rawValue: dto.period) ?? .monthly,
+                category: dto.categoryID.flatMap { categoriesByID[$0] },
+                colorHex: dto.colorHex
+            )
+            budget.id = dto.id
+            budget.isActive = dto.isActive
+            budget.createdAt = dto.createdAt
+            budget.alertsEnabled = dto.alertsEnabled
+            budget.lastAlertedThresholdRaw = dto.lastAlertedThreshold
+            budget.lastAlertedPeriodStart = dto.lastAlertedPeriodStart
+            context.insert(budget)
+            budgetsByID[dto.id] = budget
+        }
+
+        for dto in envelope.recurringTransactions {
+            let recurring = RecurringTransaction(
+                title: dto.title,
+                amount: dto.amount,
+                type: TransactionType(rawValue: dto.type) ?? .expense,
+                frequency: RecurrenceFrequency(rawValue: dto.frequency) ?? .monthly,
+                startDate: dto.startDate,
+                category: dto.categoryID.flatMap { categoriesByID[$0] },
+                account: dto.accountID.flatMap { accountsByID[$0] },
+                notes: dto.notes
+            )
+            recurring.id = dto.id
+            recurring.nextDueDate = dto.nextDueDate
+            recurring.endDate = dto.endDate
+            recurring.isActive = dto.isActive
+            recurring.createdAt = dto.createdAt
+            recurring.reminderEnabled = dto.reminderEnabled
+            recurring.reminderDaysBefore = dto.reminderDaysBefore
+            context.insert(recurring)
+        }
+
+        for dto in envelope.savingsGoals {
+            let goal = SavingsGoal(
+                name: dto.name,
+                targetAmount: dto.targetAmount,
+                currentAmount: dto.manualCurrentAmount,
+                targetDate: dto.targetDate,
+                linkedAccount: dto.linkedAccountID.flatMap { accountsByID[$0] },
+                notes: dto.notes,
+                colorHex: dto.colorHex,
+                icon: dto.icon,
+                status: SavingsGoalStatus(rawValue: dto.status) ?? .active
+            )
+            goal.id = dto.id
+            goal.createdAt = dto.createdAt
+            context.insert(goal)
+        }
+
+        for dto in envelope.transfers {
+            let transfer = Transfer(
+                amount: dto.amount,
+                date: dto.date,
+                fromAccount: dto.fromAccountID.flatMap { accountsByID[$0] },
+                toAccount: dto.toAccountID.flatMap { accountsByID[$0] },
+                notes: dto.notes
+            )
+            transfer.id = dto.id
+            transfer.createdAt = dto.createdAt
+            context.insert(transfer)
+        }
+
+        for dto in envelope.transactions {
+            let transaction = Transaction(
+                title: dto.title,
+                amount: dto.amount,
+                date: dto.date,
+                type: TransactionType(rawValue: dto.type) ?? .expense,
+                category: dto.categoryID.flatMap { categoriesByID[$0] },
+                account: dto.accountID.flatMap { accountsByID[$0] },
+                budget: dto.budgetID.flatMap { budgetsByID[$0] },
+                notes: dto.notes,
+                isGenerated: dto.isGenerated,
+                recurringSourceID: dto.recurringSourceID,
+                recurringDueDate: dto.recurringDueDate,
+                isAdjustment: dto.isAdjustment
+            )
+            transaction.id = dto.id
+            transaction.createdAt = dto.createdAt
+            context.insert(transaction)
+        }
+
+        try context.save()
+    }
+
+    @MainActor
+    private static func deleteAll<T: PersistentModel>(_ modelType: T.Type, in context: ModelContext) throws {
+        for item in try context.fetch(FetchDescriptor<T>()) {
+            context.delete(item)
+        }
     }
 
     // MARK: - JSON encoding/decoding helpers

@@ -29,8 +29,12 @@ struct SettingsView: View {
     @AppStorage(SettingsView.appLockStorageKey) private var appLockEnabled = false
     @AppStorage(SettingsView.appearanceStorageKey) private var appearanceRawValue = AppAppearance.system.rawValue
     @State private var showImport = false
-    @State private var showResetConfirmation = false
+    @State private var showBackupImporter = false
+    @State private var pendingBackupImportData: Data?
+    @State private var pendingResetMode: ResetMode?
     @State private var resetErrorMessage: String?
+    @State private var backupImportErrorMessage: String?
+    @State private var backupImportSuccessMessage: String?
 
     @Query private var transactions: [Transaction]
     @Query private var categories: [TransactionCategory]
@@ -149,8 +153,20 @@ struct SettingsView: View {
                         }
                     }
 
+                    Button {
+                        showBackupImporter = true
+                    } label: {
+                        Label("Import Full Backup (JSON)", systemImage: "externaldrive.badge.plus")
+                    }
+
                     Button(role: .destructive) {
-                        showResetConfirmation = true
+                        pendingResetMode = .sampleData
+                    } label: {
+                        Label("Reset All Data and use Sample Data", systemImage: "wand.and.stars")
+                    }
+
+                    Button(role: .destructive) {
+                        pendingResetMode = .empty
                     } label: {
                         Label("Reset All Data", systemImage: "trash.fill")
                     }
@@ -211,6 +227,13 @@ struct SettingsView: View {
             .sheet(isPresented: $showImport) {
                 CSVImportView(importType: .transactions)
             }
+            .fileImporter(
+                isPresented: $showBackupImporter,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                handleBackupImportSelection(result)
+            }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -218,13 +241,21 @@ struct SettingsView: View {
                     Button("Done") { dismiss() }
                 }
             }
-            .alert("Reset All Data?", isPresented: $showResetConfirmation) {
-                Button("Reset", role: .destructive) {
-                    resetAllData()
+            .alert(
+                pendingResetMode?.confirmationTitle ?? "Reset All Data?",
+                isPresented: resetConfirmationBinding
+            ) {
+                Button(pendingResetMode?.confirmationButtonTitle ?? "Reset", role: .destructive) {
+                    if let pendingResetMode {
+                        resetAllData(useSampleData: pendingResetMode == .sampleData)
+                    }
+                    pendingResetMode = nil
                 }
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {
+                    pendingResetMode = nil
+                }
             } message: {
-                Text("This permanently deletes transactions, accounts, budgets, goals, recurring items, category rules, transfers, and custom categories. Default categories will be restored.")
+                Text(pendingResetMode?.confirmationMessage ?? "This permanently deletes transactions, accounts, budgets, goals, recurring items, category rules, transfers, and custom categories. Default categories will be restored.")
             }
             .alert("Reset Failed", isPresented: resetErrorBinding) {
                 Button("OK", role: .cancel) {
@@ -232,6 +263,30 @@ struct SettingsView: View {
                 }
             } message: {
                 Text(resetErrorMessage ?? "The data reset could not be completed.")
+            }
+            .alert("Import Full Backup?", isPresented: backupImportConfirmationBinding) {
+                Button("Import Backup", role: .destructive) {
+                    importPendingBackup()
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingBackupImportData = nil
+                }
+            } message: {
+                Text("This replaces all current EggSpend data on this device with the selected JSON backup.")
+            }
+            .alert("Import Failed", isPresented: backupImportErrorBinding) {
+                Button("OK", role: .cancel) {
+                    backupImportErrorMessage = nil
+                }
+            } message: {
+                Text(backupImportErrorMessage ?? "The backup could not be imported.")
+            }
+            .alert("Import Complete", isPresented: backupImportSuccessBinding) {
+                Button("OK", role: .cancel) {
+                    backupImportSuccessMessage = nil
+                }
+            } message: {
+                Text(backupImportSuccessMessage ?? "Your backup was imported.")
             }
         }
     }
@@ -243,7 +298,62 @@ struct SettingsView: View {
         )
     }
 
-    private func resetAllData() {
+    private var resetConfirmationBinding: Binding<Bool> {
+        Binding(
+            get: { pendingResetMode != nil },
+            set: { if !$0 { pendingResetMode = nil } }
+        )
+    }
+
+    private var backupImportConfirmationBinding: Binding<Bool> {
+        Binding(
+            get: { pendingBackupImportData != nil },
+            set: { if !$0 { pendingBackupImportData = nil } }
+        )
+    }
+
+    private var backupImportErrorBinding: Binding<Bool> {
+        Binding(
+            get: { backupImportErrorMessage != nil },
+            set: { if !$0 { backupImportErrorMessage = nil } }
+        )
+    }
+
+    private var backupImportSuccessBinding: Binding<Bool> {
+        Binding(
+            get: { backupImportSuccessMessage != nil },
+            set: { if !$0 { backupImportSuccessMessage = nil } }
+        )
+    }
+
+    private func handleBackupImportSelection(_ result: Result<[URL], Error>) {
+        do {
+            guard let url = try result.get().first else { return }
+            let didStartAccessing = url.startAccessingSecurityScopedResource()
+            defer {
+                if didStartAccessing {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            pendingBackupImportData = try Data(contentsOf: url)
+        } catch {
+            backupImportErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func importPendingBackup() {
+        guard let data = pendingBackupImportData else { return }
+        pendingBackupImportData = nil
+        do {
+            try DataExporter.restoreFullBackup(from: data, in: modelContext)
+            backupImportSuccessMessage = "Your JSON backup was imported."
+        } catch {
+            modelContext.rollback()
+            backupImportErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func resetAllData(useSampleData: Bool = false) {
         do {
             try deleteAll(CategoryRule.self)
             try deleteAll(BalanceSnapshot.self)
@@ -256,6 +366,9 @@ struct SettingsView: View {
             try deleteAll(TransactionCategory.self)
             insertDefaultCategories()
             try modelContext.save()
+            if useSampleData {
+                PersistenceController.seedPreviewTransactionsIfNeeded(modelContainer: modelContext.container)
+            }
         } catch {
             modelContext.rollback()
             resetErrorMessage = error.localizedDescription
@@ -294,6 +407,38 @@ struct SettingsView: View {
                 typeFilter: typeFilter,
                 sortOrder: index
             ))
+        }
+    }
+}
+
+private enum ResetMode {
+    case empty
+    case sampleData
+
+    var confirmationTitle: String {
+        switch self {
+        case .empty:
+            return "Reset All Data?"
+        case .sampleData:
+            return "Reset and Use Sample Data?"
+        }
+    }
+
+    var confirmationButtonTitle: String {
+        switch self {
+        case .empty:
+            return "Reset"
+        case .sampleData:
+            return "Reset and Add Samples"
+        }
+    }
+
+    var confirmationMessage: String {
+        switch self {
+        case .empty:
+            return "This permanently deletes transactions, accounts, budgets, goals, recurring items, category rules, transfers, and custom categories. Default categories will be restored."
+        case .sampleData:
+            return "This permanently deletes transactions, accounts, budgets, goals, recurring items, category rules, transfers, and custom categories, then loads sample transactions, accounts, budgets, goals, recurring items, and default categories."
         }
     }
 }

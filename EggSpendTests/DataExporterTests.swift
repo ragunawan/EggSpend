@@ -446,6 +446,91 @@ final class DataExporterTests: XCTestCase {
             XCTAssertEqual(supported, DataExporter.currentSchemaVersion)
         }
     }
+
+    @MainActor
+    func testRestoreFullBackupReplacesStoreAndPreservesRelationships() throws {
+        let fixture = makeRepresentativeFixture()
+        let data = try DataExporter.fullBackupJSON(
+            transactions: fixture.transactions, categories: fixture.categories, accounts: fixture.accounts,
+            budgets: fixture.budgets, recurringTransactions: fixture.recurring, savingsGoals: fixture.goals,
+            transfers: fixture.transfers, exportDate: epochInstant(1_700_001_000),
+            appVersion: "1.2.3", buildNumber: "42"
+        )
+
+        let staleAccount = Account(name: "Stale", type: .checking, balance: 1)
+        let staleRule = CategoryRule(normalizedPattern: "stale", categoryID: UUID())
+        let staleSnapshot = BalanceSnapshot(accountID: staleAccount.id, date: fixtureDate(2024, 1, 1), balance: 1)
+        context.insert(staleAccount)
+        context.insert(staleRule)
+        context.insert(staleSnapshot)
+        try context.save()
+
+        try DataExporter.restoreFullBackup(from: data, in: context)
+
+        let restoredAccounts = try context.fetch(FetchDescriptor<Account>())
+        let restoredCategories = try context.fetch(FetchDescriptor<TransactionCategory>())
+        let restoredBudgets = try context.fetch(FetchDescriptor<Budget>())
+        let restoredTransactions = try context.fetch(FetchDescriptor<Transaction>())
+        let restoredRecurring = try context.fetch(FetchDescriptor<RecurringTransaction>())
+        let restoredGoals = try context.fetch(FetchDescriptor<SavingsGoal>())
+        let restoredTransfers = try context.fetch(FetchDescriptor<Transfer>())
+
+        XCTAssertEqual(restoredAccounts.count, fixture.accounts.count)
+        XCTAssertEqual(restoredCategories.count, fixture.categories.count)
+        XCTAssertEqual(restoredBudgets.count, fixture.budgets.count)
+        XCTAssertEqual(restoredTransactions.count, fixture.transactions.count)
+        XCTAssertEqual(restoredRecurring.count, fixture.recurring.count)
+        XCTAssertEqual(restoredGoals.count, fixture.goals.count)
+        XCTAssertEqual(restoredTransfers.count, fixture.transfers.count)
+        XCTAssertTrue(try context.fetch(FetchDescriptor<CategoryRule>()).isEmpty)
+        XCTAssertTrue(try context.fetch(FetchDescriptor<BalanceSnapshot>()).isEmpty)
+        XCTAssertFalse(restoredAccounts.contains { $0.name == "Stale" })
+
+        let checking = try XCTUnwrap(restoredAccounts.first { $0.id == fixture.accounts[0].id })
+        let groceries = try XCTUnwrap(restoredCategories.first { $0.id == fixture.categories[0].id })
+        let budget = try XCTUnwrap(restoredBudgets.first { $0.id == fixture.budgets[0].id })
+        let groceryTransaction = try XCTUnwrap(restoredTransactions.first { $0.id == fixture.transactions[1].id })
+        let recurring = try XCTUnwrap(restoredRecurring.first)
+        let goal = try XCTUnwrap(restoredGoals.first)
+        let transfer = try XCTUnwrap(restoredTransfers.first)
+
+        XCTAssertEqual(checking.createdAt, fixture.accounts[0].createdAt)
+        XCTAssertEqual(checking.isDefaultChecking, true)
+        XCTAssertEqual(groceries.typeFilter, TransactionType.expense.rawValue)
+        XCTAssertEqual(budget.category?.id, groceries.id)
+        XCTAssertEqual(budget.alertsEnabled, true)
+        XCTAssertEqual(budget.lastAlertedThresholdRaw, BudgetAlertThreshold.nearLimit.rawValue)
+        XCTAssertEqual(groceryTransaction.category?.id, groceries.id)
+        XCTAssertEqual(groceryTransaction.account?.id, checking.id)
+        XCTAssertEqual(groceryTransaction.budget?.id, budget.id)
+        XCTAssertEqual(groceryTransaction.createdAt, fixture.transactions[1].createdAt)
+        XCTAssertEqual(recurring.account?.id, checking.id)
+        XCTAssertEqual(recurring.reminderDaysBefore, 3)
+        XCTAssertEqual(goal.linkedAccount?.id, checking.id)
+        XCTAssertEqual(transfer.fromAccount?.id, checking.id)
+        XCTAssertNil(transfer.toAccount)
+    }
+
+    @MainActor
+    func testRestoreFullBackupRejectsNewerSchemaWithoutDeletingExistingData() throws {
+        let existingAccount = Account(name: "Keep Me", type: .checking, balance: 10)
+        context.insert(existingAccount)
+        try context.save()
+
+        let data = try DataExporter.fullBackupJSON(
+            transactions: [], categories: [], accounts: [], budgets: [], recurringTransactions: [],
+            savingsGoals: [], transfers: [], exportDate: epochInstant(1_700_001_000),
+            appVersion: "1.2.3", buildNumber: "42"
+        )
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json["schemaVersion"] = DataExporter.currentSchemaVersion + 1
+        let bumped = try JSONSerialization.data(withJSONObject: json)
+
+        XCTAssertThrowsError(try DataExporter.restoreFullBackup(from: bumped, in: context))
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(accounts.count, 1)
+        XCTAssertEqual(accounts.first?.name, "Keep Me")
+    }
 }
 
 private extension BackupEnvelope {
