@@ -42,12 +42,16 @@ enum ChartYAxisDomain {
             return fallback
         }
 
-        guard minValue != maxValue else {
-            let padding = max(abs(minValue) * 0.01, 1)
-            return (minValue - padding)...(maxValue + padding)
+        var lowerBound = minValue - abs(minValue * 0.2)
+        var upperBound = maxValue + abs(maxValue * 0.2)
+
+        if lowerBound == upperBound {
+            let padding = max(abs(minValue) * 0.2, 1)
+            lowerBound -= padding
+            upperBound += padding
         }
 
-        return minValue...maxValue
+        return lowerBound...upperBound
     }
 }
 
@@ -214,7 +218,6 @@ struct MetricsView: View {
                 .foregroundStyle(Color.nestBrown)
 
             let data = netWorthTimeline
-            let minWorth = data.map(\.worth).min() ?? 0
             let yDomain = ChartYAxisDomain.range(for: data.map(\.worth))
 
             Chart {
@@ -222,7 +225,7 @@ struct MetricsView: View {
                 ForEach(data, id: \.date) { point in
                     AreaMark(
                         x: .value("Date", point.date),
-                        yStart: .value("Base", minWorth),
+                        yStart: .value("Base", yDomain.lowerBound),
                         yEnd:   .value("Worth", point.worth)
                     )
                     .foregroundStyle(
@@ -280,7 +283,7 @@ struct MetricsView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let worth = value.as(Double.self) {
-                            Text(CompactCurrencyAxisFormatter.string(from: worth, currencySymbol: CurrencyFormat.symbol))
+                            Text(worth, format: .currency(code: CurrencyFormat.code).precision(.fractionLength(2)))
                         }
                     }
                 }
@@ -399,7 +402,7 @@ struct MetricsView: View {
                     AxisGridLine()
                     AxisValueLabel {
                         if let v = value.as(Double.self) {
-                            Text(abs(v), format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
+                            Text(abs(v), format: .currency(code: CurrencyFormat.code).precision(.fractionLength(2)))
                                 .font(.caption2)
                                 .foregroundStyle(v >= 0 ? Color.nestLeafGreen : Color.negative)
                         }
