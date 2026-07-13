@@ -292,7 +292,7 @@ private struct QuickAddPillLabel: View {
             .font(.caption.weight(.semibold))
             .lineLimit(1)
             .padding(.horizontal, Space.sm)
-            .frame(height: 34)
+            .frame(minHeight: 44)
             .background(Color(.secondarySystemGroupedBackground), in: Capsule())
             .overlay {
                 Capsule().strokeBorder(Color.primary.opacity(0.08))
@@ -307,7 +307,7 @@ private struct QuickAddChipStyle: ButtonStyle {
         configuration.label
             .font(.callout.weight(.semibold))
             .padding(.horizontal, Space.md)
-            .frame(height: 36)
+            .frame(minHeight: 44)
             .background(
                 isSelected ? Color.yolk.opacity(0.18) : Color(.secondarySystemGroupedBackground),
                 in: Capsule()

@@ -3,6 +3,7 @@ import SwiftData
 
 struct DashboardView: View {
     @Environment(TabRouter.self) private var tabRouter
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var accounts: [Account]
@@ -191,13 +192,17 @@ struct DashboardView: View {
             .sheet(isPresented: $showAddTransaction) { addTransactionSheet }
             .sheet(isPresented: $showQuickAdd) {
                 QuickAddSheet(onMoreOptions: openFullFormFromQuickAdd)
-                    .presentationDetents([.height(460), .large])
+                    .presentationDetents(quickAddDetents)
             }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .task(id: safeSpendRefreshKey) {
                 refreshSafeSpendResult()
             }
         }
+    }
+
+    private var quickAddDetents: Set<PresentationDetent> {
+        dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(460), .large]
     }
 
     @ViewBuilder

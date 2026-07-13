@@ -2,6 +2,8 @@ import SwiftUI
 import SwiftData
 
 struct TransactionsListView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query(sort: \Transfer.date, order: .reverse) private var transfers: [Transfer]
     @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
@@ -188,7 +190,7 @@ struct TransactionsListView: View {
             }
             .sheet(isPresented: $showQuickAdd) {
                 QuickAddSheet(onMoreOptions: openFullFormFromQuickAdd)
-                    .presentationDetents([.height(460), .large])
+                    .presentationDetents(quickAddDetents)
             }
             .sheet(item: $editingTransaction) { transaction in
                 AddTransactionView(editingTransaction: transaction)
@@ -203,6 +205,10 @@ struct TransactionsListView: View {
                 processRecurringTransactions(Array(recurring), context: modelContext)
             }
         }
+    }
+
+    private var quickAddDetents: Set<PresentationDetent> {
+        dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(460), .large]
     }
 
     @ViewBuilder

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SafeSpendHeroCard: View {
     let result: SafeSpendResult
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private var statusLabel: String {
         switch result.status {
@@ -39,20 +40,69 @@ struct SafeSpendHeroCard: View {
                     .foregroundStyle(Color.textSecondaryWarm)
             }
 
-            HStack(alignment: .firstTextBaseline) {
-                Text(result.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
-                    .font(NestType.hero)
-                    .foregroundStyle(statusColor)
-                    .contentTransition(.numericText())
-                Spacer()
-                Label(statusLabel, systemImage: statusIcon)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(statusColor)
-                    .padding(.horizontal, Space.sm)
-                    .padding(.vertical, Space.xs)
-                    .background(statusColor.opacity(0.12), in: Capsule())
-            }
+            amountAndStatus
 
+            footer
+        }
+        .padding(Space.sm)
+        .nestCard()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Safe to Spend Today")
+        .accessibilityValue("\(CurrencyFormat.money(result.safeToSpendToday)), \(statusLabel)")
+    }
+
+    @ViewBuilder
+    private var amountAndStatus: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: Space.xs) {
+                amountText
+                statusPill
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            HStack(alignment: .firstTextBaseline) {
+                amountText
+                Spacer(minLength: Space.sm)
+                statusPill
+            }
+        }
+    }
+
+    private var amountText: some View {
+        Text(result.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
+            .font(NestType.hero)
+            .foregroundStyle(statusColor)
+            .contentTransition(.numericText())
+            .lineLimit(1)
+            .minimumScaleFactor(0.72)
+    }
+
+    private var statusPill: some View {
+        Label(statusLabel, systemImage: statusIcon)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(statusColor)
+            .lineLimit(1)
+            .minimumScaleFactor(0.82)
+            .padding(.horizontal, Space.sm)
+            .padding(.vertical, Space.xs)
+            .background(statusColor.opacity(0.12), in: Capsule())
+    }
+
+    @ViewBuilder
+    private var footer: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading, spacing: Space.xs) {
+                Text("Keeps \(result.requiredBuffer, format: .currency(code: CurrencyFormat.code)) cash buffer")
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Based on next 30 days")
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .font(.caption2)
+            .foregroundStyle(Color.textSecondaryWarm)
+        } else {
             HStack {
                 Text("Keeps \(result.requiredBuffer, format: .currency(code: CurrencyFormat.code)) cash buffer")
                 Spacer()
@@ -61,11 +111,6 @@ struct SafeSpendHeroCard: View {
             .font(.caption2)
             .foregroundStyle(Color.textSecondaryWarm)
         }
-        .padding(Space.sm)
-        .nestCard()
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Safe to Spend Today")
-        .accessibilityValue("\(CurrencyFormat.money(result.safeToSpendToday)), \(statusLabel)")
     }
 }
 
