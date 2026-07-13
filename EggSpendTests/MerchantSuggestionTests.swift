@@ -95,6 +95,43 @@ final class MerchantSuggestionTests: XCTestCase {
         XCTAssertEqual(suggestions.map(\.title), ["Merchant 0", "Merchant 1", "Merchant 2", "Merchant 3", "Merchant 4", "Merchant 5"])
     }
 
+    func testMatchingReturnsPartialTitleMatchesWithLatestCategoryAndAccount() {
+        let groceries = TransactionCategory(name: "Groceries", icon: "cart", colorHex: "#000000", typeFilter: .expense)
+        let checking = Account(name: "Checking", type: .checking, balance: 0)
+        let card = Account(name: "Card", type: .credit, balance: 0)
+        context.insert(groceries)
+        context.insert(checking)
+        context.insert(card)
+
+        _ = transaction(title: "Whole Foods Market", daysAgo: 12, category: nil, account: checking)
+        _ = transaction(title: "Whole Foods Market", daysAgo: 1, category: groceries, account: card)
+        _ = transaction(title: "Coffee Stand", daysAgo: 2)
+
+        let suggestions = MerchantSuggestion.matching("food", in: fetchTransactions(), referenceDate: referenceDate)
+
+        XCTAssertEqual(suggestions.count, 1)
+        XCTAssertEqual(suggestions.first?.title, "Whole Foods Market")
+        XCTAssertEqual(suggestions.first?.category?.id, groceries.id)
+        XCTAssertEqual(suggestions.first?.account?.id, card.id)
+    }
+
+    func testMatchingReturnsEmptyForBlankQuery() {
+        _ = transaction(title: "Whole Foods Market", daysAgo: 1)
+
+        XCTAssertTrue(MerchantSuggestion.matching("   ", in: fetchTransactions(), referenceDate: referenceDate).isEmpty)
+    }
+
+    func testMatchingHonorsLimit() {
+        let transactions = (0..<8).map { index in
+            transaction(title: "Market \(index)", daysAgo: index)
+        }
+
+        let suggestions = MerchantSuggestion.matching("market", in: transactions, referenceDate: referenceDate, limit: 3)
+
+        XCTAssertEqual(suggestions.count, 3)
+        XCTAssertEqual(suggestions.map(\.title), ["Market 0", "Market 1", "Market 2"])
+    }
+
     private var referenceDate: Date {
         Date(timeIntervalSince1970: 1_700_000_000)
     }
@@ -119,5 +156,9 @@ final class MerchantSuggestionTests: XCTestCase {
         )
         context.insert(transaction)
         return transaction
+    }
+
+    private func fetchTransactions() -> [Transaction] {
+        (try? context.fetch(FetchDescriptor<Transaction>())) ?? []
     }
 }

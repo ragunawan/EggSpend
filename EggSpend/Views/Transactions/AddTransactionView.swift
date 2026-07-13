@@ -17,6 +17,7 @@ struct AddTransactionView: View {
 
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var categoryRules: [CategoryRule]
     @Query private var budgets: [Budget]
     @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
@@ -83,6 +84,11 @@ struct AddTransactionView: View {
     }
 
     private var amount: Double { AmountParser.parse(amountText) ?? 0 }
+
+    private var payeeSuggestions: [MerchantSuggestion] {
+        guard selectedEntryKind != .transfer, !isEditing else { return [] }
+        return MerchantSuggestion.matching(title, in: transactions, limit: 5)
+    }
 
     private var isValid: Bool {
         guard amount > 0 else { return false }
@@ -169,7 +175,11 @@ struct AddTransactionView: View {
     private var detailsSection: some View {
         Section("Details") {
             TextField("Payee", text: $title)
+                .textInputAutocapitalization(.words)
                 .onSubmit { prefillCategoryForTitle() }
+            if !payeeSuggestions.isEmpty {
+                payeeSuggestionsList
+            }
             HStack {
                 Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
@@ -180,6 +190,41 @@ struct AddTransactionView: View {
             }
             DatePicker("Date", selection: $date, displayedComponents: .date)
         }
+    }
+
+    private var payeeSuggestionsList: some View {
+        VStack(alignment: .leading, spacing: Space.xs) {
+            ForEach(payeeSuggestions) { suggestion in
+                Button {
+                    applyPayeeSuggestion(suggestion)
+                } label: {
+                    HStack(spacing: Space.sm) {
+                        Image(systemName: suggestion.type.systemImage)
+                            .foregroundStyle(suggestion.type == .income ? Color.positive : Color.negative)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(suggestion.title)
+                                .foregroundStyle(.primary)
+                            if !suggestionSubtitle(for: suggestion).isEmpty {
+                                Text(suggestionSubtitle(for: suggestion))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.up.left")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Fills payee, category, and account from the most recent matching transaction")
+            }
+        }
+        .padding(.vertical, Space.xs)
     }
 
     private var transferDetailsSection: some View {
@@ -414,6 +459,40 @@ struct AddTransactionView: View {
               categoryMatchesSelectedType(category)
         else { return }
         selectedCategory = category
+    }
+
+    private func applyPayeeSuggestion(_ suggestion: MerchantSuggestion) {
+        title = suggestion.title
+        selectedEntryKind = suggestion.type == .income ? .income : .expense
+        selectedCategory = resolvedCategory(for: suggestion)
+        if suggestion.type == .income {
+            selectedBudget = nil
+        }
+        if let account = suggestion.account, !account.isArchived {
+            selectedAccount = account
+        }
+    }
+
+    private func resolvedCategory(for suggestion: MerchantSuggestion) -> TransactionCategory? {
+        let ruleCategory = CategoryRuleEngine.categoryFor(title: suggestion.title, rules: categoryRules, categories: categories)
+        if categoryMatchesSelectedType(ruleCategory) {
+            return ruleCategory
+        }
+        if categoryMatchesSelectedType(suggestion.category) {
+            return suggestion.category
+        }
+        return nil
+    }
+
+    private func categoryMatchesSelectedType(_ category: TransactionCategory?) -> Bool {
+        guard let category else { return false }
+        return categoryMatchesSelectedType(category)
+    }
+
+    private func suggestionSubtitle(for suggestion: MerchantSuggestion) -> String {
+        [suggestion.category?.name, suggestion.account?.name]
+            .compactMap { $0 }
+            .joined(separator: " • ")
     }
 
     private func categoryMatchesSelectedType(_ category: TransactionCategory) -> Bool {

@@ -49,4 +49,25 @@ struct MerchantSuggestion: Identifiable, Hashable {
         .prefix(limit)
         .map { $0 }
     }
+
+    static func matching(
+        _ query: String,
+        in transactions: [Transaction],
+        referenceDate: Date = .now,
+        calendar: Calendar = .current,
+        limit: Int = 6
+    ) -> [MerchantSuggestion] {
+        let normalizedQuery = CSVParser.normalizedTitle(query)
+        guard !normalizedQuery.isEmpty else { return [] }
+
+        return build(
+            from: transactions,
+            referenceDate: referenceDate,
+            calendar: calendar,
+            limit: transactions.count
+        )
+        .filter { $0.id.contains(normalizedQuery) }
+        .prefix(limit)
+        .map { $0 }
+    }
 }

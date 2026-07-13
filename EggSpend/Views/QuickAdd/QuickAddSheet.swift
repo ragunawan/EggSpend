@@ -57,10 +57,11 @@ struct QuickAddSheet: View {
     }
 
     private var suggestions: [MerchantSuggestion] {
-        let allSuggestions = MerchantSuggestion.build(from: transactions, limit: 20)
         let query = CSVParser.normalizedTitle(title)
-        guard !query.isEmpty else { return Array(allSuggestions.prefix(6)) }
-        return Array(allSuggestions.filter { $0.id.contains(query) }.prefix(6))
+        guard !query.isEmpty else {
+            return MerchantSuggestion.build(from: transactions, limit: 6)
+        }
+        return MerchantSuggestion.matching(title, in: transactions, limit: 6)
     }
 
     private var availableCategories: [TransactionCategory] {
