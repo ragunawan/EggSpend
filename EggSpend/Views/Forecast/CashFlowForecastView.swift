@@ -31,31 +31,63 @@ struct CashFlowForecastView: View {
 
     // MARK: - Derived Data
 
-    private var forecastResult: (points: [ForecastDataPoint], events: [ForecastEvent]) {
-        ForecastEngine.buildForecast(
-            accounts: Array(accounts),
+    private struct ForecastSnapshot {
+        let points: [ForecastDataPoint]
+        let events: [ForecastEvent]
+        let inflows: [ForecastEvent]
+        let outflows: [ForecastEvent]
+        let startBalance: Double
+        let endBalance: Double
+        let balanceDelta: Double
+        let lowestBalance: Double
+        let liquidBalance: Double
+        let totalScheduledInflows: Double
+        let totalScheduledOutflows: Double
+        let eventPointBalances: [UUID: ForecastDataPoint]
+    }
+
+    private func makeForecastSnapshot() -> ForecastSnapshot {
+        let accountList = Array(accounts)
+        let result = ForecastEngine.buildForecast(
+            accounts: accountList,
             transactions: Array(transactions),
             recurring: Array(recurring),
             horizonDays: horizon.rawValue
         )
+        let points = result.points
+        let events = result.events
+        let inflows = events.filter { $0.amount > 0 }
+        let outflows = events.filter { $0.amount < 0 }
+        let startBalance = points.first?.balance ?? 0
+        let endBalance = points.last?.balance ?? 0
+        let lowestBalance = points.lazy.map(\.balance).min() ?? 0
+        let calendar = Calendar.current
+        let pointsByDay = Dictionary(uniqueKeysWithValues: points.map { (calendar.startOfDay(for: $0.date), $0) })
+        let eventPointBalances = Dictionary(uniqueKeysWithValues: events.prefix(30).compactMap { event in
+            pointsByDay[calendar.startOfDay(for: event.date)].map { (event.id, $0) }
+        })
+
+        return ForecastSnapshot(
+            points: points,
+            events: events,
+            inflows: inflows,
+            outflows: outflows,
+            startBalance: startBalance,
+            endBalance: endBalance,
+            balanceDelta: endBalance - startBalance,
+            lowestBalance: lowestBalance,
+            liquidBalance: ForecastEngine.liquidBalance(from: accountList),
+            totalScheduledInflows: inflows.reduce(0) { $0 + $1.amount },
+            totalScheduledOutflows: outflows.reduce(0) { $0 + abs($1.amount) },
+            eventPointBalances: eventPointBalances
+        )
     }
-
-    private var forecastPoints: [ForecastDataPoint] { forecastResult.points }
-    private var forecastEvents: [ForecastEvent] { forecastResult.events }
-
-    private var startBalance: Double { forecastPoints.first?.balance ?? 0 }
-    private var endBalance: Double { forecastPoints.last?.balance ?? 0 }
-    private var balanceDelta: Double { endBalance - startBalance }
-
-    private var inflows: [ForecastEvent] { forecastEvents.filter { $0.amount > 0 } }
-    private var outflows: [ForecastEvent] { forecastEvents.filter { $0.amount < 0 } }
-    private var totalScheduledInflows: Double { inflows.reduce(0) { $0 + $1.amount } }
-    private var totalScheduledOutflows: Double { outflows.reduce(0) { $0 + abs($1.amount) } }
-    private var lowestBalance: Double { forecastPoints.map(\.balance).min() ?? 0 }
 
     // MARK: - Body
 
     var body: some View {
+        let snapshot = makeForecastSnapshot()
+
         ZStack {
             NestBackground()
 
@@ -64,10 +96,10 @@ struct CashFlowForecastView: View {
                 if accounts.isEmpty {
                     noAccountsSection
                 } else {
-                    balanceChartSection
-                    summaryStatsSection
-                    if !inflows.isEmpty { inflowsSection }
-                    if !outflows.isEmpty { outflowsSection }
+                    balanceChartSection(snapshot)
+                    summaryStatsSection(snapshot)
+                    if !snapshot.inflows.isEmpty { inflowsSection(snapshot.inflows) }
+                    if !snapshot.outflows.isEmpty { outflowsSection(snapshot.outflows) }
                     assumptionsSection
                 }
             }
@@ -137,12 +169,12 @@ struct CashFlowForecastView: View {
 
     // MARK: - Balance Chart
 
-    private var balanceChartAccessibilityValue: String {
-        let base = "Today \(CurrencyFormat.money(startBalance)), ending \(CurrencyFormat.money(endBalance)), lowest \(CurrencyFormat.money(lowestBalance))"
-        return lowestBalance < 0 ? base + ", goes negative" : base
+    private func balanceChartAccessibilityValue(_ snapshot: ForecastSnapshot) -> String {
+        let base = "Today \(CurrencyFormat.money(snapshot.startBalance)), ending \(CurrencyFormat.money(snapshot.endBalance)), lowest \(CurrencyFormat.money(snapshot.lowestBalance))"
+        return snapshot.lowestBalance < 0 ? base + ", goes negative" : base
     }
 
-    private var balanceChartSection: some View {
+    private func balanceChartSection(_ snapshot: ForecastSnapshot) -> some View {
         Section {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
@@ -150,17 +182,18 @@ struct CashFlowForecastView: View {
                         .font(.subheadline).fontWeight(.semibold)
                         .foregroundStyle(Color.nestBrown)
                     Spacer()
-                    if lowestBalance < 0 {
+                    if snapshot.lowestBalance < 0 {
                         Label("Goes negative", systemImage: "exclamationmark.triangle.fill")
                             .font(.caption2).foregroundStyle(Color.negative)
                     }
                 }
 
-                let pts = forecastPoints
+                let pts = snapshot.points
                 let minBal = pts.map(\.balance).min() ?? 0
                 let maxBal = pts.map(\.balance).max() ?? 1
                 let yPad  = max((maxBal - minBal) * 0.12, 100)
                 let yDomain = (minBal - yPad)...(maxBal + yPad)
+                let chartColor = chartColor(for: snapshot.balanceDelta)
 
                 Chart {
                     ForEach(pts, id: \.date) { p in
@@ -194,8 +227,8 @@ struct CashFlowForecastView: View {
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
 
                     // Event dots (capped to keep chart readable)
-                    ForEach(forecastEvents.prefix(30), id: \.id) { ev in
-                        if let match = pts.first(where: { Calendar.current.isDate($0.date, inSameDayAs: ev.date) }) {
+                    ForEach(snapshot.events.prefix(30), id: \.id) { ev in
+                        if let match = snapshot.eventPointBalances[ev.id] {
                             PointMark(
                                 x: .value("Date", match.date),
                                 y: .value("Balance", match.balance)
@@ -235,7 +268,7 @@ struct CashFlowForecastView: View {
                     }
                 }
                 .chartXAxis {
-                    AxisMarks(values: xAxisWeekMarks(for: pts)) { _ in
+                    AxisMarks(values: xAxisMarks(for: pts, horizonDays: horizon.rawValue)) { _ in
                         AxisGridLine()
                         AxisTick()
                         AxisValueLabel(format: .dateTime.month(.abbreviated).day(), centered: true)
@@ -246,24 +279,24 @@ struct CashFlowForecastView: View {
                 // daily point/event dot individually.
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Projected balance")
-                .accessibilityValue(balanceChartAccessibilityValue)
+                .accessibilityValue(balanceChartAccessibilityValue(snapshot))
 
                 // Summary row
                 HStack {
-                    labeledAmount(label: "Today", value: startBalance, alignment: .leading)
+                    labeledAmount(label: "Today", value: snapshot.startBalance, alignment: .leading)
                     Spacer()
                     VStack(alignment: .center, spacing: 2) {
                         Text("\(horizon.rawValue)-day change").font(.caption).foregroundStyle(.secondary)
                         HStack(spacing: 3) {
-                            Image(systemName: balanceDelta >= 0 ? "arrow.up.right" : "arrow.down.right")
+                            Image(systemName: snapshot.balanceDelta >= 0 ? "arrow.up.right" : "arrow.down.right")
                                 .font(.caption2)
-                            Text(abs(balanceDelta), format: .currency(code: CurrencyFormat.code))
+                            Text(abs(snapshot.balanceDelta), format: .currency(code: CurrencyFormat.code))
                                 .font(.system(.callout, design: .rounded, weight: .semibold))
                         }
-                        .foregroundStyle(balanceDelta >= 0 ? Color.nestLeafGreen : Color.negative)
+                        .foregroundStyle(snapshot.balanceDelta >= 0 ? Color.nestLeafGreen : Color.negative)
                     }
                     Spacer()
-                    labeledAmount(label: "Day \(horizon.rawValue)", value: endBalance, alignment: .trailing)
+                    labeledAmount(label: "Day \(horizon.rawValue)", value: snapshot.endBalance, alignment: .trailing)
                 }
                 .padding(.top, 4)
             }
@@ -275,7 +308,7 @@ struct CashFlowForecastView: View {
         .listRowBackground(Color.clear)
     }
 
-    private var chartColor: Color {
+    private func chartColor(for balanceDelta: Double) -> Color {
         balanceDelta >= 0 ? Color.eggBlue : Color.yolk
     }
 
@@ -311,24 +344,24 @@ struct CashFlowForecastView: View {
 
     // MARK: - Summary Stats
 
-    private var summaryStatsSection: some View {
+    private func summaryStatsSection(_ snapshot: ForecastSnapshot) -> some View {
         Section {
             HStack(spacing: 10) {
                 statChip(
                     title: "Liquid Base",
-                    value: ForecastEngine.liquidBalance(from: Array(accounts)),
+                    value: snapshot.liquidBalance,
                     color: Color.eggBlue,
                     icon: "banknote.fill"
                 )
                 statChip(
                     title: "Sched. In",
-                    value: totalScheduledInflows,
+                    value: snapshot.totalScheduledInflows,
                     color: Color.nestLeafGreen,
                     icon: "arrow.down.circle.fill"
                 )
                 statChip(
                     title: "Sched. Out",
-                    value: totalScheduledOutflows,
+                    value: snapshot.totalScheduledOutflows,
                     color: Color.negative,
                     icon: "arrow.up.circle.fill"
                 )
@@ -354,7 +387,7 @@ struct CashFlowForecastView: View {
 
     // MARK: - Inflows / Outflows
 
-    private var inflowsSection: some View {
+    private func inflowsSection(_ inflows: [ForecastEvent]) -> some View {
         Section {
             ForEach(inflows.prefix(12)) { ev in eventRow(ev) }
             if inflows.count > 12 {
@@ -368,7 +401,7 @@ struct CashFlowForecastView: View {
         }
     }
 
-    private var outflowsSection: some View {
+    private func outflowsSection(_ outflows: [ForecastEvent]) -> some View {
         Section {
             ForEach(outflows.prefix(12)) { ev in eventRow(ev) }
             if outflows.count > 12 {
@@ -454,11 +487,21 @@ struct CashFlowForecastView: View {
 
     // MARK: - Axis Marks
 
-    private func xAxisWeekMarks(for points: [ForecastDataPoint]) -> [Date] {
+    private func xAxisMarks(for points: [ForecastDataPoint], horizonDays: Int) -> [Date] {
         guard let firstDate = points.first?.date else { return [] }
         let calendar = Calendar.current
-        return (1...4).compactMap { week in
-            calendar.date(byAdding: .day, value: week * 7, to: firstDate)
+        let strideDays: Int
+        switch horizonDays {
+        case ...30:
+            strideDays = 7
+        case ...60:
+            strideDays = 14
+        default:
+            strideDays = 30
+        }
+
+        return stride(from: strideDays, through: horizonDays, by: strideDays).compactMap { day in
+            calendar.date(byAdding: .day, value: day, to: firstDate)
         }
     }
 }

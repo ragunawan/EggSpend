@@ -134,8 +134,13 @@ struct ForecastEngine {
         let startBalance = liquidBalance(from: accounts)
         let dailyDrift = averageDailyNetFlow(from: transactions)
         let events = upcomingEvents(from: recurring, accounts: accounts, horizonDays: horizonDays)
+        let eventDeltasByDay = Dictionary(grouping: events, by: { calendar.startOfDay(for: $0.date) })
+            .mapValues { dayEvents in
+                dayEvents.reduce(0.0) { $0 + $1.amount }
+            }
 
         var points: [ForecastDataPoint] = []
+        points.reserveCapacity(max(horizonDays, 1) + 1)
         var runningBalance = startBalance
 
         // Anchor: today's known liquid balance
@@ -144,9 +149,7 @@ struct ForecastEngine {
         for dayOffset in 1...max(horizonDays, 1) {
             guard let date = calendar.date(byAdding: .day, value: dayOffset, to: todayStart) else { continue }
 
-            // Recurring events scheduled on this exact calendar day
-            let dayRecurring = events.filter { calendar.isDate($0.date, inSameDayAs: date) }
-            let recurringDelta = dayRecurring.reduce(0.0) { $0 + $1.amount }
+            let recurringDelta = eventDeltasByDay[calendar.startOfDay(for: date)] ?? 0
 
             runningBalance += dailyDrift + recurringDelta
             points.append(ForecastDataPoint(date: date, balance: runningBalance, isProjected: true))
