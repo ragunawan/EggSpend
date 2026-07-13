@@ -428,18 +428,11 @@ struct MetricsView: View {
     private func netWorthCallout(date: Date, worth: Double) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
-                .font(.caption2).foregroundStyle(Color.secondary)
+                .font(.caption2).foregroundStyle(Color.primary.opacity(0.72))
             Text(worth, format: .currency(code: CurrencyFormat.code))
                 .font(.caption).fontWeight(.semibold).foregroundStyle(Color.primary)
         }
-        .padding(.horizontal, Space.sm)
-        .padding(.vertical, Space.xs)
-        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: Radius.control))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.control)
-                .stroke(Color.nestBrown.opacity(0.12), lineWidth: 1)
-        }
-        .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
+        .chartDetailCalloutStyle()
     }
 
     // Cash flow bar chart (income positive, expenses negative from zero line)
@@ -536,8 +529,8 @@ struct MetricsView: View {
     private func cashFlowCallout(date: Date, income: Double, expenses: Double) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
-                .font(.caption2).foregroundStyle(Color.secondary)
-            HStack(spacing: 8) {
+                .font(.caption2).foregroundStyle(Color.primary.opacity(0.72))
+            VStack(alignment: .leading, spacing: 3) {
                 Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                       systemImage: "arrow.down.circle.fill")
                     .font(.caption).foregroundStyle(Color.nestLeafGreen)
@@ -546,14 +539,7 @@ struct MetricsView: View {
                     .font(.caption).foregroundStyle(Color.negative)
             }
         }
-        .padding(.horizontal, Space.sm)
-        .padding(.vertical, Space.xs)
-        .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: Radius.control))
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.control)
-                .stroke(Color.nestBrown.opacity(0.12), lineWidth: 1)
-        }
-        .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
+        .chartDetailCalloutStyle()
     }
 
     private var cashFlowSummaryStats: some View {

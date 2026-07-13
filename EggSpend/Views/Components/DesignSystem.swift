@@ -26,3 +26,26 @@ enum NestType {
 extension Animation {
     static let quickFade = Animation.easeOut(duration: 0.2)
 }
+
+private struct ChartDetailCalloutStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, Space.sm)
+            .padding(.vertical, 5)
+            .background(
+                Color(lightHex: "FFFFFF", darkHex: "1E1A16"),
+                in: RoundedRectangle(cornerRadius: Radius.control)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.control)
+                    .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.16), radius: 6, y: 3)
+    }
+}
+
+extension View {
+    func chartDetailCalloutStyle() -> some View {
+        modifier(ChartDetailCalloutStyle())
+    }
+}

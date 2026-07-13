@@ -322,7 +322,10 @@ struct BudgetDetailView: View {
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [6, 4]))
                     .annotation(position: .top, alignment: .trailing) {
                         Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
-                            .font(.caption2).foregroundStyle(Color.negative.opacity(0.7))
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.negative)
+                            .chartDetailCalloutStyle()
                     }
             }
             .chartYAxis {

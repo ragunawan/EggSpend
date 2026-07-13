@@ -213,11 +213,6 @@ struct CashFlowForecastView: View {
                         .interpolationMethod(.catmullRom)
                     }
 
-                    // Zero line — visually marks where balance would go negative
-                    RuleMark(y: .value("Zero", 0))
-                        .foregroundStyle(Color.negative.opacity(0.45))
-                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
-
                     // Event dots (capped to keep chart readable)
                     ForEach(snapshot.events.prefix(30), id: \.id) { ev in
                         if let match = snapshot.eventPointBalances[ev.id] {
@@ -313,16 +308,7 @@ struct CashFlowForecastView: View {
                 .font(.caption).fontWeight(.semibold)
                 .foregroundStyle(balance >= 0 ? Color.primary : Color.negative)
         }
-        .padding(.horizontal, 8).padding(.vertical, 5)
-        .background(
-            Color(lightHex: "FFFFFF", darkHex: "1E1A16"),
-            in: RoundedRectangle(cornerRadius: Radius.control)
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: Radius.control)
-                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
-        }
-        .shadow(color: .black.opacity(0.16), radius: 6, y: 3)
+        .chartDetailCalloutStyle()
     }
 
     private func labeledAmount(label: String, value: Double, alignment: HorizontalAlignment) -> some View {
