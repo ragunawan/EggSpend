@@ -132,7 +132,6 @@ struct MetricsView: View {
                         noDataSection
                     } else {
                         timelineSection
-                        incomeVsExpenseSection
                         if !expensesByCategory.isEmpty { categoryBreakdownSection }
                     }
                 }
@@ -176,7 +175,7 @@ struct MetricsView: View {
         .listRowBackground(Color.clear)
     }
 
-    // MARK: - Timeline section (new)
+    // MARK: - Charts
 
     private var timelineSection: some View {
         Section {
@@ -184,12 +183,9 @@ struct MetricsView: View {
                 netWorthChart
                 Divider()
                 cashFlowChart
+                cashFlowSummaryStats
             }
             .padding(.vertical, Space.sm)
-
-        } header: {
-            Label("Timeline", systemImage: "chart.xyaxis.line")
-                .foregroundStyle(Color.twig)
         }
         .listRowBackground(Color.clear)
     }
@@ -427,6 +423,35 @@ struct MetricsView: View {
         .shadow(color: Color.nestBrown.opacity(0.08), radius: 4, y: 2)
     }
 
+    private var cashFlowSummaryStats: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Net")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(totalIncome - totalExpenses, format: .currency(code: CurrencyFormat.code))
+                    .font(.headline)
+                    .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : Color.negative)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("Savings Rate")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if totalIncome > 0 {
+                    Text("\(Int((1 - totalExpenses / totalIncome) * 100))%")
+                        .font(.headline)
+                        .foregroundStyle(Color.nestBrown)
+                } else {
+                    Text("—")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.top, Space.xs)
+    }
+
     // MARK: - Axis format helpers
 
     private var xAxisFormat: Date.FormatStyle {
@@ -443,52 +468,6 @@ struct MetricsView: View {
         case .month: return .dateTime.month(.wide).day()
         case .year:  return .dateTime.month(.wide).year()
         }
-    }
-
-    // MARK: - Income vs Expenses summary
-
-    private var incomeVsExpenseSection: some View {
-        Section("Period Summary") {
-            Group {
-                Chart {
-                    BarMark(x: .value("Type", "Income"),   y: .value("Amount", totalIncome))
-                        .foregroundStyle(Color.nestLeafGreen.gradient)
-                        .accessibilityLabel("Income")
-                        .accessibilityValue(CurrencyFormat.money(totalIncome))
-                    BarMark(x: .value("Type", "Expenses"), y: .value("Amount", totalExpenses))
-                        .foregroundStyle(Color.negative.opacity(0.8).gradient)
-                        .accessibilityLabel("Expenses")
-                        .accessibilityValue(CurrencyFormat.money(totalExpenses))
-                }
-                .chartYAxis {
-                    AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
-                }
-                .frame(height: 160)
-                .padding(.vertical, Space.sm)
-
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Net").font(.caption).foregroundStyle(.secondary)
-                        Text(totalIncome - totalExpenses, format: .currency(code: CurrencyFormat.code))
-                            .font(.headline)
-                            .foregroundStyle(totalIncome >= totalExpenses ? Color.nestLeafGreen : Color.negative)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text("Savings Rate").font(.caption).foregroundStyle(.secondary)
-                        if totalIncome > 0 {
-                            Text("\(Int((1 - totalExpenses / totalIncome) * 100))%")
-                                .font(.headline).foregroundStyle(Color.nestBrown)
-                        } else {
-                            Text("—").font(.headline).foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .padding(.vertical, Space.xs)
-            }
-
-        }
-        .listRowBackground(Color.clear)
     }
 
     // MARK: - Category breakdown
