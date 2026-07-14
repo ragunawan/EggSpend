@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Focus
 
-Work only on the EggSpend codebase in `/Users/ai/Documents/Dev/EggSpend`. Ignore sibling directories unless explicitly asked.
+Work only on the EggSpend codebase (this repository). Ignore sibling directories unless explicitly asked.
 
 EggSpend is the repository name, Xcode project name, iOS app target, product name, test target, and shared scheme.
 
@@ -53,13 +53,17 @@ Nine SwiftData `@Model` classes: `Transaction`, `TransactionCategory`, `Account`
 
 Domain logic lives outside views in:
 
-- `EggSpend/Utilities/` — `CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`
+- `EggSpend/Utilities/` — `CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`, `TransactionEntryService`, `TransferBalanceService`, `BudgetAlertCoordinator`, `NotificationScheduler`
 - `EggSpend/Views/Forecast/ForecastEngine.swift` — forecast math lives here (in Views/, not Utilities/)
 - `EggSpend/Models/RecurringTransaction.swift` — `processRecurringTransactions(_:context:)` is a top-level function called from `EggSpendApp.onAppear`; it generates `Transaction` records for every overdue due date and advances `nextDueDate`
 
-**Launch sequence.** `EggSpendApp.onAppear` runs: seed default categories → processRecurringTransactions → DuplicateSweeper.sweep (cloud sync self-heal) → captureBalanceSnapshots.
+**Launch sequence.** `EggSpendApp.onAppear` runs: seed default categories → (seed preview data if `--preview-data`) → processRecurringTransactions → DuplicateSweeper.sweep (cloud sync self-heal) → captureBalanceSnapshots. Balance snapshots are also re-captured on every `scenePhase` transition back to `.active`, so day rollovers while backgrounded are caught on foreground.
 
-**AccountBalanceService.** When creating, editing, or deleting a transaction that is linked to an account, you must call `AccountBalanceService.apply(_:to:)` or `AccountBalanceService.reverse(_:from:)` manually. The model does not auto-update balances.
+**AccountBalanceService.** When creating, editing, or deleting a transaction that is linked to an account, you must call `AccountBalanceService.apply(_:to:)` or `AccountBalanceService.reverse(_:from:)` manually. The model does not auto-update balances. `TransferBalanceService.apply/reverse` is the equivalent for `Transfer` (debits fromAccount, credits toAccount).
+
+**TransactionEntryService.** The shared creation path for transactions (used by AddTransactionView and QuickAdd). It trims input, inserts the model, applies the account balance, and runs the budget-alert check — prefer it over inserting `Transaction` directly from a view.
+
+**Budget alerts & notifications.** `BudgetAlertCoordinator.checkBudgets` must be called after any transaction mutation that could move a budget's spend; it fires threshold notifications via `NotificationScheduler`. Notification code depends on `NotificationCenterProtocol` (a testable abstraction over `UNUserNotificationCenter`) — inject it rather than calling the real center in logic/tests.
 
 **Budget category matching.** A `Budget` with `category == nil` matches transactions that also have no category (i.e. uncategorized spend), not all transactions. This is intentional — nil means "catch uncategorized".
 
@@ -71,7 +75,7 @@ Domain logic lives outside views in:
 - `seedDefaultCategoriesIfNeeded` — runs at every launch; idempotent (no-ops if categories exist)
 - `previewContainer()` — returns an in-memory `ModelContainer` pre-populated with sample data; used in all `#Preview` blocks
 
-**@AppStorage keys.** Settings and onboarding state keys are owned by their feature files: `SettingsView.aiNarrativeStorageKey`, `SettingsView.appLockStorageKey`, `OnboardingView.hasCompletedOnboardingKey`.
+**@AppStorage keys.** Settings and onboarding state keys are owned by their feature files: `SettingsView.aiNarrativeStorageKey`, `SettingsView.appLockStorageKey`, `SettingsView.appearanceStorageKey`, `OnboardingView.hasCompletedOnboardingKey`.
 
 ### UI layer
 
@@ -85,7 +89,8 @@ Domain logic lives outside views in:
 
 - When adding Swift files, keep both `EggSpend.xcodeproj/project.pbxproj` and `generate_project.py` in sync (now also registers resources: PrivacyInfo.xcprivacy, Localizable.xcstrings).
 - Use `Decimal` or currency-safe formatting for any new money logic; avoid `Double` arithmetic for financial totals (the existing codebase uses `Double` — be intentional about extending that pattern).
-- Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes. Test suite has 469 XCTest cases; every test file includes the 9-model schema list.
+- Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes. Test suite has ~500 XCTest cases across 31 files; every test file includes the 9-model schema list.
+- Loop/agent working docs live at the repo root (`IMPLEMENTATION_PLAN.md`, `AGENT_LOOP_LOG.md`, `BUGS_AND_RISKS.md`, `FEATURE_BACKLOG.md`, `CHANGELOG.md`, `TODO.md`) — keep them updated when completing tracked tasks.
 
 ## Running & Screenshots
 
