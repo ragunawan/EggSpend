@@ -72,6 +72,7 @@ enum TransactionEntryService {
         date: Date,
         fromAccount: Account?,
         toAccount: Account?,
+        savingsGoal: SavingsGoal? = nil,
         notes: String,
         context: ModelContext
     ) -> Transfer {
@@ -80,10 +81,12 @@ enum TransactionEntryService {
             date: date,
             fromAccount: fromAccount,
             toAccount: toAccount,
+            savingsGoal: savingsGoal,
             notes: notes
         )
         context.insert(transfer)
         TransferBalanceService.apply(transfer)
+        SavingsGoalContributionService.apply(transfer)
         return transfer
     }
 
@@ -93,15 +96,19 @@ enum TransactionEntryService {
         date: Date,
         fromAccount: Account?,
         toAccount: Account?,
+        savingsGoal: SavingsGoal? = nil,
         notes: String
     ) {
         TransferBalanceService.reverse(transfer)
+        SavingsGoalContributionService.reverse(transfer)
         transfer.amount = amount
         transfer.date = date
         transfer.fromAccount = fromAccount
         transfer.toAccount = toAccount
+        transfer.savingsGoal = savingsGoal
         transfer.notes = notes
         TransferBalanceService.apply(transfer)
+        SavingsGoalContributionService.apply(transfer)
     }
 
     private static func recordRuleIfNeeded(

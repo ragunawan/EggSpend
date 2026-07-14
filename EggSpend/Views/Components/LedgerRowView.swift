@@ -193,6 +193,9 @@ struct LedgerRowView: View {
             return values
         case .transfer(let transfer):
             var values = [transferTitle(transfer)]
+            if let goal = transfer.savingsGoal {
+                values.append(goal.name)
+            }
             if showsMeta.contains(.date) {
                 values.append(shortDateString(transfer.date))
             }

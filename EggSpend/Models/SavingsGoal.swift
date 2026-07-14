@@ -37,6 +37,9 @@ final class SavingsGoal {
     @Relationship(deleteRule: .nullify)
     var linkedAccount: Account?
 
+    @Relationship(deleteRule: .nullify, inverse: \Transfer.savingsGoal)
+    var contributingTransfers: [Transfer]? = []
+
     // MARK: Computed wrappers
 
     var status: SavingsGoalStatus {
@@ -71,6 +74,7 @@ final class SavingsGoal {
         self.icon = icon
         self.createdAt = .now
         self.statusRaw = status.rawValue
+        self.contributingTransfers = []
     }
 
     // MARK: Progress

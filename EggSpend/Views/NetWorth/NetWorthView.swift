@@ -278,11 +278,22 @@ struct NetWorthView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(assets) { account in
-                        Button { editingAccount = account } label: {
+                        NavigationLink {
+                            TransactionsListView(
+                                initialFilter: transactionFilter(for: account),
+                                hideTransfers: false,
+                                showUpcoming: false
+                            )
+                        } label: {
                             AccountRowView(account: account, previousCycleTotal: nil)
                         }
-                        .buttonStyle(.plain)
                         .listRowInsets(compactAccountRowInsets)
+                        .swipeActions(edge: .leading) {
+                            Button("Edit", systemImage: "pencil") {
+                                editingAccount = account
+                            }
+                            .tint(Color.yolk)
+                        }
                         .swipeActions(edge: .trailing) {
                             Button("Archive", systemImage: "archivebox") {
                                 accountToArchive = account
@@ -305,13 +316,18 @@ struct NetWorthView: View {
                 } else {
                     let previousCycleTotals = previousBillingCycleTotals
                     ForEach(liabilities) { account in
-                        Button { editingAccount = account } label: {
+                        NavigationLink {
+                            TransactionsListView(
+                                initialFilter: transactionFilter(for: account),
+                                hideTransfers: false,
+                                showUpcoming: false
+                            )
+                        } label: {
                             AccountRowView(
                                 account: account,
                                 previousCycleTotal: account.type == .credit ? previousCycleTotals[account.id] : nil
                             )
                         }
-                        .buttonStyle(.plain)
                         .listRowInsets(compactAccountRowInsets)
                         .swipeActions(edge: .leading) {
                             Button("Edit", systemImage: "pencil") {
@@ -371,6 +387,10 @@ struct NetWorthView: View {
         for account in accounts where account.isLiability {
             account.rollDueDateIfNeeded()
         }
+    }
+
+    private func transactionFilter(for account: Account) -> TransactionFilter {
+        TransactionFilter(accountIDs: [account.id])
     }
 }
 

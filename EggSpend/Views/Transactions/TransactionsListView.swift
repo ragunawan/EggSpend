@@ -43,10 +43,17 @@ struct TransactionsListView: View {
     private var filteredTransfers: [Transfer] {
         guard filter.type == nil && !hideTransfers else { return [] }
         return transfers.filter { transfer in
-            searchText.isEmpty
+            let matchesSearch = searchText.isEmpty
                 || transfer.notes.localizedCaseInsensitiveContains(searchText)
                 || (transfer.fromAccount?.name.localizedCaseInsensitiveContains(searchText) ?? false)
                 || (transfer.toAccount?.name.localizedCaseInsensitiveContains(searchText) ?? false)
+            guard matchesSearch else { return false }
+            if !filter.accountIDs.isEmpty {
+                let fromMatches = transfer.fromAccount.map { filter.accountIDs.contains($0.id) } ?? false
+                let toMatches = transfer.toAccount.map { filter.accountIDs.contains($0.id) } ?? false
+                guard fromMatches || toMatches else { return false }
+            }
+            return true
         }
     }
 
@@ -456,6 +463,7 @@ struct TransactionsListView: View {
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
                     TransferBalanceService.reverse(transfer)
+                    SavingsGoalContributionService.reverse(transfer)
                     modelContext.delete(transfer)
                 } label: {
                     Label("Delete", systemImage: "trash")
@@ -500,6 +508,7 @@ struct TransactionsListView: View {
                 modelContext.delete(tx)
             case .transfer(let transfer):
                 TransferBalanceService.reverse(transfer)
+                SavingsGoalContributionService.reverse(transfer)
                 modelContext.delete(transfer)
             case .upcoming:
                 continue

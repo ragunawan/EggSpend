@@ -200,4 +200,36 @@ final class TransferTests: XCTestCase {
         XCTAssertNil(fetched.first?.fromAccount)
         XCTAssertEqual(fetched.first?.toAccount?.name, "Savings")
     }
+
+    // MARK: - Savings goal association
+
+    func testTransferPersistsSavingsGoalAssociation() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let goal = SavingsGoal(name: "Vacation", targetAmount: 2000)
+        let transfer = Transfer(amount: 200, fromAccount: checking, toAccount: nil, savingsGoal: goal)
+        context.insert(checking)
+        context.insert(goal)
+        context.insert(transfer)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Transfer>())
+        XCTAssertEqual(fetched.first?.savingsGoal?.name, "Vacation")
+    }
+
+    func testSavingsGoalDeletionNullifiesTransferReferenceWithoutDeletingTransferHistory() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let goal = SavingsGoal(name: "Vacation", targetAmount: 2000)
+        let transfer = Transfer(amount: 200, fromAccount: checking, toAccount: nil, savingsGoal: goal)
+        context.insert(checking)
+        context.insert(goal)
+        context.insert(transfer)
+        try context.save()
+
+        context.delete(goal)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Transfer>())
+        XCTAssertEqual(fetched.count, 1)
+        XCTAssertNil(fetched.first?.savingsGoal)
+    }
 }

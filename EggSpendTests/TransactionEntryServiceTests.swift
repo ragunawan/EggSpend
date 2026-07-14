@@ -176,4 +176,50 @@ final class TransactionEntryServiceTests: XCTestCase {
         XCTAssertEqual(transfer.fromAccount?.id, cash.id)
         XCTAssertEqual(transfer.toAccount?.id, investment.id)
     }
+
+    func testCreateTransferWithSavingsGoalTagsTransferAndCreditsManualProgress() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let goal = SavingsGoal(name: "Vacation", targetAmount: 2000, currentAmount: 100)
+        context.insert(checking)
+        context.insert(goal)
+
+        let transfer = TransactionEntryService.createTransfer(
+            amount: 300,
+            date: Date(timeIntervalSince1970: 3_000),
+            fromAccount: checking,
+            toAccount: nil,
+            savingsGoal: goal,
+            notes: "vacation fund",
+            context: context
+        )
+
+        XCTAssertEqual(transfer.savingsGoal?.id, goal.id)
+        XCTAssertEqual(goal.manualCurrentAmount, 400, accuracy: 0.001)
+    }
+
+    func testUpdateTransferChangingSavingsGoalRebalancesBothGoals() throws {
+        let goalA = SavingsGoal(name: "Vacation", targetAmount: 2000, currentAmount: 100)
+        let goalB = SavingsGoal(name: "Emergency Fund", targetAmount: 5000, currentAmount: 50)
+        let transfer = Transfer(amount: 300, fromAccount: nil, toAccount: nil, savingsGoal: goalA)
+        context.insert(goalA)
+        context.insert(goalB)
+        context.insert(transfer)
+        TransferBalanceService.apply(transfer)
+        SavingsGoalContributionService.apply(transfer)
+        XCTAssertEqual(goalA.manualCurrentAmount, 400, accuracy: 0.001)
+
+        TransactionEntryService.updateTransfer(
+            transfer,
+            amount: 300,
+            date: Date(timeIntervalSince1970: 4_000),
+            fromAccount: nil,
+            toAccount: nil,
+            savingsGoal: goalB,
+            notes: ""
+        )
+
+        XCTAssertEqual(goalA.manualCurrentAmount, 100, accuracy: 0.001, "Reassigned away from goalA — its contribution should be reversed")
+        XCTAssertEqual(goalB.manualCurrentAmount, 350, accuracy: 0.001, "Newly tagged goalB should receive the contribution")
+        XCTAssertEqual(transfer.savingsGoal?.id, goalB.id)
+    }
 }

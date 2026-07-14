@@ -80,6 +80,12 @@ struct TransferDetailView: View {
                     Text("Deleted account").foregroundStyle(.secondary)
                 }
             }
+            if let goal = transfer.savingsGoal {
+                LabeledContent("Savings Goal") {
+                    Label(goal.name, systemImage: goal.icon)
+                        .foregroundStyle(Color(hex: goal.colorHex) ?? .yolk)
+                }
+            }
         }
     }
 
@@ -101,6 +107,7 @@ struct TransferDetailView: View {
 
     private func deleteAndDismiss() {
         TransferBalanceService.reverse(transfer)
+        SavingsGoalContributionService.reverse(transfer)
         modelContext.delete(transfer)
         dismiss()
     }

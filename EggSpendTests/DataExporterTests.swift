@@ -512,6 +512,31 @@ final class DataExporterTests: XCTestCase {
     }
 
     @MainActor
+    func testRestoreFullBackupPreservesTransferSavingsGoalAssociation() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        let vacationGoal = SavingsGoal(name: "Vacation", targetAmount: 2000, currentAmount: 400)
+        let transfer = Transfer(amount: 300, date: fixtureDate(2024, 3, 5), fromAccount: checking, toAccount: nil,
+                                savingsGoal: vacationGoal, notes: "vacation fund")
+
+        let data = try DataExporter.fullBackupJSON(
+            transactions: [], categories: [], accounts: [checking], budgets: [], recurringTransactions: [],
+            savingsGoals: [vacationGoal], transfers: [transfer], exportDate: epochInstant(1_700_001_000),
+            appVersion: "1.2.3", buildNumber: "42"
+        )
+
+        let envelope = try DataExporter.validateBackup(data)
+        XCTAssertEqual(envelope.transfers.first?.savingsGoalID, vacationGoal.id)
+        XCTAssertEqual(envelope.transfers.first?.savingsGoalName, "Vacation")
+
+        try DataExporter.restoreFullBackup(from: data, in: context)
+
+        let restoredGoal = try XCTUnwrap(try context.fetch(FetchDescriptor<SavingsGoal>()).first)
+        let restoredTransfer = try XCTUnwrap(try context.fetch(FetchDescriptor<Transfer>()).first)
+        XCTAssertEqual(restoredTransfer.savingsGoal?.id, restoredGoal.id)
+        XCTAssertEqual(restoredTransfer.savingsGoal?.name, "Vacation")
+    }
+
+    @MainActor
     func testRestoreFullBackupRejectsNewerSchemaWithoutDeletingExistingData() throws {
         let existingAccount = Account(name: "Keep Me", type: .checking, balance: 10)
         context.insert(existingAccount)
