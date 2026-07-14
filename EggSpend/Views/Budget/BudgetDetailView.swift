@@ -273,11 +273,6 @@ struct BudgetDetailView: View {
 
             Chart {
                 // Pace target area (shaded region under ideal line)
-                // Uses "Pace Day"/"Pace Base" (not "Day"/"Base") so Swift Charts
-                // doesn't fold this series' style into the actual-spend series below —
-                // marks that share value-label strings across ForEach loops can be
-                // treated as one style domain, which previously made the actual-spend
-                // line render with the pace line's green dashed style.
                 ForEach(paceLine, id: \.date) { point in
                     AreaMark(
                         x: .value("Pace Day", point.date),
@@ -288,13 +283,19 @@ struct BudgetDetailView: View {
                     .interpolationMethod(.linear)
                 }
 
-                // Pace target line
+                // Pace target line. `foregroundStyle(by:)` is load-bearing, not
+                // decorative: without a categorical series encoding, Swift Charts
+                // treats every LineMark in the Chart (across every ForEach) as one
+                // continuous line and connects all their points in x-order — giving
+                // each series its own color/dash literal is not enough to keep them
+                // visually or topologically separate. Unique x/y value-label strings
+                // (tried previously) don't prevent this either; only `by:` does.
                 ForEach(paceLine, id: \.date) { point in
                     LineMark(
                         x: .value("Pace Day", point.date),
                         y: .value("Pace", point.pace)
                     )
-                    .foregroundStyle(Color.nestLeafGreen.opacity(0.5))
+                    .foregroundStyle(by: .value("Series", "Target Pace"))
                     .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                     .interpolationMethod(.linear)
                 }
@@ -321,7 +322,7 @@ struct BudgetDetailView: View {
                         x: .value("Spend Day", point.date),
                         y: .value("Spent", point.cumulative)
                     )
-                    .foregroundStyle(Color.yolk)
+                    .foregroundStyle(by: .value("Series", "Actual Spend"))
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
                     .symbol(Circle().strokeBorder(lineWidth: 2))
                     .symbolSize(24)
@@ -340,6 +341,15 @@ struct BudgetDetailView: View {
                             .chartDetailCalloutStyle()
                     }
             }
+            .chartForegroundStyleScale([
+                "Actual Spend": Color.yolk,
+                "Target Pace": Color.nestLeafGreen.opacity(0.5),
+            ])
+            // The custom legendChip row below already covers all three series
+            // (including the RuleMark, which chartForegroundStyleScale doesn't
+            // reach) — suppress Charts' own auto-generated legend so it isn't
+            // duplicated.
+            .chartLegend(.hidden)
             .chartYAxis {
                 AxisMarks(format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
             }
