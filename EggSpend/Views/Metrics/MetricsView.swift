@@ -367,7 +367,7 @@ struct MetricsView: View {
                         .foregroundStyle(Color.nestBrown.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                         .annotation(position: .top,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
                             netWorthCallout(date: closest.date, worth: closest.worth)
                         }
                         // Selection state is already exposed via the LineMark's own
@@ -494,7 +494,7 @@ struct MetricsView: View {
                         .foregroundStyle(Color.nestBrown.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                         .annotation(position: .top,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
                             cashFlowCallout(date: closest.date,
                                             income: closest.income,
                                             expenses: closest.expenses)
