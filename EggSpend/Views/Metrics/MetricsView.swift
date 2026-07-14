@@ -61,6 +61,11 @@ struct MetricsView: View {
     @State private var selectedNetWorthDate: Date? = nil
     @State private var selectedCashFlowDate: Date? = nil
     @State private var showAddTransaction = false
+
+    // Fixed reserved width for the Y-axis label gutter, shared by both timeline
+    // charts, so their plot areas line up instead of each auto-sizing to its own
+    // widest label ("$57K" vs "$4K") and drifting out of alignment.
+    private let yAxisLabelWidth: CGFloat = 46
     // MARK: - Period
 
     enum Period: String, CaseIterable {
@@ -378,7 +383,9 @@ struct MetricsView: View {
                 }
             }
             .chartXSelection(value: $selectedNetWorthDate)
-            .chartXScale(domain: selectedPeriod.xAxisDomain)
+            // Matches the cash-flow chart's plot padding below so both charts'
+            // plot areas share the same width and the same dates line up vertically.
+            .chartXScale(domain: selectedPeriod.xAxisDomain, range: .plotDimension(padding: 16))
             .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
@@ -386,6 +393,9 @@ struct MetricsView: View {
                     AxisValueLabel {
                         if let worth = value.as(Double.self) {
                             Text(CompactCurrencyAxisFormatter.string(from: worth, currencySymbol: CurrencyFormat.symbol))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .frame(width: yAxisLabelWidth, alignment: .trailing)
                         }
                     }
                 }
@@ -505,6 +515,7 @@ struct MetricsView: View {
                             Text(CompactCurrencyAxisFormatter.string(from: abs(v), currencySymbol: CurrencyFormat.symbol))
                                 .font(.caption2)
                                 .foregroundStyle(v >= 0 ? Color.nestLeafGreen : Color.negative)
+                                .frame(width: yAxisLabelWidth, alignment: .trailing)
                         }
                     }
                 }
@@ -530,14 +541,19 @@ struct MetricsView: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
                 .font(.caption2).foregroundStyle(Color.primary.opacity(0.72))
-            VStack(alignment: .leading, spacing: 3) {
-                Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
-                      systemImage: "arrow.down.circle.fill")
-                    .font(.caption).foregroundStyle(Color.nestLeafGreen)
-                Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
-                      systemImage: "arrow.up.circle.fill")
-                    .font(.caption).foregroundStyle(Color.negative)
-            }
+            // Explicit lineLimit + fixedSize keep these single-line under the narrow
+            // width the chart annotation can propose during selection — without it,
+            // SwiftUI wraps the currency text one character per line (icon stays put).
+            Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
+                  systemImage: "arrow.down.circle.fill")
+                .font(.caption).foregroundStyle(Color.nestLeafGreen)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+            Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
+                  systemImage: "arrow.up.circle.fill")
+                .font(.caption).foregroundStyle(Color.negative)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
         .chartDetailCalloutStyle()
     }
