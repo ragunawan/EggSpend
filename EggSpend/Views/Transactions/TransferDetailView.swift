@@ -48,14 +48,14 @@ struct TransferDetailView: View {
                         .font(.largeTitle)
                         .foregroundStyle(Color.twig)
                     Text(transfer.amount, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(NestType.hero)
                     Text("Transfer")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, Space.sm)
         }
     }
 

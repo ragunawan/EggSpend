@@ -9,111 +9,120 @@
 		/* Begin PBXBuildFile section */
 		AA0200000000000000000001 /* EggSpendApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000001 /* EggSpendApp.swift */; };
 		AA0200000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000002 /* ContentView.swift */; };
-		AA0200000000000000000013 /* EggSpendTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000013 /* EggSpendTheme.swift */; };
+		AA0200000000000000000012 /* EggSpendTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000013 /* EggSpendTheme.swift */; };
+		AA0200000000000000000069 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000084 /* DesignSystem.swift */; };
+		AA020000000000000000006A /* NestBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000085 /* NestBackground.swift */; };
+		AA020000000000000000006B /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000086 /* SectionHeader.swift */; };
+		AA020000000000000000006C /* AmountText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000087 /* AmountText.swift */; };
+		AA020000000000000000006D /* StatTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000088 /* StatTile.swift */; };
+		AA020000000000000000006E /* ThinProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000089 /* ThinProgressBar.swift */; };
+		AA020000000000000000006F /* CompactProgressRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008A /* CompactProgressRow.swift */; };
+		AA0200000000000000000070 /* LedgerRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008B /* LedgerRowView.swift */; };
+		AA0200000000000000000071 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008C /* EmptyStateView.swift */; };
 		AA0200000000000000000003 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000003 /* Transaction.swift */; };
 		AA0200000000000000000004 /* TransactionCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000004 /* TransactionCategory.swift */; };
 		AA0200000000000000000005 /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000005 /* Account.swift */; };
-		AA0200000000000000000014 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000014 /* Budget.swift */; };
-		AA0200000000000000000015 /* RecurringTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000015 /* RecurringTransaction.swift */; };
-		AA0200000000000000000037 /* SavingsGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004C /* SavingsGoal.swift */; };
-		AA0200000000000000000047 /* Transfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005C /* Transfer.swift */; };
-		AA020000000000000000005A /* BalanceSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006F /* BalanceSnapshot.swift */; };
-		AA0200000000000000000060 /* CategoryRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000075 /* CategoryRule.swift */; };
-		AA020000000000000000004C /* RecurringProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000061 /* RecurringProjection.swift */; };
+		AA0200000000000000000013 /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000014 /* Budget.swift */; };
+		AA0200000000000000000014 /* RecurringTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000015 /* RecurringTransaction.swift */; };
+		AA0200000000000000000034 /* SavingsGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004C /* SavingsGoal.swift */; };
+		AA0200000000000000000042 /* Transfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005C /* Transfer.swift */; };
+		AA0200000000000000000054 /* BalanceSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006F /* BalanceSnapshot.swift */; };
+		AA020000000000000000005A /* CategoryRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000075 /* CategoryRule.swift */; };
+		AA0200000000000000000046 /* RecurringProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000061 /* RecurringProjection.swift */; };
 		AA0200000000000000000006 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000006 /* DashboardView.swift */; };
+		AA0200000000000000000072 /* DashboardHomeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008D /* DashboardHomeComponents.swift */; };
 		AA0200000000000000000007 /* TransactionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000007 /* TransactionsListView.swift */; };
 		AA0200000000000000000008 /* AddTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000008 /* AddTransactionView.swift */; };
 		AA0200000000000000000009 /* TransactionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000009 /* TransactionDetailView.swift */; };
-		AA020000000000000000004A /* TransferDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005F /* TransferDetailView.swift */; };
+		AA0200000000000000000044 /* TransferDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005F /* TransferDetailView.swift */; };
+		AA0200000000000000000075 /* CurrencyKeypadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000090 /* CurrencyKeypadView.swift */; };
+		AA0200000000000000000076 /* MerchantSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000091 /* MerchantSuggestion.swift */; };
+		AA0200000000000000000078 /* QuickAddSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000093 /* QuickAddSheet.swift */; };
 		AA020000000000000000000A /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000A /* NetWorthView.swift */; };
 		AA020000000000000000000B /* MetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000B /* MetricsView.swift */; };
-		AA020000000000000000000C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000C /* AccountsView.swift */; };
 		AA020000000000000000000D /* AddAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000D /* AddAccountView.swift */; };
-		AA020000000000000000004F /* DebtPayoffPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000064 /* DebtPayoffPlannerView.swift */; };
-		AA0200000000000000000019 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000019 /* BudgetView.swift */; };
-		AA020000000000000000001A /* AddBudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001A /* AddBudgetView.swift */; };
-		AA020000000000000000001B /* BudgetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000040 /* BudgetDetailView.swift */; };
-		AA020000000000000000001C /* RecurringTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001B /* RecurringTransactionsView.swift */; };
-		AA020000000000000000004D /* RecurringNext30DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000062 /* RecurringNext30DaysView.swift */; };
-		AA020000000000000000001D /* AddRecurringTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001C /* AddRecurringTransactionView.swift */; };
-		AA0200000000000000000016 /* NestHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000016 /* NestHeaderView.swift */; };
-		AA0200000000000000000017 /* EggProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000017 /* EggProgressView.swift */; };
-		AA0200000000000000000018 /* BirdAnimationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000018 /* BirdAnimationView.swift */; };
-		AA0200000000000000000045 /* FloatingLeavesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005A /* FloatingLeavesView.swift */; };
-		AA0200000000000000000046 /* AnimatedCanopyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005B /* AnimatedCanopyBackground.swift */; };
+		AA0200000000000000000049 /* DebtPayoffPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000064 /* DebtPayoffPlannerView.swift */; };
+		AA0200000000000000000016 /* BudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000019 /* BudgetView.swift */; };
+		AA0200000000000000000017 /* AddBudgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001A /* AddBudgetView.swift */; };
+		AA0200000000000000000018 /* BudgetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000040 /* BudgetDetailView.swift */; };
+		AA0200000000000000000019 /* RecurringTransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001B /* RecurringTransactionsView.swift */; };
+		AA0200000000000000000047 /* RecurringNext30DaysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000062 /* RecurringNext30DaysView.swift */; };
+		AA020000000000000000001A /* AddRecurringTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001C /* AddRecurringTransactionView.swift */; };
+		AA0200000000000000000015 /* EggProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000017 /* EggProgressView.swift */; };
 		AA020000000000000000000E /* CategoryBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000E /* CategoryBadgeView.swift */; };
 		AA020000000000000000000F /* AmountLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000000F /* AmountLabel.swift */; };
-		AA0200000000000000000010 /* TransactionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000010 /* TransactionRowView.swift */; };
-		AA0200000000000000000049 /* TransferRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005E /* TransferRowView.swift */; };
-		AA0200000000000000000011 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000011 /* PersistenceController.swift */; };
-		AA020000000000000000003D /* SyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000052 /* SyncStatus.swift */; };
-		AA020000000000000000001F /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001E /* CSVParser.swift */; };
-		AA020000000000000000002F /* AccountBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000044 /* AccountBalanceService.swift */; };
-		AA0200000000000000000048 /* TransferBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005D /* TransferBalanceService.swift */; };
-		AA0200000000000000000020 /* CSVImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001F /* CSVImportView.swift */; };
-		AA0200000000000000000021 /* CategoryManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000036 /* CategoryManagementView.swift */; };
-		AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000037 /* AddEditCategoryView.swift */; };
-		AA0200000000000000000023 /* ForecastEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000041 /* ForecastEngine.swift */; };
-		AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000042 /* CashFlowForecastView.swift */; };
-		AA0200000000000000000050 /* CashFlowCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000065 /* CashFlowCalendarView.swift */; };
-		AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000046 /* MonthlyReviewCalculator.swift */; };
-		AA0200000000000000000052 /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000067 /* NetWorthCalculator.swift */; };
-		AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000047 /* MonthlyReviewView.swift */; };
-		AA0200000000000000000034 /* TransactionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000049 /* TransactionFilter.swift */; };
-		AA0200000000000000000035 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004A /* TransactionFilterView.swift */; };
-		AA0200000000000000000038 /* SavingsGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004D /* SavingsGoalsView.swift */; };
-		AA0200000000000000000039 /* AddSavingsGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004E /* AddSavingsGoalView.swift */; };
-		AA020000000000000000003F /* SafeSpendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000054 /* SafeSpendCalculator.swift */; };
-		AA020000000000000000004E /* DebtPayoffCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000063 /* DebtPayoffCalculator.swift */; };
-		AA0200000000000000000040 /* SafeToSpendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000055 /* SafeToSpendView.swift */; };
-		AA0200000000000000000042 /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000057 /* NotificationScheduler.swift */; };
-		AA0200000000000000000043 /* BudgetAlertCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000058 /* BudgetAlertCoordinator.swift */; };
-		AA0200000000000000000053 /* AmountParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000068 /* AmountParser.swift */; };
-		AA0200000000000000000055 /* CurrencyFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006A /* CurrencyFormat.swift */; };
-		AA0200000000000000000057 /* DataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006C /* DataExporter.swift */; };
-		AA0200000000000000000059 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006E /* SettingsView.swift */; };
-		AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000070 /* BalanceSnapshotService.swift */; };
-		AA020000000000000000005D /* SubscriptionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000072 /* SubscriptionDetector.swift */; };
-		AA0200000000000000000061 /* CategoryRuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000076 /* CategoryRuleEngine.swift */; };
-		AA0200000000000000000063 /* SpendingDeltaCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000078 /* SpendingDeltaCalculator.swift */; };
-		AA0200000000000000000065 /* NarrativeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007A /* NarrativeGenerator.swift */; };
-		AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000074 /* SubscriptionAuditView.swift */; };
-		AA0200000000000000000067 /* AppLockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007C /* AppLockController.swift */; };
-		AA0200000000000000000069 /* TransactionGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007E /* TransactionGrouping.swift */; };
-		AA020000000000000000006B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000080 /* OnboardingView.swift */; };
-		AA020000000000000000006C /* DuplicateSweeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000081 /* DuplicateSweeper.swift */; };
-		AA0200000000000000000012 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
-		AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
-		AA020000000000000000006E /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000083 /* Localizable.xcstrings */; };
-		AA0200000000000000000027 /* TransactionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000030 /* TransactionModelTests.swift */; };
-		AA0200000000000000000028 /* MetricsCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000031 /* MetricsCalculationTests.swift */; };
-		AA0200000000000000000029 /* NetWorthCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000032 /* NetWorthCalculationTests.swift */; };
-		AA020000000000000000002A /* CategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000033 /* CategoryTests.swift */; };
-		AA020000000000000000002B /* BudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000034 /* BudgetTests.swift */; };
-		AA020000000000000000002C /* RecurringTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000035 /* RecurringTransactionTests.swift */; };
-		AA020000000000000000002D /* CategoryManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000038 /* CategoryManagementTests.swift */; };
-		AA020000000000000000002E /* CashFlowForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000043 /* CashFlowForecastTests.swift */; };
-		AA0200000000000000000030 /* TransactionAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000045 /* TransactionAccountTests.swift */; };
-		AA0200000000000000000033 /* MonthlyReviewCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000048 /* MonthlyReviewCalculatorTests.swift */; };
-		AA0200000000000000000036 /* TransactionFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004B /* TransactionFilterTests.swift */; };
-		AA020000000000000000003A /* SavingsGoalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004F /* SavingsGoalTests.swift */; };
-		AA020000000000000000003B /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000050 /* CSVParserTests.swift */; };
-		AA020000000000000000003E /* CloudKitSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000053 /* CloudKitSchemaTests.swift */; };
-		AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */; };
-		AA0200000000000000000044 /* NotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000059 /* NotificationSchedulerTests.swift */; };
-		AA020000000000000000004B /* TransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000060 /* TransferTests.swift */; };
-		AA0200000000000000000051 /* DebtPayoffCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000066 /* DebtPayoffCalculatorTests.swift */; };
-		AA0200000000000000000054 /* AmountParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000069 /* AmountParserTests.swift */; };
-		AA0200000000000000000056 /* CurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006B /* CurrencyFormatTests.swift */; };
-		AA0200000000000000000058 /* DataExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006D /* DataExporterTests.swift */; };
-		AA020000000000000000005C /* BalanceSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000071 /* BalanceSnapshotTests.swift */; };
-		AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000073 /* SubscriptionDetectorTests.swift */; };
-		AA0200000000000000000062 /* CategoryRuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000077 /* CategoryRuleEngineTests.swift */; };
-		AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */; };
-		AA0200000000000000000066 /* NarrativeGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007B /* NarrativeGeneratorTests.swift */; };
-		AA0200000000000000000068 /* AppLockControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007D /* AppLockControllerTests.swift */; };
-		AA020000000000000000006A /* TransactionGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007F /* TransactionGroupingTests.swift */; };
-		AA020000000000000000006D /* DuplicateSweeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000082 /* DuplicateSweeperTests.swift */; };
+		AA0200000000000000000010 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000011 /* PersistenceController.swift */; };
+		AA020000000000000000003A /* SyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000052 /* SyncStatus.swift */; };
+		AA020000000000000000001C /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001E /* CSVParser.swift */; };
+		AA020000000000000000002C /* AccountBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000044 /* AccountBalanceService.swift */; };
+		AA0200000000000000000043 /* TransferBalanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000005D /* TransferBalanceService.swift */; };
+		AA0200000000000000000073 /* TransactionEntryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008E /* TransactionEntryService.swift */; };
+		AA020000000000000000001D /* CSVImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000001F /* CSVImportView.swift */; };
+		AA020000000000000000001E /* CategoryManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000036 /* CategoryManagementView.swift */; };
+		AA020000000000000000001F /* AddEditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000037 /* AddEditCategoryView.swift */; };
+		AA0200000000000000000020 /* ForecastEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000041 /* ForecastEngine.swift */; };
+		AA0200000000000000000021 /* CashFlowForecastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000042 /* CashFlowForecastView.swift */; };
+		AA020000000000000000004A /* CashFlowCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000065 /* CashFlowCalendarView.swift */; };
+		AA020000000000000000002E /* MonthlyReviewCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000046 /* MonthlyReviewCalculator.swift */; };
+		AA020000000000000000004C /* NetWorthCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000067 /* NetWorthCalculator.swift */; };
+		AA020000000000000000002F /* MonthlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000047 /* MonthlyReviewView.swift */; };
+		AA0200000000000000000031 /* TransactionFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000049 /* TransactionFilter.swift */; };
+		AA0200000000000000000032 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004A /* TransactionFilterView.swift */; };
+		AA0200000000000000000035 /* SavingsGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004D /* SavingsGoalsView.swift */; };
+		AA0200000000000000000036 /* AddSavingsGoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004E /* AddSavingsGoalView.swift */; };
+		AA020000000000000000003C /* SafeSpendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000054 /* SafeSpendCalculator.swift */; };
+		AA0200000000000000000048 /* DebtPayoffCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000063 /* DebtPayoffCalculator.swift */; };
+		AA020000000000000000003D /* SafeToSpendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000055 /* SafeToSpendView.swift */; };
+		AA020000000000000000003F /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000057 /* NotificationScheduler.swift */; };
+		AA0200000000000000000040 /* BudgetAlertCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000058 /* BudgetAlertCoordinator.swift */; };
+		AA020000000000000000004D /* AmountParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000068 /* AmountParser.swift */; };
+		AA020000000000000000004F /* CurrencyFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006A /* CurrencyFormat.swift */; };
+		AA0200000000000000000051 /* DataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006C /* DataExporter.swift */; };
+		AA0200000000000000000053 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006E /* SettingsView.swift */; };
+		AA0200000000000000000055 /* BalanceSnapshotService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000070 /* BalanceSnapshotService.swift */; };
+		AA0200000000000000000057 /* SubscriptionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000072 /* SubscriptionDetector.swift */; };
+		AA020000000000000000005B /* CategoryRuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000076 /* CategoryRuleEngine.swift */; };
+		AA020000000000000000005D /* SpendingDeltaCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000078 /* SpendingDeltaCalculator.swift */; };
+		AA020000000000000000005F /* NarrativeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007A /* NarrativeGenerator.swift */; };
+		AA0200000000000000000059 /* SubscriptionAuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000074 /* SubscriptionAuditView.swift */; };
+		AA0200000000000000000061 /* AppLockController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007C /* AppLockController.swift */; };
+		AA0200000000000000000063 /* TransactionGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007E /* TransactionGrouping.swift */; };
+		AA0200000000000000000065 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000080 /* OnboardingView.swift */; };
+		AA0200000000000000000066 /* DuplicateSweeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000081 /* DuplicateSweeper.swift */; };
+		AA0200000000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
+		AA0200000000000000000039 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
+		AA0200000000000000000068 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000083 /* Localizable.xcstrings */; };
+		AA0200000000000000000024 /* TransactionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000030 /* TransactionModelTests.swift */; };
+		AA0200000000000000000025 /* MetricsCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000031 /* MetricsCalculationTests.swift */; };
+		AA0200000000000000000026 /* NetWorthCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000032 /* NetWorthCalculationTests.swift */; };
+		AA0200000000000000000027 /* CategoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000033 /* CategoryTests.swift */; };
+		AA0200000000000000000028 /* BudgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000034 /* BudgetTests.swift */; };
+		AA0200000000000000000029 /* RecurringTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000035 /* RecurringTransactionTests.swift */; };
+		AA020000000000000000002A /* CategoryManagementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000038 /* CategoryManagementTests.swift */; };
+		AA020000000000000000002B /* CashFlowForecastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000043 /* CashFlowForecastTests.swift */; };
+		AA020000000000000000002D /* TransactionAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000045 /* TransactionAccountTests.swift */; };
+		AA0200000000000000000030 /* MonthlyReviewCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000048 /* MonthlyReviewCalculatorTests.swift */; };
+		AA0200000000000000000033 /* TransactionFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004B /* TransactionFilterTests.swift */; };
+		AA0200000000000000000037 /* SavingsGoalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000004F /* SavingsGoalTests.swift */; };
+		AA0200000000000000000038 /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000050 /* CSVParserTests.swift */; };
+		AA020000000000000000003B /* CloudKitSchemaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000053 /* CloudKitSchemaTests.swift */; };
+		AA020000000000000000003E /* SafeSpendCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000056 /* SafeSpendCalculatorTests.swift */; };
+		AA0200000000000000000041 /* NotificationSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000059 /* NotificationSchedulerTests.swift */; };
+		AA0200000000000000000045 /* TransferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000060 /* TransferTests.swift */; };
+		AA020000000000000000004B /* DebtPayoffCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000066 /* DebtPayoffCalculatorTests.swift */; };
+		AA020000000000000000004E /* AmountParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000069 /* AmountParserTests.swift */; };
+		AA0200000000000000000050 /* CurrencyFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006B /* CurrencyFormatTests.swift */; };
+		AA0200000000000000000052 /* DataExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000006D /* DataExporterTests.swift */; };
+		AA0200000000000000000056 /* BalanceSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000071 /* BalanceSnapshotTests.swift */; };
+		AA0200000000000000000058 /* SubscriptionDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000073 /* SubscriptionDetectorTests.swift */; };
+		AA020000000000000000005C /* CategoryRuleEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000077 /* CategoryRuleEngineTests.swift */; };
+		AA020000000000000000005E /* SpendingDeltaCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000079 /* SpendingDeltaCalculatorTests.swift */; };
+		AA0200000000000000000060 /* NarrativeGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007B /* NarrativeGeneratorTests.swift */; };
+		AA0200000000000000000062 /* AppLockControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007D /* AppLockControllerTests.swift */; };
+		AA0200000000000000000064 /* TransactionGroupingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007F /* TransactionGroupingTests.swift */; };
+		AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000082 /* DuplicateSweeperTests.swift */; };
+		AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008F /* TransactionEntryServiceTests.swift */; };
+		AA0200000000000000000077 /* MerchantSuggestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000092 /* MerchantSuggestionTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -132,6 +141,15 @@
 		AA0100000000000000000001 /* EggSpendApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendApp.swift; sourceTree = "<group>"; };
 		AA0100000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000013 /* EggSpendTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggSpendTheme.swift; sourceTree = "<group>"; };
+		AA0100000000000000000084 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		AA0100000000000000000085 /* NestBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestBackground.swift; sourceTree = "<group>"; };
+		AA0100000000000000000086 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		AA0100000000000000000087 /* AmountText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmountText.swift; sourceTree = "<group>"; };
+		AA0100000000000000000088 /* StatTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatTile.swift; sourceTree = "<group>"; };
+		AA0100000000000000000089 /* ThinProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinProgressBar.swift; sourceTree = "<group>"; };
+		AA010000000000000000008A /* CompactProgressRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompactProgressRow.swift; sourceTree = "<group>"; };
+		AA010000000000000000008B /* LedgerRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LedgerRowView.swift; sourceTree = "<group>"; };
+		AA010000000000000000008C /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000003 /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		AA0100000000000000000004 /* TransactionCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionCategory.swift; sourceTree = "<group>"; };
 		AA0100000000000000000005 /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
@@ -143,13 +161,16 @@
 		AA0100000000000000000075 /* CategoryRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRule.swift; sourceTree = "<group>"; };
 		AA0100000000000000000061 /* RecurringProjection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringProjection.swift; sourceTree = "<group>"; };
 		AA0100000000000000000006 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		AA010000000000000000008D /* DashboardHomeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHomeComponents.swift; sourceTree = "<group>"; };
 		AA0100000000000000000007 /* TransactionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000008 /* AddTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransactionView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000009 /* TransactionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailView.swift; sourceTree = "<group>"; };
 		AA010000000000000000005F /* TransferDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferDetailView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000090 /* CurrencyKeypadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyKeypadView.swift; sourceTree = "<group>"; };
+		AA0100000000000000000091 /* MerchantSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantSuggestion.swift; sourceTree = "<group>"; };
+		AA0100000000000000000093 /* QuickAddSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddSheet.swift; sourceTree = "<group>"; };
 		AA010000000000000000000A /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000B /* MetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsView.swift; sourceTree = "<group>"; };
-		AA010000000000000000000C /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000D /* AddAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAccountView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000064 /* DebtPayoffPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtPayoffPlannerView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000019 /* BudgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetView.swift; sourceTree = "<group>"; };
@@ -158,20 +179,15 @@
 		AA010000000000000000001B /* RecurringTransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringTransactionsView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000062 /* RecurringNext30DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringNext30DaysView.swift; sourceTree = "<group>"; };
 		AA010000000000000000001C /* AddRecurringTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRecurringTransactionView.swift; sourceTree = "<group>"; };
-		AA0100000000000000000016 /* NestHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestHeaderView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000017 /* EggProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggProgressView.swift; sourceTree = "<group>"; };
-		AA0100000000000000000018 /* BirdAnimationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BirdAnimationView.swift; sourceTree = "<group>"; };
-		AA010000000000000000005A /* FloatingLeavesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingLeavesView.swift; sourceTree = "<group>"; };
-		AA010000000000000000005B /* AnimatedCanopyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedCanopyBackground.swift; sourceTree = "<group>"; };
 		AA010000000000000000000E /* CategoryBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBadgeView.swift; sourceTree = "<group>"; };
 		AA010000000000000000000F /* AmountLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmountLabel.swift; sourceTree = "<group>"; };
-		AA0100000000000000000010 /* TransactionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRowView.swift; sourceTree = "<group>"; };
-		AA010000000000000000005E /* TransferRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferRowView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000011 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		AA0100000000000000000052 /* SyncStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatus.swift; sourceTree = "<group>"; };
 		AA010000000000000000001E /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		AA0100000000000000000044 /* AccountBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBalanceService.swift; sourceTree = "<group>"; };
 		AA010000000000000000005D /* TransferBalanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferBalanceService.swift; sourceTree = "<group>"; };
+		AA010000000000000000008E /* TransactionEntryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEntryService.swift; sourceTree = "<group>"; };
 		AA010000000000000000001F /* CSVImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVImportView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000036 /* CategoryManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagementView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000037 /* AddEditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditCategoryView.swift; sourceTree = "<group>"; };
@@ -237,6 +253,8 @@
 		AA010000000000000000007D /* AppLockControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockControllerTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000007F /* TransactionGroupingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionGroupingTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000082 /* DuplicateSweeperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSweeperTests.swift; sourceTree = "<group>"; };
+		AA010000000000000000008F /* TransactionEntryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEntryServiceTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000092 /* MerchantSuggestionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantSuggestionTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -314,6 +332,7 @@
 			children = (
 				AA0300000000000000000006 /* Dashboard */,
 				AA0300000000000000000007 /* Transactions */,
+				AA030000000000000000001A /* QuickAdd */,
 				AA030000000000000000000E /* Budget */,
 				AA030000000000000000000F /* Recurring */,
 				AA0300000000000000000018 /* Subscriptions */,
@@ -337,6 +356,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0100000000000000000006 /* DashboardView.swift */,
+				AA010000000000000000008D /* DashboardHomeComponents.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -351,6 +371,16 @@
 				AA010000000000000000005F /* TransferDetailView.swift */,
 			);
 			path = Transactions;
+			sourceTree = "<group>";
+		};
+		AA030000000000000000001A /* QuickAdd */ = {
+			isa = PBXGroup;
+			children = (
+				AA0100000000000000000090 /* CurrencyKeypadView.swift */,
+				AA0100000000000000000091 /* MerchantSuggestion.swift */,
+				AA0100000000000000000093 /* QuickAddSheet.swift */,
+			);
+			path = QuickAdd;
 			sourceTree = "<group>";
 		};
 		AA030000000000000000000E /* Budget */ = {
@@ -408,7 +438,6 @@
 		AA030000000000000000000A /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
-				AA010000000000000000000C /* AccountsView.swift */,
 				AA010000000000000000000D /* AddAccountView.swift */,
 				AA0100000000000000000064 /* DebtPayoffPlannerView.swift */,
 			);
@@ -418,15 +447,18 @@
 		AA030000000000000000000B /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				AA0100000000000000000016 /* NestHeaderView.swift */,
+				AA0100000000000000000084 /* DesignSystem.swift */,
+				AA0100000000000000000085 /* NestBackground.swift */,
+				AA0100000000000000000086 /* SectionHeader.swift */,
+				AA0100000000000000000087 /* AmountText.swift */,
+				AA0100000000000000000088 /* StatTile.swift */,
+				AA0100000000000000000089 /* ThinProgressBar.swift */,
+				AA010000000000000000008A /* CompactProgressRow.swift */,
+				AA010000000000000000008B /* LedgerRowView.swift */,
+				AA010000000000000000008C /* EmptyStateView.swift */,
 				AA0100000000000000000017 /* EggProgressView.swift */,
-				AA0100000000000000000018 /* BirdAnimationView.swift */,
-				AA010000000000000000005A /* FloatingLeavesView.swift */,
-				AA010000000000000000005B /* AnimatedCanopyBackground.swift */,
 				AA010000000000000000000E /* CategoryBadgeView.swift */,
 				AA010000000000000000000F /* AmountLabel.swift */,
-				AA0100000000000000000010 /* TransactionRowView.swift */,
-				AA010000000000000000005E /* TransferRowView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -454,6 +486,7 @@
 				AA010000000000000000001E /* CSVParser.swift */,
 				AA0100000000000000000044 /* AccountBalanceService.swift */,
 				AA010000000000000000005D /* TransferBalanceService.swift */,
+				AA010000000000000000008E /* TransactionEntryService.swift */,
 				AA0100000000000000000046 /* MonthlyReviewCalculator.swift */,
 				AA0100000000000000000067 /* NetWorthCalculator.swift */,
 				AA0100000000000000000049 /* TransactionFilter.swift */,
@@ -561,6 +594,8 @@
 				AA010000000000000000007D /* AppLockControllerTests.swift */,
 				AA010000000000000000007F /* TransactionGroupingTests.swift */,
 				AA0100000000000000000082 /* DuplicateSweeperTests.swift */,
+				AA010000000000000000008F /* TransactionEntryServiceTests.swift */,
+				AA0100000000000000000092 /* MerchantSuggestionTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -654,9 +689,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0200000000000000000012 /* Assets.xcassets in Resources */,
-				AA020000000000000000003C /* PrivacyInfo.xcprivacy in Resources */,
-				AA020000000000000000006E /* Localizable.xcstrings in Resources */,
+				AA0200000000000000000011 /* Assets.xcassets in Resources */,
+				AA0200000000000000000039 /* PrivacyInfo.xcprivacy in Resources */,
+				AA0200000000000000000068 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -669,79 +704,86 @@
 			files = (
 				AA0200000000000000000001 /* EggSpendApp.swift in Sources */,
 				AA0200000000000000000002 /* ContentView.swift in Sources */,
-				AA0200000000000000000013 /* EggSpendTheme.swift in Sources */,
+				AA0200000000000000000012 /* EggSpendTheme.swift in Sources */,
+				AA0200000000000000000069 /* DesignSystem.swift in Sources */,
+				AA020000000000000000006A /* NestBackground.swift in Sources */,
+				AA020000000000000000006B /* SectionHeader.swift in Sources */,
+				AA020000000000000000006C /* AmountText.swift in Sources */,
+				AA020000000000000000006D /* StatTile.swift in Sources */,
+				AA020000000000000000006E /* ThinProgressBar.swift in Sources */,
+				AA020000000000000000006F /* CompactProgressRow.swift in Sources */,
+				AA0200000000000000000070 /* LedgerRowView.swift in Sources */,
+				AA0200000000000000000071 /* EmptyStateView.swift in Sources */,
 				AA0200000000000000000003 /* Transaction.swift in Sources */,
 				AA0200000000000000000004 /* TransactionCategory.swift in Sources */,
 				AA0200000000000000000005 /* Account.swift in Sources */,
-				AA0200000000000000000014 /* Budget.swift in Sources */,
-				AA0200000000000000000015 /* RecurringTransaction.swift in Sources */,
-				AA0200000000000000000037 /* SavingsGoal.swift in Sources */,
-				AA0200000000000000000047 /* Transfer.swift in Sources */,
-				AA020000000000000000005A /* BalanceSnapshot.swift in Sources */,
-				AA0200000000000000000060 /* CategoryRule.swift in Sources */,
-				AA020000000000000000004C /* RecurringProjection.swift in Sources */,
+				AA0200000000000000000013 /* Budget.swift in Sources */,
+				AA0200000000000000000014 /* RecurringTransaction.swift in Sources */,
+				AA0200000000000000000034 /* SavingsGoal.swift in Sources */,
+				AA0200000000000000000042 /* Transfer.swift in Sources */,
+				AA0200000000000000000054 /* BalanceSnapshot.swift in Sources */,
+				AA020000000000000000005A /* CategoryRule.swift in Sources */,
+				AA0200000000000000000046 /* RecurringProjection.swift in Sources */,
 				AA0200000000000000000006 /* DashboardView.swift in Sources */,
+				AA0200000000000000000072 /* DashboardHomeComponents.swift in Sources */,
 				AA0200000000000000000007 /* TransactionsListView.swift in Sources */,
 				AA0200000000000000000008 /* AddTransactionView.swift in Sources */,
 				AA0200000000000000000009 /* TransactionDetailView.swift in Sources */,
-				AA020000000000000000004A /* TransferDetailView.swift in Sources */,
+				AA0200000000000000000044 /* TransferDetailView.swift in Sources */,
+				AA0200000000000000000075 /* CurrencyKeypadView.swift in Sources */,
+				AA0200000000000000000076 /* MerchantSuggestion.swift in Sources */,
+				AA0200000000000000000078 /* QuickAddSheet.swift in Sources */,
 				AA020000000000000000000A /* NetWorthView.swift in Sources */,
 				AA020000000000000000000B /* MetricsView.swift in Sources */,
-				AA020000000000000000000C /* AccountsView.swift in Sources */,
 				AA020000000000000000000D /* AddAccountView.swift in Sources */,
-				AA020000000000000000004F /* DebtPayoffPlannerView.swift in Sources */,
-				AA0200000000000000000019 /* BudgetView.swift in Sources */,
-				AA020000000000000000001A /* AddBudgetView.swift in Sources */,
-				AA020000000000000000001B /* BudgetDetailView.swift in Sources */,
-				AA020000000000000000001C /* RecurringTransactionsView.swift in Sources */,
-				AA020000000000000000004D /* RecurringNext30DaysView.swift in Sources */,
-				AA020000000000000000001D /* AddRecurringTransactionView.swift in Sources */,
-				AA0200000000000000000016 /* NestHeaderView.swift in Sources */,
-				AA0200000000000000000017 /* EggProgressView.swift in Sources */,
-				AA0200000000000000000018 /* BirdAnimationView.swift in Sources */,
-				AA0200000000000000000045 /* FloatingLeavesView.swift in Sources */,
-				AA0200000000000000000046 /* AnimatedCanopyBackground.swift in Sources */,
+				AA0200000000000000000049 /* DebtPayoffPlannerView.swift in Sources */,
+				AA0200000000000000000016 /* BudgetView.swift in Sources */,
+				AA0200000000000000000017 /* AddBudgetView.swift in Sources */,
+				AA0200000000000000000018 /* BudgetDetailView.swift in Sources */,
+				AA0200000000000000000019 /* RecurringTransactionsView.swift in Sources */,
+				AA0200000000000000000047 /* RecurringNext30DaysView.swift in Sources */,
+				AA020000000000000000001A /* AddRecurringTransactionView.swift in Sources */,
+				AA0200000000000000000015 /* EggProgressView.swift in Sources */,
 				AA020000000000000000000E /* CategoryBadgeView.swift in Sources */,
 				AA020000000000000000000F /* AmountLabel.swift in Sources */,
-				AA0200000000000000000010 /* TransactionRowView.swift in Sources */,
-				AA0200000000000000000049 /* TransferRowView.swift in Sources */,
-				AA0200000000000000000011 /* PersistenceController.swift in Sources */,
-				AA020000000000000000003D /* SyncStatus.swift in Sources */,
-				AA020000000000000000001F /* CSVParser.swift in Sources */,
-				AA020000000000000000002F /* AccountBalanceService.swift in Sources */,
-				AA0200000000000000000048 /* TransferBalanceService.swift in Sources */,
-				AA0200000000000000000020 /* CSVImportView.swift in Sources */,
-				AA0200000000000000000021 /* CategoryManagementView.swift in Sources */,
-				AA0200000000000000000022 /* AddEditCategoryView.swift in Sources */,
-				AA0200000000000000000023 /* ForecastEngine.swift in Sources */,
-				AA0200000000000000000024 /* CashFlowForecastView.swift in Sources */,
-				AA0200000000000000000050 /* CashFlowCalendarView.swift in Sources */,
-				AA0200000000000000000031 /* MonthlyReviewCalculator.swift in Sources */,
-				AA0200000000000000000052 /* NetWorthCalculator.swift in Sources */,
-				AA0200000000000000000032 /* MonthlyReviewView.swift in Sources */,
-				AA0200000000000000000034 /* TransactionFilter.swift in Sources */,
-				AA0200000000000000000035 /* TransactionFilterView.swift in Sources */,
-				AA0200000000000000000038 /* SavingsGoalsView.swift in Sources */,
-				AA0200000000000000000039 /* AddSavingsGoalView.swift in Sources */,
-				AA020000000000000000003F /* SafeSpendCalculator.swift in Sources */,
-				AA020000000000000000004E /* DebtPayoffCalculator.swift in Sources */,
-				AA0200000000000000000040 /* SafeToSpendView.swift in Sources */,
-				AA0200000000000000000042 /* NotificationScheduler.swift in Sources */,
-				AA0200000000000000000043 /* BudgetAlertCoordinator.swift in Sources */,
-				AA0200000000000000000053 /* AmountParser.swift in Sources */,
-				AA0200000000000000000055 /* CurrencyFormat.swift in Sources */,
-				AA0200000000000000000057 /* DataExporter.swift in Sources */,
-				AA0200000000000000000059 /* SettingsView.swift in Sources */,
-				AA020000000000000000005B /* BalanceSnapshotService.swift in Sources */,
-				AA020000000000000000005D /* SubscriptionDetector.swift in Sources */,
-				AA0200000000000000000061 /* CategoryRuleEngine.swift in Sources */,
-				AA0200000000000000000063 /* SpendingDeltaCalculator.swift in Sources */,
-				AA0200000000000000000065 /* NarrativeGenerator.swift in Sources */,
-				AA020000000000000000005F /* SubscriptionAuditView.swift in Sources */,
-				AA0200000000000000000067 /* AppLockController.swift in Sources */,
-				AA0200000000000000000069 /* TransactionGrouping.swift in Sources */,
-				AA020000000000000000006B /* OnboardingView.swift in Sources */,
-				AA020000000000000000006C /* DuplicateSweeper.swift in Sources */,
+				AA0200000000000000000010 /* PersistenceController.swift in Sources */,
+				AA020000000000000000003A /* SyncStatus.swift in Sources */,
+				AA020000000000000000001C /* CSVParser.swift in Sources */,
+				AA020000000000000000002C /* AccountBalanceService.swift in Sources */,
+				AA0200000000000000000043 /* TransferBalanceService.swift in Sources */,
+				AA0200000000000000000073 /* TransactionEntryService.swift in Sources */,
+				AA020000000000000000001D /* CSVImportView.swift in Sources */,
+				AA020000000000000000001E /* CategoryManagementView.swift in Sources */,
+				AA020000000000000000001F /* AddEditCategoryView.swift in Sources */,
+				AA0200000000000000000020 /* ForecastEngine.swift in Sources */,
+				AA0200000000000000000021 /* CashFlowForecastView.swift in Sources */,
+				AA020000000000000000004A /* CashFlowCalendarView.swift in Sources */,
+				AA020000000000000000002E /* MonthlyReviewCalculator.swift in Sources */,
+				AA020000000000000000004C /* NetWorthCalculator.swift in Sources */,
+				AA020000000000000000002F /* MonthlyReviewView.swift in Sources */,
+				AA0200000000000000000031 /* TransactionFilter.swift in Sources */,
+				AA0200000000000000000032 /* TransactionFilterView.swift in Sources */,
+				AA0200000000000000000035 /* SavingsGoalsView.swift in Sources */,
+				AA0200000000000000000036 /* AddSavingsGoalView.swift in Sources */,
+				AA020000000000000000003C /* SafeSpendCalculator.swift in Sources */,
+				AA0200000000000000000048 /* DebtPayoffCalculator.swift in Sources */,
+				AA020000000000000000003D /* SafeToSpendView.swift in Sources */,
+				AA020000000000000000003F /* NotificationScheduler.swift in Sources */,
+				AA0200000000000000000040 /* BudgetAlertCoordinator.swift in Sources */,
+				AA020000000000000000004D /* AmountParser.swift in Sources */,
+				AA020000000000000000004F /* CurrencyFormat.swift in Sources */,
+				AA0200000000000000000051 /* DataExporter.swift in Sources */,
+				AA0200000000000000000053 /* SettingsView.swift in Sources */,
+				AA0200000000000000000055 /* BalanceSnapshotService.swift in Sources */,
+				AA0200000000000000000057 /* SubscriptionDetector.swift in Sources */,
+				AA020000000000000000005B /* CategoryRuleEngine.swift in Sources */,
+				AA020000000000000000005D /* SpendingDeltaCalculator.swift in Sources */,
+				AA020000000000000000005F /* NarrativeGenerator.swift in Sources */,
+				AA0200000000000000000059 /* SubscriptionAuditView.swift in Sources */,
+				AA0200000000000000000061 /* AppLockController.swift in Sources */,
+				AA0200000000000000000063 /* TransactionGrouping.swift in Sources */,
+				AA0200000000000000000065 /* OnboardingView.swift in Sources */,
+				AA0200000000000000000066 /* DuplicateSweeper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -749,35 +791,37 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0200000000000000000027 /* TransactionModelTests.swift in Sources */,
-				AA0200000000000000000028 /* MetricsCalculationTests.swift in Sources */,
-				AA0200000000000000000029 /* NetWorthCalculationTests.swift in Sources */,
-				AA020000000000000000002A /* CategoryTests.swift in Sources */,
-				AA020000000000000000002B /* BudgetTests.swift in Sources */,
-				AA020000000000000000002C /* RecurringTransactionTests.swift in Sources */,
-				AA020000000000000000002D /* CategoryManagementTests.swift in Sources */,
-				AA020000000000000000002E /* CashFlowForecastTests.swift in Sources */,
-				AA0200000000000000000030 /* TransactionAccountTests.swift in Sources */,
-				AA0200000000000000000033 /* MonthlyReviewCalculatorTests.swift in Sources */,
-				AA0200000000000000000036 /* TransactionFilterTests.swift in Sources */,
-				AA020000000000000000003A /* SavingsGoalTests.swift in Sources */,
-				AA020000000000000000003B /* CSVParserTests.swift in Sources */,
-				AA020000000000000000003E /* CloudKitSchemaTests.swift in Sources */,
-				AA0200000000000000000041 /* SafeSpendCalculatorTests.swift in Sources */,
-				AA0200000000000000000044 /* NotificationSchedulerTests.swift in Sources */,
-				AA020000000000000000004B /* TransferTests.swift in Sources */,
-				AA0200000000000000000051 /* DebtPayoffCalculatorTests.swift in Sources */,
-				AA0200000000000000000054 /* AmountParserTests.swift in Sources */,
-				AA0200000000000000000056 /* CurrencyFormatTests.swift in Sources */,
-				AA0200000000000000000058 /* DataExporterTests.swift in Sources */,
-				AA020000000000000000005C /* BalanceSnapshotTests.swift in Sources */,
-				AA020000000000000000005E /* SubscriptionDetectorTests.swift in Sources */,
-				AA0200000000000000000062 /* CategoryRuleEngineTests.swift in Sources */,
-				AA0200000000000000000064 /* SpendingDeltaCalculatorTests.swift in Sources */,
-				AA0200000000000000000066 /* NarrativeGeneratorTests.swift in Sources */,
-				AA0200000000000000000068 /* AppLockControllerTests.swift in Sources */,
-				AA020000000000000000006A /* TransactionGroupingTests.swift in Sources */,
-				AA020000000000000000006D /* DuplicateSweeperTests.swift in Sources */,
+				AA0200000000000000000024 /* TransactionModelTests.swift in Sources */,
+				AA0200000000000000000025 /* MetricsCalculationTests.swift in Sources */,
+				AA0200000000000000000026 /* NetWorthCalculationTests.swift in Sources */,
+				AA0200000000000000000027 /* CategoryTests.swift in Sources */,
+				AA0200000000000000000028 /* BudgetTests.swift in Sources */,
+				AA0200000000000000000029 /* RecurringTransactionTests.swift in Sources */,
+				AA020000000000000000002A /* CategoryManagementTests.swift in Sources */,
+				AA020000000000000000002B /* CashFlowForecastTests.swift in Sources */,
+				AA020000000000000000002D /* TransactionAccountTests.swift in Sources */,
+				AA0200000000000000000030 /* MonthlyReviewCalculatorTests.swift in Sources */,
+				AA0200000000000000000033 /* TransactionFilterTests.swift in Sources */,
+				AA0200000000000000000037 /* SavingsGoalTests.swift in Sources */,
+				AA0200000000000000000038 /* CSVParserTests.swift in Sources */,
+				AA020000000000000000003B /* CloudKitSchemaTests.swift in Sources */,
+				AA020000000000000000003E /* SafeSpendCalculatorTests.swift in Sources */,
+				AA0200000000000000000041 /* NotificationSchedulerTests.swift in Sources */,
+				AA0200000000000000000045 /* TransferTests.swift in Sources */,
+				AA020000000000000000004B /* DebtPayoffCalculatorTests.swift in Sources */,
+				AA020000000000000000004E /* AmountParserTests.swift in Sources */,
+				AA0200000000000000000050 /* CurrencyFormatTests.swift in Sources */,
+				AA0200000000000000000052 /* DataExporterTests.swift in Sources */,
+				AA0200000000000000000056 /* BalanceSnapshotTests.swift in Sources */,
+				AA0200000000000000000058 /* SubscriptionDetectorTests.swift in Sources */,
+				AA020000000000000000005C /* CategoryRuleEngineTests.swift in Sources */,
+				AA020000000000000000005E /* SpendingDeltaCalculatorTests.swift in Sources */,
+				AA0200000000000000000060 /* NarrativeGeneratorTests.swift in Sources */,
+				AA0200000000000000000062 /* AppLockControllerTests.swift in Sources */,
+				AA0200000000000000000064 /* TransactionGroupingTests.swift in Sources */,
+				AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */,
+				AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */,
+				AA0200000000000000000077 /* MerchantSuggestionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

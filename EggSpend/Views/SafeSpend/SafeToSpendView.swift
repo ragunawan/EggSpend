@@ -12,12 +12,6 @@ struct SafeToSpendView: View {
 
     @State private var showAssumptions = false
     @State private var showAddAccount = false
-    // See MetricsView.emptyStateHeight — a single concrete `.frame(height:)`
-    // is what actually constrains `ContentUnavailableView` inside a List
-    // row; `@ScaledMetric` keeps that fixed height growing with Dynamic Type
-    // instead of clipping the CTA button at larger accessibility sizes.
-    @ScaledMetric(relativeTo: .body) private var emptyStateHeight: CGFloat = 340
-
     private var result: SafeSpendResult {
         SafeSpendCalculator.calculate(
             accounts: Array(accounts),
@@ -31,7 +25,7 @@ struct SafeToSpendView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 if accounts.isEmpty {
@@ -60,28 +54,13 @@ struct SafeToSpendView: View {
 
     private var noAccountsSection: some View {
         Section {
-            ContentUnavailableView {
-                Label {
-                    Text("No Accounts Yet")
-                } icon: {
-                    Image(systemName: "banknote").symbolEffect(.pulse)
-                }
-            } description: {
-                Text("Add an account so EggSpend can calculate what's safe to spend today.")
-            } actions: {
-                Button { showAddAccount = true } label: {
-                    Label("Add Account", systemImage: "plus")
-                }
-                .buttonStyle(.borderedProminent).tint(Color.nestBrown)
-            }
-            // See MetricsView.noDataSection — fixes row height so the
-            // action button doesn't stretch to fill the scroll view, using
-            // `emptyStateHeight` so it still grows with Dynamic Type.
-            .frame(height: emptyStateHeight)
-            // Cap Dynamic Type growth beyond AX3 — the fixed `emptyStateHeight`
-            // budget above was sized/settled for that ceiling (loop 26); letting
-            // text keep scaling past it would clip the CTA button again.
-            .dynamicTypeSize(...DynamicTypeSize.accessibility3)
+            EmptyStateView(
+                title: "No Accounts Yet",
+                icon: "banknote",
+                description: "Add an account so EggSpend can calculate what's safe to spend today.",
+                action: ("Add Account", { showAddAccount = true }),
+                context: .listRow
+            )
         }
         .listRowBackground(Color.clear)
     }
@@ -94,7 +73,7 @@ struct SafeToSpendView: View {
                 Text("Safe to Spend Today")
                     .font(.subheadline).foregroundStyle(Color.twig)
                 Text(result.safeToSpendToday, format: .currency(code: CurrencyFormat.code))
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .font(NestType.hero)
                     .foregroundStyle(statusColor)
                 Label(statusLabel, systemImage: statusIcon)
                     .font(.caption.weight(.semibold))
@@ -126,7 +105,7 @@ struct SafeToSpendView: View {
         switch result.status {
         case .onTrack: return .nestLeafGreen
         case .tight:   return .yolk
-        case .pause:   return .red
+        case .pause:   return Color.negative
         }
     }
 
@@ -135,7 +114,7 @@ struct SafeToSpendView: View {
     private var breakdownSection: some View {
         Section {
             breakdownRow(label: "Liquid cash", value: result.liquidBalance, color: .eggBlue)
-            breakdownRow(label: "Upcoming 30-day bills", value: -result.upcomingNetOutflowReserve, color: .red)
+            breakdownRow(label: "Upcoming 30-day bills", value: -result.upcomingNetOutflowReserve, color: Color.negative)
             breakdownRow(label: "Cash buffer", value: -result.requiredBuffer, color: .yolk)
             breakdownRow(label: "Savings goal reserve", value: -result.plannedSavingsReserve, color: .nestLeafGreen)
             breakdownRow(label: "Cash available after obligations", value: result.cashAvailableAfterObligations,
@@ -220,7 +199,7 @@ struct SafeToSpendView: View {
                         Text(abs(result.thirtyDayNetWorthDelta), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                     }
-                    .foregroundStyle(result.thirtyDayNetWorthDelta >= 0 ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(result.thirtyDayNetWorthDelta >= 0 ? Color.nestLeafGreen : Color.negative)
                 }
             }
             .padding(.vertical, 6)

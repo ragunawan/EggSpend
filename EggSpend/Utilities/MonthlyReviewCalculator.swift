@@ -12,6 +12,18 @@ struct MonthlyReviewData {
     let netWorthAtStart: Double
     let netWorthAtEnd: Double
     let netWorthChange: Double
+
+    static let empty = MonthlyReviewData(
+        income: 0,
+        expenses: 0,
+        netSavings: 0,
+        savingsRate: nil,
+        topCategories: [],
+        budgetOverruns: [],
+        netWorthAtStart: 0,
+        netWorthAtEnd: 0,
+        netWorthChange: 0
+    )
 }
 
 struct CategorySpend: Identifiable {

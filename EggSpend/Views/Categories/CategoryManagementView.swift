@@ -48,7 +48,7 @@ struct CategoryManagementView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             Group {
                 if categories.isEmpty {
@@ -99,7 +99,7 @@ struct CategoryManagementView: View {
                             } header: {
                                 Text("Auto-Categorization Rules")
                             } footer: {
-                                Text("Rules are learned automatically when you categorize a transaction. Deleting a rule stops future auto-assignment for that title.")
+                                Text("Rules are learned automatically when you categorize a transaction. Deleting a rule stops future auto-assignment for that payee.")
                             }
                         }
                     }
@@ -163,7 +163,7 @@ struct CategoryManagementView: View {
                 rulePatternToDelete = nil
             }
         } message: {
-            Text("This title will no longer be auto-categorized. Future transactions with this title will start uncategorized again.")
+            Text("This payee will no longer be auto-categorized. Future transactions with this payee will start uncategorized again.")
         }
     }
 
@@ -220,7 +220,7 @@ struct CategoryManagementView: View {
             .contentShape(Rectangle())
             .padding(.vertical, 6)
             .padding(.horizontal, 12)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
         }
         .buttonStyle(.plain)
@@ -233,7 +233,7 @@ struct CategoryManagementView: View {
                     systemImage: category.isArchived ? "tray.and.arrow.up" : "archivebox"
                 )
             }
-            .tint(.orange)
+            .tint(Color.warningTone)
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
@@ -242,14 +242,14 @@ struct CategoryManagementView: View {
             } label: {
                 Label("Delete", systemImage: "trash")
             }
-            .tint(.red)
+            .tint(Color.negative)
 
             Button {
                 editingCategory = category
             } label: {
                 Label("Edit", systemImage: "pencil")
             }
-            .tint(.blue)
+            .tint(Color.info)
         }
     }
 
@@ -282,7 +282,7 @@ struct CategoryManagementView: View {
         .contentShape(Rectangle())
         .padding(.vertical, 6)
         .padding(.horizontal, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
@@ -291,7 +291,7 @@ struct CategoryManagementView: View {
             } label: {
                 Label("Delete", systemImage: "trash")
             }
-            .tint(.red)
+            .tint(Color.negative)
         }
     }
 }

@@ -98,8 +98,14 @@ enum PersistenceController {
             ("Student Loan",      .loan,     -24_000),
         ]
         for (name, type, balance) in accounts {
-            context.insert(Account(name: name, type: type, balance: balance,
-                                   notes: type == .investment ? "Vanguard target-date fund" : ""))
+            let account = Account(
+                name: name,
+                type: type,
+                balance: balance,
+                notes: type == .investment ? "Vanguard target-date fund" : ""
+            )
+            account.isDefaultChecking = type == .checking
+            context.insert(account)
         }
 
         // Seed budgets (only if none exist yet)
@@ -122,6 +128,46 @@ enum PersistenceController {
             for (name, limit, period, cat, hex) in budgetDefs {
                 context.insert(Budget(name: name, limitAmount: limit, period: period,
                                       category: cat, colorHex: hex))
+            }
+        }
+
+        do {
+            try context.save()
+        } catch {
+            print("PersistenceController: failed to save seeded preview data: \(error)")
+        }
+
+        // Seed sample recurring transactions (only if none exist yet)
+        let recurringDescriptor = FetchDescriptor<RecurringTransaction>()
+        let existingRecurring = (try? context.fetch(recurringDescriptor)) ?? []
+        if existingRecurring.isEmpty {
+            let catDescriptor3 = FetchDescriptor<TransactionCategory>()
+            let cats3 = (try? context.fetch(catDescriptor3)) ?? []
+            let salaryCat = cats3.first { $0.name == "Salary" }
+            let netflixCat = cats3.first { $0.name == "Entertainment" }
+            let rentCat = cats3.first { $0.name == "Housing" }
+            let accountDescriptor = FetchDescriptor<Account>()
+            let savedAccounts = (try? context.fetch(accountDescriptor)) ?? []
+            let checkingAccount = savedAccounts.first { $0.name == "Chase Checking" }
+
+            let recurring: [(String, Double, TransactionType, RecurrenceFrequency, TransactionCategory?, Account?)] = [
+                ("Salary Deposit", 4_200, .income, .biweekly, salaryCat, checkingAccount),
+                ("Netflix", 17.99, .expense, .monthly, netflixCat, nil),
+                ("Rent", 2_200, .expense, .monthly, rentCat, checkingAccount)
+            ]
+            let cal = Calendar.current
+            for (title, amount, type, freq, cat, acct) in recurring {
+                let start = cal.date(byAdding: .month, value: -1, to: .now) ?? .now
+                let item = RecurringTransaction(
+                    title: title,
+                    amount: amount,
+                    type: type,
+                    frequency: freq,
+                    startDate: start,
+                    category: cat,
+                    account: acct
+                )
+                context.insert(item)
             }
         }
 
@@ -216,7 +262,9 @@ enum PersistenceController {
             ("Student Loan", .loan, -22_000)
         ]
         for (name, type, balance) in accounts {
-            context.insert(Account(name: name, type: type, balance: balance))
+            let account = Account(name: name, type: type, balance: balance)
+            account.isDefaultChecking = type == .checking
+            context.insert(account)
         }
 
         do {

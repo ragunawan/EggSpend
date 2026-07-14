@@ -7,6 +7,7 @@ A SwiftUI personal finance app for tracking transactions, budgets, accounts, and
   <img src="screenshots/iphone-6.3/02-transactions.png" width="200" alt="Transactions" />
   <img src="screenshots/iphone-6.3/03-budget.png" width="200" alt="Budget" />
   <img src="screenshots/iphone-6.3/04-net-worth.png" width="200" alt="Net Worth" />
+  <img src="screenshots/iphone-6.3/05-metrics.png" width="200" alt="Metrics" />
 </p>
 
 ## Features
@@ -26,6 +27,7 @@ A SwiftUI personal finance app for tracking transactions, budgets, accounts, and
 - First-run onboarding (skippable)
 - Locale-aware currency display
 - VoiceOver support across charts and controls
+- Redesigned five-tab interface with compact ledger rows, Quick Add, and unified Nest Egg tracking
 
 ## Stack
 
@@ -67,6 +69,10 @@ Useful launch arguments (set in the Xcode scheme or via `ProcessInfo`):
 - `generate_project.py` — generates `EggSpend.xcodeproj/project.pbxproj` and registers resources; keep in sync when adding/removing Swift files
 - `docs/` — GitHub Pages site (privacy policy, support page)
 - `screenshots/` — App Store screenshot sets
+
+## Redesign Notes
+
+The current UI uses the shared `EggSpendTheme` design tokens and a single `LedgerRowView` for transactions, transfers, and upcoming recurring rows. The old standalone `AccountsView.swift` screen was retired during the redesign; account management now lives in the Nest Egg flow and related settings/manage screens.
 
 ## Contributing
 

@@ -16,7 +16,7 @@ struct RecurringTransactionsView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 if !dueSoon.isEmpty {
@@ -41,7 +41,7 @@ struct RecurringTransactionsView: View {
                                         item.isActive = false
                                         NotificationScheduler.syncReminder(for: item)
                                     }
-                                    .tint(.orange)
+                                    .tint(Color.warningTone)
                                 }
                         }
                         .onDelete { offsets in delete(from: active, at: offsets) }
@@ -58,7 +58,7 @@ struct RecurringTransactionsView: View {
                                         item.isActive = true
                                         NotificationScheduler.syncReminder(for: item)
                                     }
-                                    .tint(.green)
+                                    .tint(Color.positive)
                                 }
                         }
                         .onDelete { offsets in delete(from: inactive, at: offsets) }
@@ -128,9 +128,10 @@ struct RecurringTransactionsView: View {
                             .font(.caption).padding(.horizontal, 6).padding(.vertical, 2)
                             .background(accent.opacity(0.15), in: Capsule())
                             .foregroundStyle(accent)
-                        Text("Next: \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))")
-                            .font(.caption).foregroundStyle(.secondary)
                     }
+                    Text("Next: \(item.nextDueDate.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     if let account = item.account {
                         Label(account.name, systemImage: account.type.icon)
                             .font(.caption).foregroundStyle(.secondary)
@@ -141,7 +142,7 @@ struct RecurringTransactionsView: View {
             }
             .padding(.vertical, 4)
             .padding(.horizontal, 12)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
         }
         .buttonStyle(.plain)

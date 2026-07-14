@@ -14,6 +14,7 @@ struct AddBudgetView: View {
     @State private var selectedCategory: TransactionCategory? = nil
     @State private var isActive = true
     @State private var alertsEnabled = false
+    @State private var createAsSavingsGoal = false
     @State private var showValidationError = false
 
     private var isEditing: Bool { editingBudget != nil }
@@ -29,34 +30,46 @@ struct AddBudgetView: View {
                         Text(CurrencyFormat.symbol).foregroundStyle(.secondary)
                         TextField("0.00", text: $amountText).keyboardType(.decimalPad)
                     }
-                    Picker("Period", selection: $period) {
-                        ForEach(BudgetPeriod.allCases, id: \.self) { p in
-                            Label(p.rawValue, systemImage: p.icon).tag(p)
+                    if !createAsSavingsGoal {
+                        Picker("Period", selection: $period) {
+                            ForEach(BudgetPeriod.allCases, id: \.self) { p in
+                                Label(p.rawValue, systemImage: p.icon).tag(p)
+                            }
                         }
+                        .pickerStyle(.segmented)
                     }
-                    .pickerStyle(.segmented)
                 }
 
-                Section {
-                    Toggle("Alert Near Limit & When Exceeded", isOn: $alertsEnabled)
-                        .onChange(of: alertsEnabled) { _, newValue in
-                            if newValue {
-                                NotificationScheduler.requestAuthorizationIfNeeded { granted in
-                                    DispatchQueue.main.async {
-                                        if !granted { alertsEnabled = false }
+                if !isEditing {
+                    Section {
+                        Toggle("Create as Savings Goal", isOn: $createAsSavingsGoal.animation())
+                    } footer: {
+                        Text("Savings goals track progress toward a target instead of spending against a limit.")
+                    }
+                }
+
+                if !createAsSavingsGoal {
+                    Section {
+                        Toggle("Alert Near Limit & When Exceeded", isOn: $alertsEnabled)
+                            .onChange(of: alertsEnabled) { _, newValue in
+                                if newValue {
+                                    NotificationScheduler.requestAuthorizationIfNeeded { granted in
+                                        DispatchQueue.main.async {
+                                            if !granted { alertsEnabled = false }
+                                        }
                                     }
                                 }
                             }
-                        }
-                } footer: {
-                    Text("Notifies you at 80% and 100% of this budget's limit.")
-                }
+                    } footer: {
+                        Text("Notifies you at 80% and 100% of this budget's limit.")
+                    }
 
-                Section("Category (optional)") {
-                    Picker("Category", selection: $selectedCategory) {
-                        Text("All Expenses").tag(Optional<TransactionCategory>.none)
-                        ForEach(categories.filter { $0.appliesTo == nil || $0.appliesTo == .expense }.sorted { $0.sortOrder < $1.sortOrder }) { cat in
-                            Label(cat.name, systemImage: cat.icon).tag(Optional(cat))
+                    Section("Category (optional)") {
+                        Picker("Category", selection: $selectedCategory) {
+                            Text("All Expenses").tag(Optional<TransactionCategory>.none)
+                            ForEach(categories.filter { $0.appliesTo == nil || $0.appliesTo == .expense }.sorted { $0.sortOrder < $1.sortOrder }) { cat in
+                                Label(cat.name, systemImage: cat.icon).tag(Optional(cat))
+                            }
                         }
                     }
                 }
@@ -67,7 +80,7 @@ struct AddBudgetView: View {
                     }
                 }
             }
-            .navigationTitle(isEditing ? "Edit Budget" : "New Budget Egg")
+            .navigationTitle(isEditing ? "Edit Budget" : (createAsSavingsGoal ? "New Savings Goal" : "New Budget Egg"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -93,6 +106,14 @@ struct AddBudgetView: View {
             b.category = selectedCategory
             b.isActive = isActive
             b.alertsEnabled = alertsEnabled
+        } else if createAsSavingsGoal {
+            let goal = SavingsGoal(
+                name: name.trimmingCharacters(in: .whitespaces),
+                targetAmount: amount,
+                colorHex: selectedCategory?.colorHex ?? "D4820A",
+                icon: selectedCategory?.icon ?? "leaf.fill"
+            )
+            modelContext.insert(goal)
         } else {
             let budget = Budget(
                 name: name.trimmingCharacters(in: .whitespaces),
@@ -120,5 +141,5 @@ struct AddBudgetView: View {
 
 #Preview {
     AddBudgetView()
-        .modelContainer(for: [Budget.self, TransactionCategory.self], inMemory: true)
+        .modelContainer(for: [Budget.self, SavingsGoal.self, TransactionCategory.self], inMemory: true)
 }

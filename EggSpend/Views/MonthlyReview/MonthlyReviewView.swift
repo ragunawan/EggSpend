@@ -7,30 +7,51 @@ struct MonthlyReviewView: View {
     @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
 
     @State private var selectedMonth: Date = Calendar.current.startOfMonth(for: .now)
+    @State private var review: MonthlyReviewData = .empty
 
     // MARK: - Derived data
 
-    private var review: MonthlyReviewData {
-        MonthlyReviewCalculator.calculate(
-            month: selectedMonth,
-            transactions: Array(transactions),
-            accounts: Array(accounts),
-            budgets: Array(budgets)
-        )
-    }
-
     private var isCurrentMonth: Bool {
         Calendar.current.startOfMonth(for: selectedMonth) == Calendar.current.startOfMonth(for: .now)
+    }
+
+    private var reviewInputSignature: Int {
+        var hasher = Hasher()
+        hasher.combine(selectedMonth.timeIntervalSinceReferenceDate)
+        for transaction in transactions {
+            hasher.combine(transaction.id)
+            hasher.combine(transaction.amount)
+            hasher.combine(transaction.date.timeIntervalSinceReferenceDate)
+            hasher.combine(transaction.typeRaw)
+            hasher.combine(transaction.isAdjustment)
+            hasher.combine(transaction.category?.id)
+            hasher.combine(transaction.account?.id)
+        }
+        for account in accounts {
+            hasher.combine(account.id)
+            hasher.combine(account.balance)
+            hasher.combine(account.typeRaw)
+            hasher.combine(account.includeInNetWorth)
+            hasher.combine(account.isArchived)
+        }
+        for budget in budgets {
+            hasher.combine(budget.id)
+            hasher.combine(budget.name)
+            hasher.combine(budget.limitAmount)
+            hasher.combine(budget.periodRaw)
+            hasher.combine(budget.isActive)
+            hasher.combine(budget.category?.id)
+        }
+        return hasher.finalize()
     }
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
-                monthNavigationSection
                 summarySection
                 savingsRateSection
                 if !review.topCategories.isEmpty { topCategoriesSection }
@@ -42,50 +63,69 @@ struct MonthlyReviewView: View {
             .background(Color.clear)
         }
         .navigationTitle("Monthly Review")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            monthNavigationBar
+        }
+        .onAppear(perform: refreshReview)
+        .onChange(of: reviewInputSignature) { _, _ in refreshReview() }
     }
 
     // MARK: - Month navigation
 
-    private var monthNavigationSection: some View {
-        Section {
-            HStack {
-                Button {
-                    changeMonth(by: -1)
-                } label: {
-                    Image(systemName: "chevron.left.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(Color.yolk)
-                }
-
-                Spacer()
-
-                Text(selectedMonth, format: .dateTime.month(.wide).year())
-                    .font(.headline)
-                    .foregroundStyle(Color.nestBrown)
-                    .contentTransition(.numericText())
-
-                Spacer()
-
-                Button {
-                    changeMonth(by: 1)
-                } label: {
-                    Image(systemName: "chevron.right.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(isCurrentMonth ? Color.twig.opacity(0.4) : Color.yolk)
-                }
-                .disabled(isCurrentMonth)
+    private var monthNavigationBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                changeMonth(by: -1)
+            } label: {
+                Image(systemName: "chevron.left.circle.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color.yolk)
             }
-            .padding(.vertical, 6)
+            .buttonStyle(.plain)
+            .frame(width: 32, height: 32)
+
+            Spacer(minLength: 8)
+
+            Text(selectedMonth, format: .dateTime.month(.wide).year())
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.nestBrown)
+                .contentTransition(.numericText())
+                .lineLimit(1)
+
+            Spacer(minLength: 8)
+
+            Button {
+                changeMonth(by: 1)
+            } label: {
+                Image(systemName: "chevron.right.circle.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(isCurrentMonth ? Color.twig.opacity(0.4) : Color.yolk)
+            }
+            .buttonStyle(.plain)
+            .disabled(isCurrentMonth)
+            .frame(width: 32, height: 32)
         }
-        .listRowBackground(Color.clear)
+        .padding(.horizontal, 20)
+        .frame(height: 36)
+        .background(.thinMaterial)
     }
 
     private func changeMonth(by value: Int) {
         guard let newMonth = Calendar.current.date(byAdding: .month, value: value, to: selectedMonth) else { return }
-        withAnimation(.easeInOut(duration: 0.25)) {
+        withAnimation(.easeInOut(duration: 0.16)) {
             selectedMonth = Calendar.current.startOfMonth(for: newMonth)
         }
+    }
+
+    private func refreshReview() {
+        review = MonthlyReviewCalculator.calculate(
+            month: selectedMonth,
+            transactions: Array(transactions),
+            accounts: Array(accounts),
+            budgets: Array(budgets)
+        )
     }
 
     // MARK: - Summary
@@ -96,9 +136,9 @@ struct MonthlyReviewView: View {
                 statChip(title: "Income", value: review.income,
                          color: .eggBlue, icon: "arrow.down.circle.fill")
                 statChip(title: "Expenses", value: review.expenses,
-                         color: .red, icon: "arrow.up.circle.fill")
+                         color: Color.negative, icon: "arrow.up.circle.fill")
                 statChip(title: "Net Savings", value: review.netSavings,
-                         color: review.netSavings >= 0 ? .nestLeafGreen : .red,
+                         color: review.netSavings >= 0 ? .nestLeafGreen : Color.negative,
                          icon: "leaf.circle.fill")
             }
         }
@@ -116,7 +156,8 @@ struct MonthlyReviewView: View {
                 .minimumScaleFactor(0.6).lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
+        .padding(8)
+        .frame(height: 72, alignment: .topLeading)
         .nestCard()
     }
 
@@ -130,17 +171,17 @@ struct MonthlyReviewView: View {
                         .font(.subheadline).foregroundStyle(Color.twig)
                     if let rate = review.savingsRate {
                         Text("\(Int((rate * 100).rounded()))%")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .foregroundStyle(rate >= 0 ? Color.nestLeafGreen : .red)
+                            .font(NestType.hero)
+                            .foregroundStyle(rate >= 0 ? Color.nestLeafGreen : Color.negative)
                     } else {
                         Text("—")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .font(NestType.hero)
                             .foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
                 Image(systemName: (review.savingsRate ?? 0) >= 0 ? "chart.line.uptrend.xyaxis" : "chart.line.downtrend.xyaxis")
-                    .font(.system(size: 30))
+                    .font(.title)
                     .foregroundStyle(Color.yolk.opacity(0.7))
             }
             .padding(.vertical, 8)
@@ -159,7 +200,7 @@ struct MonthlyReviewView: View {
                             .fill(Color.yolk.opacity(0.15))
                             .frame(width: 36, height: 36)
                         Image(systemName: entry.icon)
-                            .font(.system(size: 14))
+                            .font(.caption)
                             .foregroundStyle(Color.yolk)
                     }
                     Text(entry.name)
@@ -194,10 +235,10 @@ struct MonthlyReviewView: View {
                         Spacer()
                         Text("+\(overrun.overage, format: .currency(code: CurrencyFormat.code))")
                             .font(.system(.caption, design: .rounded, weight: .semibold))
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.negative)
                     }
                     ProgressView(value: min(overrun.progress, 1.5), total: 1.5)
-                        .tint(.red)
+                        .tint(Color.negative)
                     HStack {
                         Text("Spent \(overrun.spent, format: .currency(code: CurrencyFormat.code))")
                         Spacer()
@@ -210,7 +251,7 @@ struct MonthlyReviewView: View {
             }
         } header: {
             Label("Budget Overruns", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.negative)
         }
     }
 
@@ -234,7 +275,7 @@ struct MonthlyReviewView: View {
                         Text(abs(review.netWorthChange), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
                     }
-                    .foregroundStyle(review.netWorthChange >= 0 ? Color.nestLeafGreen : .red)
+                    .foregroundStyle(review.netWorthChange >= 0 ? Color.nestLeafGreen : Color.negative)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {

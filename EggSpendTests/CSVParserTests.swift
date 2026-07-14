@@ -197,7 +197,7 @@ final class CSVParserTests: XCTestCase {
 
     func testInferAccountTypeLoan() {
         XCTAssertEqual(CSVParser.inferAccountType(from: "Loan"), .loan)
-        XCTAssertEqual(CSVParser.inferAccountType(from: "Mortgage"), .loan)
+        XCTAssertEqual(CSVParser.inferAccountType(from: "Mortgage"), .mortgage)
         XCTAssertEqual(CSVParser.inferAccountType(from: "Debt"), .loan)
     }
 

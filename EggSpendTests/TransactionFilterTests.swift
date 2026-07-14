@@ -59,6 +59,20 @@ final class TransactionFilterTests: XCTestCase {
         XCTAssertFalse(filter.matches(txUncategorized))
     }
 
+    func testUncategorizedFilter() {
+        let category = TransactionCategory(name: "Groceries", icon: "cart", colorHex: "E67E22")
+        var filter = TransactionFilter()
+        filter.uncategorizedOnly = true
+
+        let txCategorized = Transaction(title: "Market", amount: 50, type: .expense, category: category)
+        let txUncategorized = Transaction(title: "Misc", amount: 10, type: .expense)
+
+        XCTAssertTrue(filter.isActive)
+        XCTAssertEqual(filter.activeCount, 1)
+        XCTAssertFalse(filter.matches(txCategorized))
+        XCTAssertTrue(filter.matches(txUncategorized))
+    }
+
     func testAccountFilter() throws {
         let checking = Account(name: "Checking", type: .checking, balance: 1000)
         let savings = Account(name: "Savings", type: .savings, balance: 5000)
@@ -162,6 +176,7 @@ final class TransactionFilterTests: XCTestCase {
         var filter = TransactionFilter()
         filter.type = .expense
         filter.categoryIDs = [UUID()]
+        filter.uncategorizedOnly = true
         filter.accountIDs = [UUID()]
         filter.startDate = .now
         filter.endDate = .now
@@ -176,6 +191,7 @@ final class TransactionFilterTests: XCTestCase {
         XCTAssertEqual(filter.activeCount, 0)
         XCTAssertNil(filter.type)
         XCTAssertTrue(filter.categoryIDs.isEmpty)
+        XCTAssertFalse(filter.uncategorizedOnly)
         XCTAssertTrue(filter.accountIDs.isEmpty)
         XCTAssertNil(filter.startDate)
         XCTAssertNil(filter.endDate)

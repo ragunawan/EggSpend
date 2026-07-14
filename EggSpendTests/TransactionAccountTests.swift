@@ -43,6 +43,17 @@ final class TransactionAccountTests: XCTestCase {
         XCTAssertEqual(account.balance, 900, accuracy: 0.001)
     }
 
+    func testCheckingAccountCanStoreDefaultCheckingFlag() throws {
+        let account = Account(name: "Primary Checking", type: .checking, balance: 1000)
+        account.isDefaultChecking = true
+        context.insert(account)
+        try context.save()
+
+        let fetched = try context.fetch(FetchDescriptor<Account>())
+        XCTAssertEqual(fetched.first?.type, .checking)
+        XCTAssertEqual(fetched.first?.isDefaultChecking, true)
+    }
+
     // MARK: - Liability account balance rules
 
     func testIncomeReducesLiabilityBalance() throws {
@@ -260,6 +271,38 @@ final class TransactionAccountTests: XCTestCase {
     func testLoanAccountDueDateDefaultsNilUntilSet() throws {
         let account = Account(name: "Loan", type: .loan, balance: -10000)
         XCTAssertNil(account.dueDate)
+    }
+
+    func testLiabilityDueDateRollsForwardToNextMonthWhenPast() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let account = Account(name: "Visa", type: .credit, balance: -500)
+        account.dueDate = calendar.date(from: DateComponents(year: 2026, month: 6, day: 10))!
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 13))!
+
+        XCTAssertTrue(account.rollDueDateIfNeeded(asOf: today, calendar: calendar))
+
+        XCTAssertEqual(account.dueDate, calendar.date(from: DateComponents(year: 2026, month: 8, day: 10))!)
+    }
+
+    func testLiabilityDueDateDoesNotRollWhenTodayOrFuture() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 13))!
+        let account = Account(name: "Loan", type: .loan, balance: -10000)
+        account.dueDate = today
+
+        XCTAssertFalse(account.rollDueDateIfNeeded(asOf: today, calendar: calendar))
+        XCTAssertEqual(account.dueDate, today)
+    }
+
+    func testAssetDueDateDoesNotRoll() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let account = Account(name: "Checking", type: .checking, balance: 1000)
+        let oldDueDate = calendar.date(from: DateComponents(year: 2026, month: 6, day: 10))!
+        account.dueDate = oldDueDate
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 13))!
+
+        XCTAssertFalse(account.rollDueDateIfNeeded(asOf: today, calendar: calendar))
+        XCTAssertEqual(account.dueDate, oldDueDate)
     }
 
     // MARK: - CSV import: net balance effect helper

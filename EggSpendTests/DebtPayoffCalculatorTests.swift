@@ -49,4 +49,36 @@ final class DebtPayoffCalculatorTests: XCTestCase {
         XCTAssertLessThan(withExtra.months, base.months)
         XCTAssertLessThan(withExtra.totalInterest, base.totalInterest)
     }
+
+    func testAmortizationScheduleGroupsPaymentsByYear() throws {
+        let startDate = try XCTUnwrap(Calendar(identifier: .gregorian).date(from: DateComponents(year: 2026, month: 1, day: 1)))
+        let schedule = DebtPayoffCalculator.amortizationSchedule(
+            balance: 1_200,
+            annualPercentageRate: 0,
+            monthlyPayment: 100,
+            firstPaymentDate: startDate,
+            monthlyEscrow: 25,
+            calendar: Calendar(identifier: .gregorian)
+        )
+
+        XCTAssertEqual(schedule.status, .projected)
+        XCTAssertEqual(schedule.years.count, 1)
+        XCTAssertEqual(schedule.years[0].payments.count, 12)
+        XCTAssertEqual(schedule.totalPrincipal, 1_200, accuracy: 0.001)
+        XCTAssertEqual(schedule.totalInterest, 0, accuracy: 0.001)
+        XCTAssertEqual(schedule.totalEscrow, 300, accuracy: 0.001)
+        XCTAssertEqual(schedule.years[0].endingBalance, 0, accuracy: 0.001)
+    }
+
+    func testAmortizationScheduleHandlesInsufficientPayment() {
+        let schedule = DebtPayoffCalculator.amortizationSchedule(
+            balance: 10_000,
+            annualPercentageRate: 24,
+            monthlyPayment: 100,
+            firstPaymentDate: Date()
+        )
+
+        XCTAssertEqual(schedule.status, .insufficientPayment)
+        XCTAssertTrue(schedule.years.isEmpty)
+    }
 }

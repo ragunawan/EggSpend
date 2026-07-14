@@ -158,11 +158,11 @@ struct AddSavingsGoalView: View {
                             .foregroundStyle(isSelected ? Color.yolk : .primary)
                             .frame(width: 44, height: 44)
                             .background(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                                     .fill(isSelected ? Color.yolk.opacity(0.15) : Color(.systemFill))
                             )
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: Radius.control, style: .continuous)
                                     .stroke(isSelected ? Color.yolk : Color.clear, lineWidth: 2)
                             )
                     }

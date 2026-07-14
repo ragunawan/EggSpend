@@ -38,7 +38,7 @@ struct TransactionFilterView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AnimatedCanopyBackground()
+                NestBackground()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -51,7 +51,7 @@ struct TransactionFilterView: View {
                         recurringSection
                         transfersSection
                     }
-                    .padding(16)
+                    .padding(Space.lg)
                 }
             }
             .navigationTitle("Filters")
@@ -117,10 +117,24 @@ struct TransactionFilterView: View {
                             selected: draft.categoryIDs.contains(category.id)
                         ) {
                             toggle(category.id, in: &draft.categoryIDs)
+                            if !draft.categoryIDs.isEmpty {
+                                draft.uncategorizedOnly = false
+                            }
+                        }
+                    }
+
+                    FilterOptionChip(
+                        label: "Uncategorized",
+                        icon: "questionmark.circle",
+                        selected: draft.uncategorizedOnly
+                    ) {
+                        draft.uncategorizedOnly.toggle()
+                        if draft.uncategorizedOnly {
+                            draft.categoryIDs.removeAll()
                         }
                     }
                 }
-                .padding(.horizontal, 2)
+                .padding(.horizontal, Space.xs)
             }
         }
     }
@@ -146,7 +160,7 @@ struct TransactionFilterView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 2)
+                    .padding(.horizontal, Space.xs)
                 }
             }
         }
@@ -186,7 +200,7 @@ struct TransactionFilterView: View {
                         FilterOptionChip(label: "This Month", selected: false) { applyMonthToDateRange() }
                         FilterOptionChip(label: "This Year", selected: false) { applyYearToDateRange() }
                     }
-                    .padding(.horizontal, 2)
+                    .padding(.horizontal, Space.xs)
                 }
 
                 Toggle(isOn: startDateEnabled.animation()) {
@@ -245,9 +259,9 @@ struct TransactionFilterView: View {
             TextField(placeholder, text: text)
                 .keyboardType(.decimalPad)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(Color.nestCream.opacity(0.6), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .padding(.horizontal, Space.md)
+        .padding(.vertical, Space.sm)
+        .background(Color.nestCream.opacity(0.6), in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous))
     }
 
     // MARK: - Recurring
@@ -303,7 +317,7 @@ private struct FilterSectionCard<Content: View>: View {
                 .foregroundStyle(Color.nestBrown)
             content
         }
-        .padding(14)
+        .padding(Space.md)
         .frame(maxWidth: .infinity, alignment: .leading)
         .nestCard()
     }
@@ -323,8 +337,8 @@ private struct FilterOptionChip: View {
                 if let icon { Image(systemName: icon).font(.caption2) }
                 Text(label).font(.subheadline)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, Space.md)
+            .padding(.vertical, Space.sm)
             .background(selected ? Color.yolk : Color.yolk.opacity(0.12), in: Capsule())
             .foregroundStyle(selected ? .white : Color.yolk)
         }

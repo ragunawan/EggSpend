@@ -65,9 +65,11 @@ struct ForecastEngine {
     // ASSUMPTION: Paused (isActive == false) and expired (endDate < now) items are excluded.
     static func upcomingEvents(
         from recurring: [RecurringTransaction],
+        accounts: [Account] = [],
+        transactions: [Transaction] = [],
         horizonDays: Int
     ) -> [ForecastEvent] {
-        RecurringProjection.occurrences(from: recurring, start: .now, days: horizonDays)
+        let recurringEvents = RecurringProjection.occurrences(from: recurring, start: .now, days: horizonDays)
             .map { occurrence in
                 ForecastEvent(
                     date: occurrence.dueDate,
@@ -76,6 +78,72 @@ struct ForecastEngine {
                     categoryIcon: occurrence.category?.icon ?? occurrence.source.frequency.icon
                 )
             }
+
+        return (recurringEvents + creditCardPaymentEvents(from: accounts, transactions: transactions))
+            .sorted { lhs, rhs in
+                if lhs.date == rhs.date { return lhs.title < rhs.title }
+                return lhs.date < rhs.date
+            }
+    }
+
+    static func creditCardPaymentEvents(
+        from accounts: [Account],
+        transactions: [Transaction] = [],
+        asOf date: Date = .now,
+        calendar: Calendar = .current
+    ) -> [ForecastEvent] {
+        let today = calendar.startOfDay(for: date)
+        guard let twoWeeksOut = calendar.date(byAdding: .day, value: 14, to: today) else { return [] }
+
+        return accounts.compactMap { account in
+            guard !account.isArchived, account.type == .credit, let dueDate = account.nextDueDate else {
+                return nil
+            }
+
+            let dueDay = calendar.startOfDay(for: dueDate)
+            guard dueDay >= today else { return nil }
+
+            let dueThisMonth = calendar.isDate(dueDay, equalTo: today, toGranularity: .month)
+                && calendar.isDate(dueDay, equalTo: today, toGranularity: .year)
+            guard dueThisMonth || dueDay <= twoWeeksOut else { return nil }
+
+            let recentSpendAmount = creditCardRecentSpendAmount(
+                for: account,
+                transactions: transactions,
+                asOf: date,
+                calendar: calendar
+            )
+            let paymentAmount = max(recentSpendAmount, account.minimumPayment ?? 0, 0)
+            let fallbackAmount = max(abs(account.balance), 0)
+            let amount = paymentAmount > 0 ? paymentAmount : fallbackAmount
+            guard amount > 0 else { return nil }
+
+            return ForecastEvent(
+                date: dueDay,
+                title: "\(account.name) payment",
+                amount: -amount,
+                categoryIcon: account.type.icon
+            )
+        }
+    }
+
+    static func creditCardRecentSpendAmount(
+        for account: Account,
+        transactions: [Transaction],
+        asOf date: Date = .now,
+        calendar: Calendar = .current
+    ) -> Double {
+        guard let start = calendar.date(byAdding: .day, value: -30, to: date) else { return 0 }
+        return transactions
+            .filter {
+                $0.account?.id == account.id
+                    && $0.type == .expense
+                    && !$0.isAdjustment
+                    && !$0.isGenerated
+                    && $0.date >= start
+                    && $0.date <= date
+            }
+            .reduce(0.0) { $0 + $1.amount }
     }
 
     // Builds one data point per day (today + horizonDays).
@@ -92,9 +160,14 @@ struct ForecastEngine {
 
         let startBalance = liquidBalance(from: accounts)
         let dailyDrift = averageDailyNetFlow(from: transactions)
-        let events = upcomingEvents(from: recurring, horizonDays: horizonDays)
+        let events = upcomingEvents(from: recurring, accounts: accounts, transactions: transactions, horizonDays: horizonDays)
+        let eventDeltasByDay = Dictionary(grouping: events, by: { calendar.startOfDay(for: $0.date) })
+            .mapValues { dayEvents in
+                dayEvents.reduce(0.0) { $0 + $1.amount }
+            }
 
         var points: [ForecastDataPoint] = []
+        points.reserveCapacity(max(horizonDays, 1) + 1)
         var runningBalance = startBalance
 
         // Anchor: today's known liquid balance
@@ -103,9 +176,7 @@ struct ForecastEngine {
         for dayOffset in 1...max(horizonDays, 1) {
             guard let date = calendar.date(byAdding: .day, value: dayOffset, to: todayStart) else { continue }
 
-            // Recurring events scheduled on this exact calendar day
-            let dayRecurring = events.filter { calendar.isDate($0.date, inSameDayAs: date) }
-            let recurringDelta = dayRecurring.reduce(0.0) { $0 + $1.amount }
+            let recurringDelta = eventDeltasByDay[calendar.startOfDay(for: date)] ?? 0
 
             runningBalance += dailyDrift + recurringDelta
             points.append(ForecastDataPoint(date: date, balance: runningBalance, isProjected: true))

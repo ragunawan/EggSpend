@@ -53,7 +53,7 @@ struct CashFlowCalendarView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 Section {
@@ -107,11 +107,11 @@ struct CashFlowCalendarView: View {
         HStack {
             Label(day.netFlow >= 0 ? "Net Inflow" : "Net Outflow", systemImage: day.netFlow >= 0 ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .font(.caption)
-                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : .red)
+                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : Color.negative)
             Spacer()
             Text(day.netFlow, format: .currency(code: CurrencyFormat.code))
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : .red)
+                .foregroundStyle(day.netFlow >= 0 ? Color.eggBlue : Color.negative)
             Text("Balance \(day.projectedBalance, format: .currency(code: CurrencyFormat.code))")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -122,21 +122,21 @@ struct CashFlowCalendarView: View {
 
     private func transactionLine(_ transaction: Transaction) -> some View {
         line(
-            icon: transaction.category?.icon ?? transaction.type.systemImage,
+            icon: resolvedIcon(transaction.category?.icon, fallback: transaction.type.systemImage),
             title: transaction.title,
             subtitle: transaction.category?.name ?? "Actual transaction",
             amount: transaction.signedAmount,
-            color: transaction.type == .income ? Color.eggBlue : .red
+            color: transaction.type == .income ? Color.eggBlue : Color.negative
         )
     }
 
     private func recurringLine(_ occurrence: RecurringOccurrence) -> some View {
         line(
-            icon: occurrence.category?.icon ?? occurrence.source.frequency.icon,
+            icon: resolvedIcon(occurrence.category?.icon, fallback: occurrence.source.frequency.icon),
             title: occurrence.title,
             subtitle: "Upcoming recurring",
             amount: occurrence.signedAmount,
-            color: occurrence.type == .income ? Color.eggBlue : .red
+            color: occurrence.type == .income ? Color.eggBlue : Color.negative
         )
     }
 
@@ -148,6 +148,13 @@ struct CashFlowCalendarView: View {
             amount: 0,
             color: Color.yolk
         )
+    }
+
+    private func resolvedIcon(_ icon: String?, fallback: String) -> String {
+        guard let icon, !icon.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return fallback
+        }
+        return icon
     }
 
     private func line(icon: String, title: String, subtitle: String, amount: Double, color: Color) -> some View {

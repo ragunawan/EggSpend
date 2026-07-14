@@ -108,9 +108,9 @@ struct BudgetDetailView: View {
                 transactionsSection
             }
             .padding(.horizontal)
-            .padding(.bottom, 32)
+            .padding(.bottom, Space.xl)
         }
-        .background(AnimatedCanopyBackground())
+        .background(NestBackground())
         .navigationTitle(budget.name)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
@@ -155,7 +155,7 @@ struct BudgetDetailView: View {
     private var eggHeroSection: some View {
         VStack(spacing: 16) {
             // Large animated egg
-            EggProgressView(progress: progress, size: 120)
+            EggProgressView(progress: progress, size: 120, showsPercentage: false)
                 .scaleEffect(eggVisible ? 1 : 0.6)
                 .opacity(eggVisible ? 1 : 0)
                 .accessibilityElement(children: .ignore)
@@ -175,7 +175,7 @@ struct BudgetDetailView: View {
                 // Spent / limit
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(spent, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(NestType.hero)
                         .foregroundStyle(Color.nestBrown)
                     Text("/ \(budget.limitAmount, format: .currency(code: CurrencyFormat.code))")
                         .font(.system(.title3, design: .rounded))
@@ -183,15 +183,24 @@ struct BudgetDetailView: View {
                 }
 
                 // Period badge
-                Label(budget.period.rawValue, systemImage: budget.period.icon)
-                    .font(.caption)
-                    .foregroundStyle(Color.twig)
-                    .padding(.horizontal, 10).padding(.vertical, 4)
-                    .background(Color.twig.opacity(0.12), in: Capsule())
+                HStack(spacing: Space.sm) {
+                    Label(budget.period.rawValue, systemImage: budget.period.icon)
+                        .foregroundStyle(Color.twig)
+                        .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
+                        .background(Color.twig.opacity(0.12), in: Capsule())
+
+                    if let category = budget.category {
+                        Label(category.name, systemImage: category.icon)
+                            .foregroundStyle(category.color)
+                            .padding(.horizontal, Space.md).padding(.vertical, Space.xs)
+                            .background(category.color.opacity(0.12), in: Capsule())
+                    }
+                }
+                .font(.caption)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 8)
+        .padding(.top, Space.sm)
     }
 
     private var statusIcon: String {
@@ -222,7 +231,7 @@ struct BudgetDetailView: View {
                         ? remaining.formatted(.currency(code: CurrencyFormat.code))
                         : abs(remaining).formatted(.currency(code: CurrencyFormat.code)) + " over",
                      icon: "banknote",
-                     color: remaining >= 0 ? .nestLeafGreen : .red)
+                     color: remaining >= 0 ? .positive : .negative)
 
             StatCard(title: "Daily Avg",
                      value: dailyAverage.formatted(.currency(code: CurrencyFormat.code)),
@@ -309,11 +318,14 @@ struct BudgetDetailView: View {
 
                 // Budget limit rule
                 RuleMark(y: .value("Limit", budget.limitAmount))
-                    .foregroundStyle(Color.red.opacity(0.4))
+                    .foregroundStyle(Color.negative.opacity(0.4))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [6, 4]))
                     .annotation(position: .top, alignment: .trailing) {
                         Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
-                            .font(.caption2).foregroundStyle(.red.opacity(0.7))
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.negative)
+                            .chartDetailCalloutStyle()
                     }
             }
             .chartYAxis {
@@ -354,7 +366,7 @@ struct BudgetDetailView: View {
                 }
                 .frame(width: 22)
             } else {
-                RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 22, height: 3)
+                RoundedRectangle(cornerRadius: Radius.control).fill(color).frame(width: 22, height: 3)
             }
             Text(label).foregroundStyle(.secondary)
         }
@@ -380,19 +392,19 @@ struct BudgetDetailView: View {
                         Text("No transactions yet this \(budget.period.rawValue.lowercased())")
                             .font(.callout).foregroundStyle(.secondary)
                     }
-                    .padding(.vertical, 24)
+                    .padding(.vertical, Space.xl)
                     Spacer()
                 }
             } else {
                 VStack(spacing: 0) {
                     ForEach(periodTransactions) { tx in
-                        TransactionRowView(transaction: tx)
+                        LedgerRowView(row: .transaction(tx), showsMeta: [.category, .account, .date])
                         if tx.id != periodTransactions.last?.id {
-                            Divider().padding(.leading, 52)
+                            Divider().padding(.leading, Space.xl * 2 + Space.xs)
                         }
                     }
                 }
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card))
             }
         }
     }
@@ -425,11 +437,11 @@ private struct StatCard: View {
                 Text(title).font(.caption).foregroundStyle(.secondary)
             }
         }
-        .padding(14)
+        .padding(Space.md)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .stroke(color.opacity(0.15), lineWidth: 1)
         )
     }

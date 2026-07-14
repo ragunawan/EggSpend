@@ -29,6 +29,9 @@ final class Transaction {
     @Relationship(deleteRule: .nullify)
     var account: Account?
 
+    @Relationship(deleteRule: .nullify)
+    var budget: Budget?
+
     var type: TransactionType {
         get { TransactionType(rawValue: typeRaw) ?? .expense }
         set { typeRaw = newValue.rawValue }
@@ -43,6 +46,7 @@ final class Transaction {
         type: TransactionType,
         category: TransactionCategory? = nil,
         account: Account? = nil,
+        budget: Budget? = nil,
         notes: String = "",
         isGenerated: Bool = false,
         recurringSourceID: UUID? = nil,
@@ -56,6 +60,7 @@ final class Transaction {
         self.typeRaw = type.rawValue
         self.category = category
         self.account = account
+        self.budget = budget
         self.notes = notes
         self.createdAt = .now
         self.isGenerated = isGenerated

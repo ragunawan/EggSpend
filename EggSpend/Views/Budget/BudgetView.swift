@@ -1,14 +1,17 @@
 import SwiftUI
 import SwiftData
-import Charts
 
 struct BudgetView: View {
     @Query(sort: \Budget.createdAt) private var budgets: [Budget]
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query(sort: \SavingsGoal.createdAt) private var savingsGoals: [SavingsGoal]
+    @Query(sort: \TransactionCategory.sortOrder) private var categories: [TransactionCategory]
     @Environment(\.modelContext) private var modelContext
 
     @State private var showAddBudget  = false
+    @State private var showAddSavingsGoal = false
     @State private var editingBudget: Budget? = nil
+    @State private var editingSavingsGoal: SavingsGoal? = nil
     @State private var periodFilter: BudgetPeriod? = nil
 
     // MARK: – Derived
@@ -33,6 +36,13 @@ struct BudgetView: View {
     private var healthyBudgets: [Budget] {
         displayed.filter { $0.progress(from: transactions) < 0.8 }
     }
+    private var activeSavingsGoals: [SavingsGoal] { savingsGoals.filter(\.isActive) }
+    private var budgetCategories: [TransactionCategory] {
+        categories.filter { !$0.isArchived && ($0.appliesTo == nil || $0.appliesTo == .expense) }
+    }
+    private var uncategorizedBudgets: [Budget] {
+        displayed.filter { $0.category == nil }
+    }
 
     private var totalBudgeted: Double { displayed.reduce(0) { $0 + $1.limitAmount } }
     private var totalSpent: Double    { displayed.reduce(0) { $0 + $1.spent(from: transactions) } }
@@ -46,40 +56,38 @@ struct BudgetView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if budgets.isEmpty {
-                    emptyState
-                } else {
-                    VStack(spacing: 20) {
-                        summaryHeroCard
-                        periodPicker.appearRise(delay: 0.05)
-
-                        ScrollView {
-                            VStack(spacing: 16) {
-                                if displayed.isEmpty && periodFilter != nil {
-                                    filteredEmptyState
-                                        .appearRise(delay: 0.1)
-                                } else {
-                                    if !overBudget.isEmpty   { budgetGroup("Over Budget",   overBudget,   accent: .red).appearRise(delay: 0.1) }
-                                    if !warningBudgets.isEmpty { budgetGroup("Watch Out", warningBudgets, accent: .yolk).appearRise(delay: 0.15) }
-                                    if !healthyBudgets.isEmpty { budgetGroup("On Track",   healthyBudgets, accent: .nestLeafGreen).appearRise(delay: 0.2) }
-                                    inactiveBudgetsSection.appearRise(delay: 0.25)
-                                }
-                            }
-                            .padding(12)
-                            .frame(maxWidth: .infinity)
-                        }
-                        .frame(maxHeight: .infinity)
-                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(color: Color.nestBrown.opacity(0.10), radius: 8, x: 0, y: 3)
+                if budgets.isEmpty && budgetCategories.isEmpty {
+                    if activeSavingsGoals.isEmpty {
+                        emptyState
+                    } else {
+                        budgetContent
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 32)
+                } else {
+                    budgetContent
                 }
             }
-            .background(AnimatedCanopyBackground())
-            .navigationTitle("Budget Eggs")
+            .background(NestBackground())
+            .navigationTitle("Budget")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button {
+                            periodFilter = nil
+                        } label: {
+                            Label("All Periods", systemImage: periodFilter == nil ? "checkmark" : "line.3.horizontal.decrease.circle")
+                        }
+                        ForEach(BudgetPeriod.allCases, id: \.self) { period in
+                            Button {
+                                periodFilter = period
+                            } label: {
+                                Label(period.rawValue, systemImage: periodFilter == period ? "checkmark" : period.icon)
+                            }
+                        }
+                    } label: {
+                        Label(periodFilter?.rawValue ?? "All Periods", systemImage: "line.3.horizontal.decrease.circle")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button { showAddBudget = true } label: {
                         Image(systemName: "plus.circle.fill")
@@ -88,175 +96,151 @@ struct BudgetView: View {
                 }
             }
             .sheet(isPresented: $showAddBudget) { AddBudgetView() }
+            .sheet(isPresented: $showAddSavingsGoal) { AddSavingsGoalView() }
             .sheet(item: $editingBudget) { budget in AddBudgetView(editingBudget: budget) }
+            .sheet(item: $editingSavingsGoal) { goal in AddSavingsGoalView(editingGoal: goal) }
         }
     }
 
-    // MARK: – Summary hero card
+    private var budgetContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Budget Eggs")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.primary)
+                    .padding(.top, Space.xs)
 
-    private var summaryHeroCard: some View {
-        VStack(spacing: 16) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Label("Nest Overview", systemImage: "bird.fill")
-                        .font(.headline).foregroundStyle(Color.nestBrown)
-                    Text(Date.now, format: .dateTime.month(.wide).year())
-                        .font(.caption).foregroundStyle(.secondary)
+                summaryStrip
+
+                VStack(spacing: 16) {
+                    if displayed.isEmpty && periodFilter != nil && budgetCategories.isEmpty {
+                        filteredEmptyState
+
+                    } else {
+                        categoryBudgetGroups
+                        inactiveBudgetsSection
+                    }
+                    savingsGoalsSection
                 }
-                Spacer()
-                overallHealthBadge
+                .padding(Space.md)
+                .frame(maxWidth: .infinity)
             }
-
-            // Spent vs budgeted
-            HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Spent").font(.caption).foregroundStyle(.secondary)
-                    Text(totalSpent, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundStyle(totalSpent > totalBudgeted ? .red : Color.nestBrown)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text("Budgeted").font(.caption).foregroundStyle(.secondary)
-                    Text(totalBudgeted, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.title2, design: .rounded, weight: .bold))
-                        .foregroundStyle(Color.nestBrown.opacity(0.6))
-                }
-            }
-
-            // Animated progress bar
-            AnimatedProgressBar(progress: overallProgress,
-                                color: overallProgressColor)
-
-            HStack {
-                Text("\(Int(min(overallProgress, 9.99) * 100))% used")
-                    .font(.caption2).foregroundStyle(.secondary)
-                Spacer()
-                let rem = totalBudgeted - totalSpent
-                Text(rem >= 0
-                     ? "\(rem.formatted(.currency(code: CurrencyFormat.code))) remaining"
-                     : "\(abs(rem).formatted(.currency(code: CurrencyFormat.code))) over")
-                    .font(.caption2)
-                    .foregroundStyle(rem >= 0 ? Color.nestLeafGreen : .red)
-            }
-
-            // Mini donut chart of budget health distribution
-            if displayed.count > 1 { budgetHealthDonut }
         }
-        .padding(16)
-        .nestCard()
-        .padding(.top, 4)
+        .padding(.horizontal)
+        .padding(.bottom, Space.xl)
     }
 
-    private var overallHealthBadge: some View {
-        let (label, color) = overallHealthLabel
-        return Text(label)
-            .font(.caption).fontWeight(.semibold)
-            .foregroundStyle(color)
-            .padding(.horizontal, 10).padding(.vertical, 4)
-            .background(color.opacity(0.12), in: Capsule())
-    }
-
-    private var overallHealthLabel: (String, Color) {
-        if !overBudget.isEmpty   { return ("Over budget",  .red) }
-        if !warningBudgets.isEmpty { return ("Watch out", .yolk) }
-        return ("Healthy", .nestLeafGreen)
-    }
+    // MARK: – Summary strip
 
     private var overallProgressColor: Color {
         switch overallProgress {
         case ..<0.7: return .nestLeafGreen
         case ..<0.9: return .yolk
-        case ..<1.0: return .orange
-        default:     return .red
+        case ..<1.0: return .warningTone
+        default:     return .negative
         }
     }
 
-    private var budgetHealthDonut: some View {
-        HStack(spacing: 12) {
-            Chart {
-                let o = Double(overBudget.count)
-                let w = Double(warningBudgets.count)
-                let h = Double(healthyBudgets.count)
-                let total = max(o + w + h, 1)
-                SectorMark(angle: .value("Over",    o / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(.red)
-                SectorMark(angle: .value("Warning", w / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.yolk)
-                SectorMark(angle: .value("Good",    h / total), innerRadius: .ratio(0.6), angularInset: 2).foregroundStyle(Color.nestLeafGreen)
-            }
-            .frame(width: 52, height: 52)
-            .animation(.spring(), value: displayed.count)
-            // The adjacent legend already conveys this breakdown accessibly;
-            // hide the chart itself to avoid a redundant, hard-to-parse VoiceOver stop.
-            .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 3) {
-                if !overBudget.isEmpty    { donutLegend("Over budget", count: overBudget.count, color: .red) }
-                if !warningBudgets.isEmpty { donutLegend("Warning",    count: warningBudgets.count, color: .yolk) }
-                if !healthyBudgets.isEmpty { donutLegend("Healthy",    count: healthyBudgets.count, color: .nestLeafGreen) }
-            }
-            Spacer()
-        }
-    }
-
-    private func donutLegend(_ label: String, count: Int, color: Color) -> some View {
-        HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 8, height: 8)
-            Text("\(count) \(label)").font(.caption2).foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: – Period picker
-
-    private var periodPicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                FilterChip(label: "All",      selected: periodFilter == nil) { periodFilter = nil }
-                ForEach(BudgetPeriod.allCases, id: \.self) { period in
-                    FilterChip(label: period.rawValue, icon: period.icon,
-                               selected: periodFilter == period) { periodFilter = period }
-                }
-            }
-            .padding(.horizontal, 2)
-        }
+    private var summaryStrip: some View {
+        BudgetSummaryStrip(
+            spent: totalSpent,
+            budgeted: totalBudgeted,
+            progress: overallProgress,
+            progressColor: overallProgressColor,
+            periodLabel: periodFilter?.rawValue ?? "All periods",
+            overCount: overBudget.count,
+            warningCount: warningBudgets.count,
+            healthyCount: healthyBudgets.count
+        )
+        .padding(.top, Space.xs)
     }
 
     // MARK: – Budget groups
 
-    private func budgetGroup(_ title: String, _ items: [Budget], accent: Color) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(.subheadline).fontWeight(.semibold)
-                .foregroundStyle(accent)
+    private var categoryBudgetGroups: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            ForEach(budgetCategories) { category in
+                let items = displayed.filter { $0.category?.id == category.id }
+                categoryBudgetGroup(
+                    title: category.name,
+                    icon: category.icon,
+                    accent: category.color,
+                    items: items,
+                    emptyMessage: "No active budgets"
+                )
+            }
 
-            ForEach(items) { budget in
-                NavigationLink(destination: BudgetDetailView(budget: budget)) {
-                    BudgetRowView(budget: budget, transactions: Array(transactions))
+            if !uncategorizedBudgets.isEmpty || budgetCategories.isEmpty {
+                categoryBudgetGroup(
+                    title: "Uncategorized",
+                    icon: "tray",
+                    accent: .secondary,
+                    items: uncategorizedBudgets,
+                    emptyMessage: "No uncategorized budgets"
+                )
+            }
+        }
+    }
+
+    private func categoryBudgetGroup(
+        title: String,
+        icon: String,
+        accent: Color,
+        items: [Budget],
+        emptyMessage: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: Space.xs) {
+                Image(systemName: icon)
+                    .font(.caption)
+                    .foregroundStyle(accent)
+                    .frame(width: 18)
+                Text(title)
+                    .font(.subheadline).fontWeight(.semibold)
+                    .foregroundStyle(accent)
+                Spacer()
+                Text("\(items.count)")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+
+            if items.isEmpty {
+                Text(emptyMessage)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, Space.md)
+                    .padding(.vertical, Space.sm)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            } else {
+                ForEach(items) { budget in
+                    budgetRowLink(for: budget)
                 }
-                .buttonStyle(.plain)
-                .swipeActions(edge: .trailing) {
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        modelContext.delete(budget)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var savingsGoalsSection: some View {
+        if !activeSavingsGoals.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text("Savings Goals")
+                        .font(.subheadline).fontWeight(.semibold)
+                        .foregroundStyle(Color.nestLeafGreen)
+                    Spacer()
+                    Button { showAddSavingsGoal = true } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.nestLeafGreen)
                     }
-                    Button("Edit", systemImage: "pencil") {
-                        editingBudget = budget
-                    }
-                    .tint(.blue)
+                    .accessibilityLabel("Add savings goal")
                 }
-                .swipeActions(edge: .leading) {
-                    Button(budget.isActive ? "Pause" : "Resume",
-                           systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
-                        budget.isActive.toggle()
-                    }
-                    .tint(budget.isActive ? .orange : .nestLeafGreen)
-                }
-                .contextMenu {
-                    Button("Edit", systemImage: "pencil") { editingBudget = budget }
-                    Button(budget.isActive ? "Pause" : "Resume",
-                           systemImage: "power") { budget.isActive.toggle() }
-                    Divider()
-                    Button("Delete", systemImage: "trash", role: .destructive) {
-                        modelContext.delete(budget)
-                    }
+
+                ForEach(activeSavingsGoals) { goal in
+                    SavingsGoalRowView(goal: goal, showsProgressPercentage: false)
+                        .onTapGesture { editingSavingsGoal = goal }
+                        .accessibilityAddTraits(.isButton)
                 }
             }
         }
@@ -289,19 +273,8 @@ struct BudgetView: View {
 
                 if showInactive {
                     ForEach(inactiveBudgets) { budget in
-                        NavigationLink(destination: BudgetDetailView(budget: budget)) {
-                            BudgetRowView(budget: budget, transactions: Array(transactions))
-                                .opacity(0.55)
-                        }
-                        .buttonStyle(.plain)
-                        .swipeActions(edge: .trailing) {
-                            Button("Delete", systemImage: "trash", role: .destructive) { modelContext.delete(budget) }
-                            Button("Edit", systemImage: "pencil") { editingBudget = budget }.tint(.blue)
-                        }
-                        .swipeActions(edge: .leading) {
-                            Button("Resume", systemImage: "play.circle.fill") { budget.isActive.toggle() }
-                                .tint(.nestLeafGreen)
-                        }
+                        budgetRowLink(for: budget)
+                            .opacity(0.55)
                     }
                 }
             }
@@ -350,93 +323,102 @@ struct BudgetView: View {
         }
         return "No Budgets"
     }
+
+    private func budgetRowLink(for budget: Budget) -> some View {
+        CompactProgressRow(
+            name: budget.name,
+            leftAmount: budget.remaining(from: transactions),
+            progress: budget.progress(from: transactions),
+            statusColor: budget.statusColor(progress: budget.progress(from: transactions))
+        ) {
+            BudgetDetailView(budget: budget)
+        }
+        .padding(.horizontal, Space.md)
+        .padding(.vertical, Space.sm)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .contextMenu {
+            Button("Edit", systemImage: "pencil") { editingBudget = budget }
+            Button(budget.isActive ? "Pause" : "Resume",
+                   systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
+                budget.isActive.toggle()
+            }
+            Divider()
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                modelContext.delete(budget)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                modelContext.delete(budget)
+            }
+            Button("Edit", systemImage: "pencil") {
+                editingBudget = budget
+            }
+            .tint(.info)
+        }
+        .swipeActions(edge: .leading) {
+            Button(budget.isActive ? "Pause" : "Resume",
+                   systemImage: budget.isActive ? "pause.circle.fill" : "play.circle.fill") {
+                budget.isActive.toggle()
+            }
+            .tint(budget.isActive ? .warningTone : .positive)
+        }
+    }
 }
 
-// MARK: – Budget row card
+// MARK: – Summary strip
 
-struct BudgetRowView: View {
-    let budget: Budget
-    let transactions: [Transaction]
+private struct BudgetSummaryStrip: View {
+    let spent: Double
+    let budgeted: Double
+    let progress: Double
+    let progressColor: Color
+    let periodLabel: String
+    let overCount: Int
+    let warningCount: Int
+    let healthyCount: Int
 
-    private var spent:      Double { budget.spent(from: transactions) }
-    private var progress:   Double { budget.progress(from: transactions) }
-    private var remaining:  Double { budget.remaining(from: transactions) }
-    private var statusColor: Color { budget.statusColor(progress: progress) }
-
-    private var progressAccessibilityValue: String {
-        let base = "\(Int(progress * 100))% used, \(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budget.limitAmount))"
-        return progress > 1 ? base + ", over budget" : base
+    private var remaining: Double { budgeted - spent }
+    private var statusCaption: String {
+        [
+            overCount > 0 ? "\(overCount) over" : nil,
+            warningCount > 0 ? "\(warningCount) watch" : nil,
+            healthyCount > 0 ? "\(healthyCount) on track" : nil
+        ]
+        .compactMap(\.self)
+        .joined(separator: " · ")
     }
 
     var body: some View {
-        HStack(spacing: 14) {
-            EggProgressView(progress: progress, size: 56)
-                .layoutPriority(1)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(budget.name)
-                .accessibilityValue(progressAccessibilityValue)
+        HStack(spacing: Space.md) {
+            EggProgressView(progress: progress, size: 44, showsPercentage: false)
+                .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    if let cat = budget.category {
-                        Image(systemName: cat.icon).font(.caption).foregroundStyle(cat.color)
-                    }
-                    Text(budget.name)
-                        .font(.system(.body, design: .rounded, weight: .semibold))
-                        .lineLimit(2)
-                        .foregroundStyle(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                HStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: Space.sm) {
+                HStack(alignment: .firstTextBaseline, spacing: Space.xs) {
                     Text(spent, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.subheadline, design: .rounded, weight: .medium))
-                        .foregroundStyle(.primary)
-                    Text("of").font(.caption).foregroundStyle(.secondary)
-                    Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(.subheadline, design: .rounded, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
-
-                HStack(spacing: 4) {
-                    Image(systemName: remaining >= 0 ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                        .font(.caption2).foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
-                    Text(remaining >= 0
-                         ? "\(remaining, format: .currency(code: CurrencyFormat.code)) left"
-                         : "\(abs(remaining), format: .currency(code: CurrencyFormat.code)) over")
+                        .font(NestType.amount)
+                        .foregroundStyle(spent > budgeted ? Color.negative : Color.nestBrown)
+                    Text("of \(budgeted, format: .currency(code: CurrencyFormat.code)) · \(periodLabel)")
                         .font(.caption)
-                        .foregroundStyle(remaining >= 0 ? Color.nestLeafGreen : .red)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
 
-                AnimatedProgressBar(progress: progress, color: statusColor, height: 3)
-                    .padding(.top, 2)
-            }
-            .layoutPriority(2)
+                ThinProgressBar(progress: progress, color: progressColor)
 
-            Spacer(minLength: 0)
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Image(systemName: budget.period.icon).font(.caption).foregroundStyle(.secondary)
-                Text(budget.period.compactLabel)
+                Text(statusCaption.isEmpty ? "No active budgets" : statusCaption)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
             }
-            .frame(width: 48, alignment: .trailing)
-            .fixedSize(horizontal: true, vertical: false)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(statusColor.opacity(0.2), lineWidth: 1)
-        )
-        .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
+        .padding(Space.md)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Budget summary")
+        .accessibilityValue("\(CurrencyFormat.money(spent)) of \(CurrencyFormat.money(budgeted)), \(Int(progress * 100))% used, \(remaining >= 0 ? CurrencyFormat.money(remaining) + " remaining" : CurrencyFormat.money(abs(remaining)) + " over")")
     }
 }
 
@@ -444,54 +426,11 @@ struct BudgetRowView: View {
 
 struct AnimatedProgressBar: View {
     let progress: Double
-    var color: Color = .nestLeafGreen
-    var height: CGFloat = 10
+    var color: Color = .positive
+    var height: CGFloat = 4
 
     var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: height / 2)
-                    .fill(Color.twig.opacity(0.15))
-                    .frame(height: height)
-                RoundedRectangle(cornerRadius: height / 2)
-                    .fill(color)
-                    .frame(width: geo.size.width * min(progress, 1.0), height: height)
-                    .animation(.spring(response: 0.6, dampingFraction: 0.8), value: progress)
-            }
-        }
-        .frame(height: height)
-    }
-}
-
-private struct FilterChip: View {
-    let label: String
-    var icon: String? = nil
-    let selected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                if let icon { Image(systemName: icon).font(.caption2) }
-                Text(label).font(.subheadline)
-            }
-            .padding(.horizontal, 14).padding(.vertical, 7)
-            .background(selected ? Color.nestBrown : Color.nestBrown.opacity(0.08),
-                        in: Capsule())
-            .foregroundStyle(selected ? .white : Color.nestBrown)
-        }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.3), value: selected)
-    }
-}
-
-private extension BudgetPeriod {
-    var compactLabel: String {
-        switch self {
-        case .weekly: return "Week"
-        case .monthly: return "Month"
-        case .yearly: return "Year"
-        }
+        ThinProgressBar(progress: progress, color: color, height: height)
     }
 }
 

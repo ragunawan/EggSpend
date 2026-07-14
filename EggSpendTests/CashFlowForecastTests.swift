@@ -197,6 +197,144 @@ final class CashFlowForecastTests: XCTestCase {
         XCTAssertTrue(Calendar.current.isDateInToday(events.first?.date ?? .distantPast))
     }
 
+    func testCreditCardPaymentEventsIncludeCardsDueThisMonth() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 10))!
+        let dueDate = calendar.date(from: DateComponents(year: 2026, month: 7, day: 30))!
+        let card = Account(name: "Rewards Card", type: .credit, balance: 900)
+        card.dueDate = dueDate
+        card.minimumPayment = 75
+
+        let events = ForecastEngine.creditCardPaymentEvents(from: [card], asOf: today, calendar: calendar)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events.first?.title, "Rewards Card payment")
+        XCTAssertEqual(events.first?.amount ?? 0, -75, accuracy: 0.001)
+    }
+
+    func testCreditCardPaymentEventsUseLastThirtyDaySpendWhenHigherThanMinimumPayment() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 10))!
+        let dueDate = calendar.date(from: DateComponents(year: 2026, month: 7, day: 30))!
+        let card = Account(name: "Rewards Card", type: .credit, balance: 900)
+        card.dueDate = dueDate
+        card.minimumPayment = 75
+
+        let recentA = Transaction(
+            title: "Groceries",
+            amount: 120,
+            date: calendar.date(byAdding: .day, value: -5, to: today)!,
+            type: .expense,
+            account: card
+        )
+        let recentB = Transaction(
+            title: "Gas",
+            amount: 80,
+            date: calendar.date(byAdding: .day, value: -12, to: today)!,
+            type: .expense,
+            account: card
+        )
+        let old = Transaction(
+            title: "Old",
+            amount: 500,
+            date: calendar.date(byAdding: .day, value: -31, to: today)!,
+            type: .expense,
+            account: card
+        )
+
+        let events = ForecastEngine.creditCardPaymentEvents(
+            from: [card],
+            transactions: [recentA, recentB, old],
+            asOf: today,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events.first?.amount ?? 0, -200, accuracy: 0.001)
+    }
+
+    func testCreditCardPaymentEventsIgnoreGeneratedAndAdjustmentSpendForLastThirtyDays() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 10))!
+        let dueDate = calendar.date(from: DateComponents(year: 2026, month: 7, day: 30))!
+        let card = Account(name: "Rewards Card", type: .credit, balance: 900)
+        card.dueDate = dueDate
+        card.minimumPayment = 75
+
+        let organic = Transaction(
+            title: "Groceries",
+            amount: 120,
+            date: calendar.date(byAdding: .day, value: -5, to: today)!,
+            type: .expense,
+            account: card
+        )
+        let generated = Transaction(
+            title: "Rewards Card payment",
+            amount: 300,
+            date: calendar.date(byAdding: .day, value: -3, to: today)!,
+            type: .expense,
+            account: card,
+            isGenerated: true
+        )
+        let adjustment = Transaction(
+            title: "Balance adjustment",
+            amount: 400,
+            date: calendar.date(byAdding: .day, value: -2, to: today)!,
+            type: .expense,
+            account: card,
+            isAdjustment: true
+        )
+
+        let events = ForecastEngine.creditCardPaymentEvents(
+            from: [card],
+            transactions: [organic, generated, adjustment],
+            asOf: today,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(events.first?.amount ?? 0, -120, accuracy: 0.001)
+    }
+
+    func testCreditCardPaymentEventsIncludeCardsDueWithinFourteenDaysAcrossMonthBoundary() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 25))!
+        let dueDate = calendar.date(from: DateComponents(year: 2026, month: 8, day: 2))!
+        let card = Account(name: "Travel Card", type: .credit, balance: 420)
+        card.dueDate = dueDate
+
+        let events = ForecastEngine.creditCardPaymentEvents(from: [card], asOf: today, calendar: calendar)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events.first?.amount ?? 0, -420, accuracy: 0.001)
+    }
+
+    func testCreditCardPaymentEventsExcludeCardsOutsideCurrentMonthAndFourteenDays() {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = calendar.date(from: DateComponents(year: 2026, month: 7, day: 10))!
+        let dueDate = calendar.date(from: DateComponents(year: 2026, month: 8, day: 15))!
+        let card = Account(name: "Later Card", type: .credit, balance: 420)
+        card.dueDate = dueDate
+
+        let events = ForecastEngine.creditCardPaymentEvents(from: [card], asOf: today, calendar: calendar)
+
+        XCTAssertTrue(events.isEmpty)
+    }
+
+    func testBuildForecastAppliesCreditCardPaymentOnDueDate() {
+        let calendar = Calendar.current
+        let checking = Account(name: "Checking", type: .checking, balance: 1_000)
+        let card = Account(name: "Card", type: .credit, balance: 300)
+        card.dueDate = calendar.date(byAdding: .day, value: 3, to: .now)!
+        card.minimumPayment = 50
+
+        let (points, events) = ForecastEngine.buildForecast(
+            accounts: [checking, card], transactions: [], recurring: [], horizonDays: 10
+        )
+
+        XCTAssertEqual(events.first?.amount ?? 0, -50, accuracy: 0.001)
+        XCTAssertEqual(points[2].balance - points[3].balance, 50, accuracy: 1.0)
+    }
+
     // MARK: - buildForecast
 
     func testBuildForecastPointCountEqualsHorizonPlusOne() {

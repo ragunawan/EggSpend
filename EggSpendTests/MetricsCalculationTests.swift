@@ -121,18 +121,39 @@ final class MetricsCalculationTests: XCTestCase {
         XCTAssertEqual(byCategory["Transport"] ?? 0, 12, accuracy: 0.001)
     }
 
-    func testCompactCurrencyAxisFormatterUsesLargeValueSuffixes() {
-        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 7_500_000_000_000), "$7.5T")
-        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 2_000_000_000), "$2B")
-        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 125_000_000), "$125M")
+    func testCompactCurrencyAxisFormatterUsesKForThousands() {
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 1_234), "$1.234K")
         XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 42_500), "$42.5K")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 125_000), "$125K")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 1_250_000), "$1250K")
     }
 
-    func testCompactCurrencyAxisFormatterRoundsAwayFloatingPointNoise() {
-        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 7_500_000_000_003.072), "$7.5T")
-        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 750.49), "$750")
-        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: -1_250_000_000_000), "-$1.3T")
+    func testCompactCurrencyAxisFormatterUsesAtMostFourDigits() {
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 7.1234), "$7.123")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: 750.49), "$750.5")
+        XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: -1_250_000), "-$1250K")
         XCTAssertEqual(CompactCurrencyAxisFormatter.string(from: .nan), "$0")
+    }
+
+    func testChartYAxisDomainPadsByTwentyPercentOfDataRange() {
+        let range = ChartYAxisDomain.range(for: [500, -125, 250, 900])
+
+        XCTAssertEqual(range.lowerBound, -330, accuracy: 0.001)
+        XCTAssertEqual(range.upperBound, 1105, accuracy: 0.001)
+    }
+
+    func testChartYAxisDomainIgnoresNonFiniteValues() {
+        let range = ChartYAxisDomain.range(for: [.nan, 12, .infinity, -8])
+
+        XCTAssertEqual(range.lowerBound, -12, accuracy: 0.001)
+        XCTAssertEqual(range.upperBound, 16, accuracy: 0.001)
+    }
+
+    func testChartYAxisDomainExpandsFlatSeriesForChartScale() {
+        let range = ChartYAxisDomain.range(for: [250, 250])
+
+        XCTAssertLessThan(range.lowerBound, 250)
+        XCTAssertGreaterThan(range.upperBound, 250)
     }
 
     private func insertTransactions(_ data: [(String, Double, TransactionType)]) {

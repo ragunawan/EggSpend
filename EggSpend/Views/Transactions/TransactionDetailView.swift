@@ -44,39 +44,56 @@ struct TransactionDetailView: View {
             HStack {
                 Spacer()
                 VStack(spacing: 8) {
-                    Image(systemName: transaction.type.systemImage)
-                        .font(.largeTitle)
-                        .foregroundStyle(transaction.type == .income ? .green : .red)
-                    Text(transaction.amount, format: .currency(code: CurrencyFormat.code))
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                    HStack(spacing: Space.sm) {
+                        Image(systemName: transaction.type.systemImage)
+                            .font(.title.weight(.semibold))
+                            .foregroundStyle(transaction.type == .income ? Color.positive : Color.negative)
+
+                        Text(transaction.amount, format: .currency(code: CurrencyFormat.code))
+                            .font(NestType.hero)
+                    }
+                    .fixedSize(horizontal: true, vertical: false)
+
                     Text(transaction.type.rawValue)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, Space.sm)
         }
     }
 
     private var detailsSection: some View {
         Section("Details") {
-            LabeledContent("Date") {
+            detailRow("Date") {
                 Text(transaction.date, style: .date)
             }
             if let account = transaction.account {
-                LabeledContent("Account") {
-                    Label(account.name, systemImage: account.type.icon)
-                        .foregroundStyle(.secondary)
+                detailRow("Account") {
+                    HStack(spacing: Space.sm) {
+                        Image(systemName: account.type.icon)
+                        Text(account.name)
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(.secondary)
                 }
             }
             if let category = transaction.category {
-                LabeledContent("Category") {
+                detailRow("Category") {
                     CategoryBadgeView(category: category)
                 }
             }
-            LabeledContent("Title") {
+            if transaction.type == .expense, let budget = transaction.budget {
+                detailRow("Budget") {
+                    Label(budget.name, systemImage: budget.period.icon)
+                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            detailRow("Payee") {
                 Text(transaction.title)
+                    .lineLimit(1)
             }
         }
     }
@@ -90,11 +107,25 @@ struct TransactionDetailView: View {
 
     private var metaSection: some View {
         Section {
-            LabeledContent("Added") {
+            detailRow("Added") {
                 Text(transaction.createdAt, style: .date)
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private func detailRow<Value: View>(
+        _ title: LocalizedStringKey,
+        @ViewBuilder value: () -> Value
+    ) -> some View {
+        HStack(alignment: .center, spacing: Space.md) {
+            Text(title)
+                .foregroundStyle(.primary)
+            Spacer(minLength: Space.md)
+            value()
+                .multilineTextAlignment(.trailing)
+        }
+        .frame(minHeight: 28)
     }
 
     private func deleteAndDismiss() {

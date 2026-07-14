@@ -17,11 +17,20 @@ struct AddTransactionView: View {
 
     @Query private var categories: [TransactionCategory]
     @Query(sort: \Account.name) private var accounts: [Account]
-    @Query(filter: #Predicate<Budget> { $0.isActive }) private var budgets: [Budget]
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @Query private var categoryRules: [CategoryRule]
+    @Query private var budgets: [Budget]
+    @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
 
     var editingTransaction: Transaction? = nil
     var editingTransfer: Transfer? = nil
     var initialEntryKind: EntryKind = .expense
+    var initialTitle: String = ""
+    var initialAmountText: String = ""
+    var initialDate: Date = .now
+    var initialCategory: TransactionCategory? = nil
+    var initialAccount: Account? = nil
+    var initialBudget: Budget? = nil
 
     @State private var title = ""
     @State private var amountText = ""
@@ -68,12 +77,18 @@ struct AddTransactionView: View {
             .sorted { $0.sortOrder < $1.sortOrder }
     }
 
-    // Budgets only ever track expense spend, so the selector is expense-only.
     private var availableBudgets: [Budget] {
-        budgets.sorted { $0.name < $1.name }
+        budgets
+            .filter { $0.isActive || $0.id == selectedBudget?.id }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     private var amount: Double { AmountParser.parse(amountText) ?? 0 }
+
+    private var payeeSuggestions: [MerchantSuggestion] {
+        guard selectedEntryKind != .transfer, !isEditing else { return [] }
+        return MerchantSuggestion.matching(title, in: transactions, limit: 5)
+    }
 
     private var isValid: Bool {
         guard amount > 0 else { return false }
@@ -96,8 +111,10 @@ struct AddTransactionView: View {
                 } else {
                     detailsSection
                     accountSection
-                    if selectedEntryKind == .expense { budgetSection }
                     categorySection
+                    if selectedEntryKind == .expense {
+                        budgetSection
+                    }
                 }
                 notesSection
             }
@@ -117,7 +134,7 @@ struct AddTransactionView: View {
             } message: {
                 Text(selectedEntryKind == .transfer
                      ? "Please choose two different accounts and an amount greater than zero."
-                     : "Please enter a title and an amount greater than zero.")
+                     : "Please enter a payee and an amount greater than zero.")
             }
             .onAppear { populateIfEditing() }
         }
@@ -147,7 +164,9 @@ struct AddTransactionView: View {
                     if let cat = selectedCategory, cat.appliesTo != nil, cat.appliesTo != newKind.transactionType {
                         selectedCategory = nil
                     }
-                    if newKind != .expense { selectedBudget = nil }
+                    if newKind != .expense {
+                        selectedBudget = nil
+                    }
                 }
             }
         }
@@ -155,7 +174,12 @@ struct AddTransactionView: View {
 
     private var detailsSection: some View {
         Section("Details") {
-            TextField("Title", text: $title)
+            TextField("Payee", text: $title)
+                .textInputAutocapitalization(.words)
+                .onSubmit { prefillCategoryForTitle() }
+            if !payeeSuggestions.isEmpty {
+                payeeSuggestionsList
+            }
             HStack {
                 Text(CurrencyFormat.symbol)
                     .foregroundStyle(.secondary)
@@ -166,6 +190,41 @@ struct AddTransactionView: View {
             }
             DatePicker("Date", selection: $date, displayedComponents: .date)
         }
+    }
+
+    private var payeeSuggestionsList: some View {
+        VStack(alignment: .leading, spacing: Space.xs) {
+            ForEach(payeeSuggestions) { suggestion in
+                Button {
+                    applyPayeeSuggestion(suggestion)
+                } label: {
+                    HStack(spacing: Space.sm) {
+                        Image(systemName: suggestion.type.systemImage)
+                            .foregroundStyle(suggestion.type == .income ? Color.positive : Color.negative)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(suggestion.title)
+                                .foregroundStyle(.primary)
+                            if !suggestionSubtitle(for: suggestion).isEmpty {
+                                Text(suggestionSubtitle(for: suggestion))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        Spacer()
+                        Image(systemName: "arrow.up.left")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Fills payee, category, and account from the most recent matching transaction")
+            }
+        }
+        .padding(.vertical, Space.xs)
     }
 
     private var transferDetailsSection: some View {
@@ -211,10 +270,11 @@ struct AddTransactionView: View {
                         }
                         .foregroundStyle(.secondary)
                     }
-                    .frame(maxWidth: 180, alignment: .trailing)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                     .accessibilityLabel("Account")
                     .accessibilityValue(selectedAccount?.name ?? "None")
                 }
+                .frame(minHeight: 44)
             }
         }
     }
@@ -246,34 +306,11 @@ struct AddTransactionView: View {
                 if let fromAccount, let toAccount, fromAccount.id == toAccount.id {
                     Label("Choose two different accounts.", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.negative)
                 }
             }
         } header: {
             Text("Accounts")
-        }
-    }
-
-    private var budgetSection: some View {
-        Section {
-            if availableBudgets.isEmpty {
-                Text("No budgets added yet")
-                    .foregroundStyle(.secondary)
-            } else {
-                Picker("Budget", selection: $selectedBudget) {
-                    Text("None").tag(Optional<Budget>.none)
-                    ForEach(availableBudgets) { budget in
-                        Text(budget.name).tag(Optional(budget))
-                    }
-                }
-                .onChange(of: selectedBudget) { _, newBudget in
-                    if let newBudget { selectedCategory = newBudget.category }
-                }
-            }
-        } header: {
-            Text("Budget")
-        } footer: {
-            Text("Assigns this transaction's category to match the selected budget.")
         }
     }
 
@@ -290,9 +327,21 @@ struct AddTransactionView: View {
                     }
                     Text("None").tag(Optional<TransactionCategory>.none)
                 }
-                .onChange(of: selectedCategory) { _, newCategory in
-                    if let selectedBudget, selectedBudget.category?.id != newCategory?.id {
-                        self.selectedBudget = nil
+            }
+        }
+    }
+
+    private var budgetSection: some View {
+        Section("Budget") {
+            if availableBudgets.isEmpty {
+                Text("No active budgets")
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker("Budget", selection: $selectedBudget) {
+                    Text("Unbudgeted").tag(Optional<Budget>.none)
+                    ForEach(availableBudgets) { budget in
+                        Label(budget.name, systemImage: budget.period.icon)
+                            .tag(Optional(budget))
                     }
                 }
             }
@@ -323,64 +372,53 @@ struct AddTransactionView: View {
     private func saveTransaction() {
         guard let type = selectedEntryKind.transactionType else { return }
         if let tx = editingTransaction {
-            // Capture old account before any changes so we can reverse its effect.
-            let oldAccount = tx.account
-            AccountBalanceService.reverse(tx, from: oldAccount)
-
-            tx.title = title.trimmingCharacters(in: .whitespaces)
-            tx.amount = amount
-            tx.date = date
-            tx.type = type
-            tx.category = selectedCategory
-            tx.account = selectedAccount
-            tx.notes = notes
-
-            AccountBalanceService.apply(tx, to: selectedAccount)
-            if let selectedCategory {
-                CategoryRuleEngine.recordRule(title: title.trimmingCharacters(in: .whitespaces), category: selectedCategory, context: modelContext)
-            }
-            BudgetAlertCoordinator.checkBudgets(context: modelContext)
-        } else {
-            let tx = Transaction(
-                title: title.trimmingCharacters(in: .whitespaces),
+            TransactionEntryService.updateTransaction(
+                tx,
+                title: title,
                 amount: amount,
                 date: date,
                 type: type,
                 category: selectedCategory,
                 account: selectedAccount,
-                notes: notes
+                budget: selectedBudget,
+                notes: notes,
+                context: modelContext
             )
-            modelContext.insert(tx)
-            AccountBalanceService.apply(tx, to: selectedAccount)
-            if let selectedCategory {
-                CategoryRuleEngine.recordRule(title: title.trimmingCharacters(in: .whitespaces), category: selectedCategory, context: modelContext)
-            }
-            BudgetAlertCoordinator.checkBudgets(context: modelContext)
+        } else {
+            TransactionEntryService.createTransaction(
+                title: title,
+                amount: amount,
+                date: date,
+                type: type,
+                category: selectedCategory,
+                account: selectedAccount,
+                budget: selectedBudget,
+                notes: notes,
+                context: modelContext
+            )
         }
+        rememberSelectedAccount()
     }
 
     private func saveTransfer() {
         if let transfer = editingTransfer {
-            // Capture old accounts before any changes so we can reverse their effect.
-            TransferBalanceService.reverse(transfer)
-
-            transfer.amount = amount
-            transfer.date = date
-            transfer.fromAccount = fromAccount
-            transfer.toAccount = toAccount
-            transfer.notes = notes
-
-            TransferBalanceService.apply(transfer)
-        } else {
-            let transfer = Transfer(
+            TransactionEntryService.updateTransfer(
+                transfer,
                 amount: amount,
                 date: date,
                 fromAccount: fromAccount,
                 toAccount: toAccount,
                 notes: notes
             )
-            modelContext.insert(transfer)
-            TransferBalanceService.apply(transfer)
+        } else {
+            TransactionEntryService.createTransfer(
+                amount: amount,
+                date: date,
+                fromAccount: fromAccount,
+                toAccount: toAccount,
+                notes: notes,
+                context: modelContext
+            )
         }
     }
 
@@ -392,9 +430,7 @@ struct AddTransactionView: View {
             selectedEntryKind = tx.type == .income ? .income : .expense
             selectedCategory = tx.category
             selectedAccount = tx.account
-            if tx.type == .expense {
-                selectedBudget = availableBudgets.first { $0.category?.id == tx.category?.id }
-            }
+            selectedBudget = tx.type == .expense ? tx.budget : nil
             notes = tx.notes
         } else if let transfer = editingTransfer {
             selectedEntryKind = .transfer
@@ -405,7 +441,89 @@ struct AddTransactionView: View {
             notes = transfer.notes
         } else {
             selectedEntryKind = initialEntryKind
+            title = initialTitle
+            amountText = initialAmountText
+            date = initialDate
+            selectedCategory = initialCategory
+            selectedAccount = initialAccount
+            selectedBudget = initialEntryKind == .expense ? initialBudget : nil
+            if let selectedCategory, !categoryMatchesSelectedType(selectedCategory) {
+                self.selectedCategory = nil
+            }
+            applyLastUsedAccountDefault()
         }
+    }
+
+    private func prefillCategoryForTitle() {
+        guard let category = CategoryRuleEngine.categoryFor(title: title, rules: categoryRules, categories: categories),
+              categoryMatchesSelectedType(category)
+        else { return }
+        selectedCategory = category
+    }
+
+    private func applyPayeeSuggestion(_ suggestion: MerchantSuggestion) {
+        title = suggestion.title
+        selectedEntryKind = suggestion.type == .income ? .income : .expense
+        selectedCategory = resolvedCategory(for: suggestion)
+        if suggestion.type == .income {
+            selectedBudget = nil
+        }
+        if let account = suggestion.account, !account.isArchived {
+            selectedAccount = account
+        }
+    }
+
+    private func resolvedCategory(for suggestion: MerchantSuggestion) -> TransactionCategory? {
+        let ruleCategory = CategoryRuleEngine.categoryFor(title: suggestion.title, rules: categoryRules, categories: categories)
+        if categoryMatchesSelectedType(ruleCategory) {
+            return ruleCategory
+        }
+        if categoryMatchesSelectedType(suggestion.category) {
+            return suggestion.category
+        }
+        return nil
+    }
+
+    private func categoryMatchesSelectedType(_ category: TransactionCategory?) -> Bool {
+        guard let category else { return false }
+        return categoryMatchesSelectedType(category)
+    }
+
+    private func suggestionSubtitle(for suggestion: MerchantSuggestion) -> String {
+        [suggestion.category?.name, suggestion.account?.name]
+            .compactMap { $0 }
+            .joined(separator: " • ")
+    }
+
+    private func categoryMatchesSelectedType(_ category: TransactionCategory) -> Bool {
+        guard let type = selectedEntryKind.transactionType else { return false }
+        return !category.isArchived && (category.appliesTo == nil || category.appliesTo == type)
+    }
+
+    private func applyLastUsedAccountDefault() {
+        guard !isEditing,
+              initialAccount == nil,
+              selectedAccount == nil,
+              selectedEntryKind != .transfer,
+              !lastUsedAccountID.isEmpty
+        else { return }
+
+        guard let id = UUID(uuidString: lastUsedAccountID) else {
+            lastUsedAccountID = ""
+            return
+        }
+
+        guard let account = accounts.first(where: { $0.id == id && !$0.isArchived }) else {
+            lastUsedAccountID = ""
+            return
+        }
+
+        selectedAccount = account
+    }
+
+    private func rememberSelectedAccount() {
+        guard let selectedAccount else { return }
+        lastUsedAccountID = selectedAccount.id.uuidString
     }
 }
 

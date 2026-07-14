@@ -133,8 +133,8 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
 
         let month = date(2026, 3, 15)
         let txs = [
-            Transaction(title: "Groceries", amount: 150, date: date(2026, 3, 5), type: .expense, category: food),
-            Transaction(title: "Bus",       amount: 50,  date: date(2026, 3, 6), type: .expense, category: nil)
+            Transaction(title: "Groceries", amount: 150, date: date(2026, 3, 5), type: .expense, category: food, budget: overBudget),
+            Transaction(title: "Bus",       amount: 50,  date: date(2026, 3, 6), type: .expense, category: nil, budget: underBudget)
         ]
         txs.forEach { context.insert($0) }
         try context.save()
@@ -164,17 +164,16 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
         let big = Budget(name: "Big", limitAmount: 100, period: .monthly, category: nil)
         [small, big].forEach { context.insert($0) }
 
-        // Both budgets are uncategorized (nil), so they'd double count against the same
-        // transactions in this simplified scenario; evaluate independently instead.
+        // Evaluate independently to make each overage assertion direct.
         let month = date(2026, 3, 15)
         let smallOverruns = MonthlyReviewCalculator.budgetOverruns(
             budgets: [small],
-            transactions: [Transaction(title: "A", amount: 30, date: date(2026, 3, 2), type: .expense)],
+            transactions: [Transaction(title: "A", amount: 30, date: date(2026, 3, 2), type: .expense, budget: small)],
             month: month
         )
         let bigOverruns = MonthlyReviewCalculator.budgetOverruns(
             budgets: [big],
-            transactions: [Transaction(title: "B", amount: 500, date: date(2026, 3, 2), type: .expense)],
+            transactions: [Transaction(title: "B", amount: 500, date: date(2026, 3, 2), type: .expense, budget: big)],
             month: month
         )
         XCTAssertEqual(smallOverruns.first?.overage ?? 0, 20, accuracy: 0.001)
@@ -265,7 +264,7 @@ final class MonthlyReviewCalculatorTests: XCTestCase {
         let month = date(2026, 3, 15)
         let txs = [
             Transaction(title: "Salary",   amount: 3000, date: date(2026, 3, 1),  type: .income),
-            Transaction(title: "Groceries",amount: 80,   date: date(2026, 3, 5),  type: .expense, category: food),
+            Transaction(title: "Groceries",amount: 80,   date: date(2026, 3, 5),  type: .expense, category: food, budget: budget),
             Transaction(title: "Rent",     amount: 1200, date: date(2026, 3, 6),  type: .expense),
             Transaction(title: "Old food", amount: 999,  date: date(2026, 1, 1),  type: .expense, category: food)
         ]

@@ -26,20 +26,19 @@ FR = {
     "TransactionDetailView":u(1, 0x09),
     "NetWorthView":        u(1, 0x0A),
     "MetricsView":         u(1, 0x0B),
+    # Reserved for deleted AccountsView.swift; keep this slot stable so
+    # generated PBXBuildFile IDs for later files do not churn.
     "AccountsView":        u(1, 0x0C),
     "AddAccountView":      u(1, 0x0D),
     "CategoryBadgeView":   u(1, 0x0E),
     "AmountLabel":         u(1, 0x0F),
-    "TransactionRowView":  u(1, 0x10),
     "PersistenceController":u(1, 0x11),
     "Assets":              u(1, 0x12),
     # New v2 files
     "EggSpendTheme":      u(1, 0x13),
     "Budget":              u(1, 0x14),
     "RecurringTransaction":u(1, 0x15),
-    "NestHeaderView":      u(1, 0x16),
     "EggProgressView":     u(1, 0x17),
-    "BirdAnimationView":   u(1, 0x18),
     "BudgetView":          u(1, 0x19),
     "AddBudgetView":       u(1, 0x1A),
     "BudgetDetailView":    u(1, 0x40),
@@ -84,11 +83,8 @@ FR = {
     "NotificationScheduler":       u(1, 0x57),
     "BudgetAlertCoordinator":      u(1, 0x58),
     "TEST_NotificationScheduler":  u(1, 0x59),
-    "FloatingLeavesView":          u(1, 0x5A),
-    "AnimatedCanopyBackground":    u(1, 0x5B),
     "Transfer":                u(1, 0x5C),
     "TransferBalanceService":  u(1, 0x5D),
-    "TransferRowView":         u(1, 0x5E),
     "TransferDetailView":      u(1, 0x5F),
     "TEST_Transfer":           u(1, 0x60),
     "RecurringProjection":     u(1, 0x61),
@@ -126,6 +122,22 @@ FR = {
     "DuplicateSweeper":        u(1, 0x81),
     "TEST_DuplicateSweeper":   u(1, 0x82),
     "Localizable":             u(1, 0x83),
+    "DesignSystem":           u(1, 0x84),
+    "NestBackground":         u(1, 0x85),
+    "SectionHeader":          u(1, 0x86),
+    "AmountText":             u(1, 0x87),
+    "StatTile":               u(1, 0x88),
+    "ThinProgressBar":        u(1, 0x89),
+    "CompactProgressRow":     u(1, 0x8A),
+    "LedgerRowView":          u(1, 0x8B),
+    "EmptyStateView":         u(1, 0x8C),
+    "DashboardHomeComponents": u(1, 0x8D),
+    "TransactionEntryService": u(1, 0x8E),
+    "TEST_TransactionEntryService": u(1, 0x8F),
+    "CurrencyKeypadView":     u(1, 0x90),
+    "MerchantSuggestion":     u(1, 0x91),
+    "TEST_MerchantSuggestion": u(1, 0x92),
+    "QuickAddSheet":          u(1, 0x93),
 }
 
 # Build files
@@ -158,6 +170,7 @@ GR = {
     "Settings":   u(3, 0x17),
     "Subscriptions": u(3, 0x18),
     "Onboarding":    u(3, 0x19),
+    "QuickAdd":      u(3, 0x1A),
 }
 
 # Targets
@@ -193,6 +206,15 @@ APP_SOURCES = [
     ("EggSpendApp",         "EggSpendApp.swift"),
     ("ContentView",          "ContentView.swift"),
     ("EggSpendTheme",       "EggSpendTheme.swift"),
+    ("DesignSystem",        "Views/Components/DesignSystem.swift"),
+    ("NestBackground",      "Views/Components/NestBackground.swift"),
+    ("SectionHeader",       "Views/Components/SectionHeader.swift"),
+    ("AmountText",          "Views/Components/AmountText.swift"),
+    ("StatTile",            "Views/Components/StatTile.swift"),
+    ("ThinProgressBar",     "Views/Components/ThinProgressBar.swift"),
+    ("CompactProgressRow",  "Views/Components/CompactProgressRow.swift"),
+    ("LedgerRowView",       "Views/Components/LedgerRowView.swift"),
+    ("EmptyStateView",      "Views/Components/EmptyStateView.swift"),
     ("Transaction",          "Models/Transaction.swift"),
     ("TransactionCategory",  "Models/TransactionCategory.swift"),
     ("Account",              "Models/Account.swift"),
@@ -204,13 +226,16 @@ APP_SOURCES = [
     ("CategoryRule",         "Models/CategoryRule.swift"),
     ("RecurringProjection",  "Utilities/RecurringProjection.swift"),
     ("DashboardView",        "Views/Dashboard/DashboardView.swift"),
+    ("DashboardHomeComponents", "Views/Dashboard/DashboardHomeComponents.swift"),
     ("TransactionsListView", "Views/Transactions/TransactionsListView.swift"),
     ("AddTransactionView",   "Views/Transactions/AddTransactionView.swift"),
     ("TransactionDetailView","Views/Transactions/TransactionDetailView.swift"),
     ("TransferDetailView",   "Views/Transactions/TransferDetailView.swift"),
+    ("CurrencyKeypadView",   "Views/QuickAdd/CurrencyKeypadView.swift"),
+    ("MerchantSuggestion",   "Views/QuickAdd/MerchantSuggestion.swift"),
+    ("QuickAddSheet",        "Views/QuickAdd/QuickAddSheet.swift"),
     ("NetWorthView",         "Views/NetWorth/NetWorthView.swift"),
     ("MetricsView",          "Views/Metrics/MetricsView.swift"),
-    ("AccountsView",         "Views/Accounts/AccountsView.swift"),
     ("AddAccountView",       "Views/Accounts/AddAccountView.swift"),
     ("DebtPayoffPlannerView", "Views/Accounts/DebtPayoffPlannerView.swift"),
     ("BudgetView",           "Views/Budget/BudgetView.swift"),
@@ -219,20 +244,15 @@ APP_SOURCES = [
     ("RecurringTransactionsView", "Views/Recurring/RecurringTransactionsView.swift"),
     ("RecurringNext30DaysView", "Views/Recurring/RecurringNext30DaysView.swift"),
     ("AddRecurringTransactionView","Views/Recurring/AddRecurringTransactionView.swift"),
-    ("NestHeaderView",       "Views/Components/NestHeaderView.swift"),
     ("EggProgressView",      "Views/Components/EggProgressView.swift"),
-    ("BirdAnimationView",    "Views/Components/BirdAnimationView.swift"),
-    ("FloatingLeavesView",   "Views/Components/FloatingLeavesView.swift"),
-    ("AnimatedCanopyBackground", "Views/Components/AnimatedCanopyBackground.swift"),
     ("CategoryBadgeView",    "Views/Components/CategoryBadgeView.swift"),
     ("AmountLabel",          "Views/Components/AmountLabel.swift"),
-    ("TransactionRowView",   "Views/Components/TransactionRowView.swift"),
-    ("TransferRowView",      "Views/Components/TransferRowView.swift"),
     ("PersistenceController","Persistence/PersistenceController.swift"),
     ("SyncStatus",            "Persistence/SyncStatus.swift"),
     ("CSVParser",            "Utilities/CSVParser.swift"),
     ("AccountBalanceService","Utilities/AccountBalanceService.swift"),
     ("TransferBalanceService","Utilities/TransferBalanceService.swift"),
+    ("TransactionEntryService","Utilities/TransactionEntryService.swift"),
     ("CSVImportView",        "Views/Import/CSVImportView.swift"),
     ("CategoryManagementView", "Views/Categories/CategoryManagementView.swift"),
     ("AddEditCategoryView",    "Views/Categories/AddEditCategoryView.swift"),
@@ -297,6 +317,8 @@ TEST_SOURCES = [
     ("TEST_AppLockController",  "EggSpendTests/AppLockControllerTests.swift"),
     ("TEST_TransactionGrouping", "EggSpendTests/TransactionGroupingTests.swift"),
     ("TEST_DuplicateSweeper",    "EggSpendTests/DuplicateSweeperTests.swift"),
+    ("TEST_TransactionEntryService", "EggSpendTests/TransactionEntryServiceTests.swift"),
+    ("TEST_MerchantSuggestion", "EggSpendTests/MerchantSuggestionTests.swift"),
 ]
 
 def pbxproj():
@@ -443,6 +465,7 @@ def pbxproj():
     a(f"\t\t\tchildren = (")
     a(f"\t\t\t\t{GR['Dashboard']} /* Dashboard */,")
     a(f"\t\t\t\t{GR['Transactions']} /* Transactions */,")
+    a(f"\t\t\t\t{GR['QuickAdd']} /* QuickAdd */,")
     a(f"\t\t\t\t{GR['Budget']} /* Budget */,")
     a(f"\t\t\t\t{GR['Recurring']} /* Recurring */,")
     a(f"\t\t\t\t{GR['Subscriptions']} /* Subscriptions */,")
@@ -475,19 +498,20 @@ def pbxproj():
         a(f"\t\t\tsourceTree = \"<group>\";")
         a(f"\t\t}};")
 
-    simple_group("Dashboard",    "Dashboard",    ["DashboardView"])
+    simple_group("Dashboard",    "Dashboard",    ["DashboardView", "DashboardHomeComponents"])
     simple_group("Transactions", "Transactions", ["TransactionsListView","AddTransactionView","TransactionDetailView","TransactionFilterView","TransferDetailView"])
+    simple_group("QuickAdd",     "QuickAdd",     ["CurrencyKeypadView", "MerchantSuggestion", "QuickAddSheet"])
     simple_group("Budget",       "Budget",       ["BudgetView","AddBudgetView","BudgetDetailView"])
     simple_group("Recurring",    "Recurring",    ["RecurringTransactionsView","RecurringNext30DaysView","AddRecurringTransactionView"])
     simple_group("Subscriptions", "Subscriptions", ["SubscriptionAuditView"])
     simple_group("Onboarding",   "Onboarding",   ["OnboardingView"])
     simple_group("NetWorth",     "NetWorth",     ["NetWorthView"])
     simple_group("Metrics",      "Metrics",      ["MetricsView"])
-    simple_group("Accounts",     "Accounts",     ["AccountsView","AddAccountView","DebtPayoffPlannerView"])
-    simple_group("Components",   "Components",   ["NestHeaderView","EggProgressView","BirdAnimationView","FloatingLeavesView","AnimatedCanopyBackground","CategoryBadgeView","AmountLabel","TransactionRowView","TransferRowView"])
+    simple_group("Accounts",     "Accounts",     ["AddAccountView","DebtPayoffPlannerView"])
+    simple_group("Components",   "Components",   ["DesignSystem","NestBackground","SectionHeader","AmountText","StatTile","ThinProgressBar","CompactProgressRow","LedgerRowView","EmptyStateView","EggProgressView","CategoryBadgeView","AmountLabel"])
     simple_group("ImportViews",  "Import",       ["CSVImportView"])
     simple_group("Categories",   "Categories",   ["CategoryManagementView", "AddEditCategoryView"])
-    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController", "TransactionGrouping", "DuplicateSweeper"])
+    simple_group("Utilities",    "Utilities",    ["CSVParser", "AccountBalanceService", "TransferBalanceService", "TransactionEntryService", "MonthlyReviewCalculator", "NetWorthCalculator", "TransactionFilter", "SafeSpendCalculator", "DebtPayoffCalculator", "RecurringProjection", "NotificationScheduler", "BudgetAlertCoordinator", "AmountParser", "CurrencyFormat", "DataExporter", "BalanceSnapshotService", "SubscriptionDetector", "CategoryRuleEngine", "SpendingDeltaCalculator", "NarrativeGenerator", "AppLockController", "TransactionGrouping", "DuplicateSweeper"])
     simple_group("Forecast",    "Forecast",     ["ForecastEngine", "CashFlowForecastView", "CashFlowCalendarView"])
     simple_group("MonthlyReview", "MonthlyReview", ["MonthlyReviewView"])
     simple_group("SavingsGoals", "SavingsGoals", ["SavingsGoalsView", "AddSavingsGoalView"])

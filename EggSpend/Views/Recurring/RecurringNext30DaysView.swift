@@ -25,7 +25,7 @@ struct RecurringNext30DaysView: View {
 
     var body: some View {
         ZStack {
-            AnimatedCanopyBackground()
+            NestBackground()
 
             List {
                 summarySection
@@ -62,8 +62,8 @@ struct RecurringNext30DaysView: View {
         Section {
             HStack(spacing: 10) {
                 summaryChip("Income", incomeTotal, Color.eggBlue, "arrow.down.circle.fill")
-                summaryChip("Expenses", expenseTotal, .red, "arrow.up.circle.fill")
-                summaryChip("Net", incomeTotal - expenseTotal, incomeTotal >= expenseTotal ? Color.nestLeafGreen : .red, "equal.circle.fill")
+                summaryChip("Expenses", expenseTotal, Color.negative, "arrow.up.circle.fill")
+                summaryChip("Net", incomeTotal - expenseTotal, incomeTotal >= expenseTotal ? Color.nestLeafGreen : Color.negative, "equal.circle.fill")
             }
         }
         .listRowBackground(Color.clear)
@@ -117,7 +117,7 @@ struct RecurringNext30DaysView: View {
         }
         .padding(.vertical, 5)
         .padding(.horizontal, 12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
     }
 }

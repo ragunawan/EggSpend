@@ -98,6 +98,7 @@ final class NetWorthCalculationTests: XCTestCase {
         XCTAssertTrue(AccountType.other.isAsset)
         XCTAssertFalse(AccountType.credit.isAsset)
         XCTAssertFalse(AccountType.loan.isAsset)
+        XCTAssertFalse(AccountType.mortgage.isAsset)
     }
 
     func testAccountBalancePersistence() throws {
@@ -388,5 +389,39 @@ final class NetWorthCalculationTests: XCTestCase {
 
         let netWorth = NetWorthCalculator.at(date: day, accounts: accounts, transactions: [], snapshots: snapshots)
         XCTAssertEqual(netWorth, 1000, accuracy: 0.001)
+    }
+
+    func testTimelineBuildsDailyBucketsUsingAtDateValues() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1000)
+        context.insert(checking)
+        try context.save()
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date.now)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+        let twoDaysAgo = calendar.date(byAdding: .day, value: -2, to: today)!
+
+        let deposit = Transaction(title: "Deposit", amount: 200, date: yesterday, type: .income, account: checking)
+        context.insert(deposit)
+        AccountBalanceService.apply(deposit, to: checking)
+        try context.save()
+
+        let accounts = try context.fetch(FetchDescriptor<Account>())
+        let transactions = try context.fetch(FetchDescriptor<Transaction>())
+        let timeline = NetWorthCalculator.timeline(
+            accounts: accounts,
+            transactions: transactions,
+            snapshots: [],
+            days: 3,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(timeline.count, 3)
+        XCTAssertTrue(calendar.isDate(timeline[0].date, inSameDayAs: twoDaysAgo))
+        XCTAssertTrue(calendar.isDate(timeline[1].date, inSameDayAs: yesterday))
+        XCTAssertTrue(calendar.isDate(timeline[2].date, inSameDayAs: today))
+        XCTAssertEqual(timeline[0].worth, 1000, accuracy: 0.001)
+        XCTAssertEqual(timeline[1].worth, 1200, accuracy: 0.001)
+        XCTAssertEqual(timeline[2].worth, 1200, accuracy: 0.001)
     }
 }

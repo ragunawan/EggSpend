@@ -5,7 +5,7 @@ struct AmountLabel: View {
     let type: TransactionType
     var font: Font = .body
 
-    private var color: Color { type == .income ? .green : .red }
+    private var color: Color { type == .income ? .positive : .negative }
     private var prefix: String { type == .income ? "+" : "-" }
 
     var body: some View {

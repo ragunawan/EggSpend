@@ -40,7 +40,7 @@ struct SavingsGoalsView: View {
                     }
                 }
             }
-            .background(AnimatedCanopyBackground())
+            .background(NestBackground())
             .navigationTitle("Savings Goals")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -113,7 +113,7 @@ struct SavingsGoalsView: View {
                                 modelContext.delete(goal)
                             }
                             Button("Edit", systemImage: "pencil") { editingGoal = goal }
-                                .tint(.blue)
+                                .tint(Color.info)
                         }
                         .swipeActions(edge: .leading) {
                             Button("Complete", systemImage: "checkmark.seal.fill") {
@@ -167,7 +167,7 @@ struct SavingsGoalsView: View {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     modelContext.delete(goal)
                                 }
-                                Button("Edit", systemImage: "pencil") { editingGoal = goal }.tint(.blue)
+                                Button("Edit", systemImage: "pencil") { editingGoal = goal }.tint(Color.info)
                             }
                             .swipeActions(edge: .leading) {
                                 Button("Reactivate", systemImage: "arrow.counterclockwise") {
@@ -205,6 +205,7 @@ struct SavingsGoalsView: View {
 
 struct SavingsGoalRowView: View {
     let goal: SavingsGoal
+    var showsProgressPercentage = true
 
     private var goalColor: Color { Color(hex: goal.colorHex) ?? .yolk }
 
@@ -215,7 +216,7 @@ struct SavingsGoalRowView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
-                EggProgressView(progress: goal.progress, size: 56)
+                EggProgressView(progress: goal.progress, size: 56, showsPercentage: showsProgressPercentage)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(goal.name)
                     .accessibilityValue(progressAccessibilityValue)
@@ -252,7 +253,7 @@ struct SavingsGoalRowView: View {
                         if let daysRemaining = goal.daysRemaining, !goal.isCompleted {
                             Text(dateLabel(for: daysRemaining))
                                 .font(.caption2)
-                                .foregroundStyle(daysRemaining < 0 ? .red : Color.twig)
+                                .foregroundStyle(daysRemaining < 0 ? Color.negative : Color.twig)
                         }
                     }
 
@@ -271,9 +272,9 @@ struct SavingsGoalRowView: View {
 
             AnimatedProgressBar(progress: goal.progress, color: goal.statusColor, height: 3)
         }
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous)
                 .stroke(goal.statusColor.opacity(0.2), lineWidth: 1)
         )
         .shadow(color: Color.nestBrown.opacity(0.07), radius: 5, y: 2)
