@@ -367,7 +367,7 @@ struct MetricsView: View {
                         .foregroundStyle(Color.nestBrown.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                         .annotation(position: .top,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
                             netWorthCallout(date: closest.date, worth: closest.worth)
                         }
                         // Selection state is already exposed via the LineMark's own
@@ -494,7 +494,7 @@ struct MetricsView: View {
                         .foregroundStyle(Color.nestBrown.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                         .annotation(position: .top,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .disabled)) {
+                                    overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
                             cashFlowCallout(date: closest.date,
                                             income: closest.income,
                                             expenses: closest.expenses)
@@ -544,13 +544,18 @@ struct MetricsView: View {
             // Explicit lineLimit + fixedSize keep these single-line under the narrow
             // width the chart annotation can propose during selection — without it,
             // SwiftUI wraps the currency text one character per line (icon stays put).
+            // .titleAndIcon is required too: under that same narrow proposed width,
+            // Label's automatic style collapses to icon-only (as it does in a
+            // constrained toolbar), dropping the amount text entirely.
             Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                   systemImage: "arrow.down.circle.fill")
+                .labelStyle(.titleAndIcon)
                 .font(.caption).foregroundStyle(Color.nestLeafGreen)
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
             Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
                   systemImage: "arrow.up.circle.fill")
+                .labelStyle(.titleAndIcon)
                 .font(.caption).foregroundStyle(Color.negative)
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)

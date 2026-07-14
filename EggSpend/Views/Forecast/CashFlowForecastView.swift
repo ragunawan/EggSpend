@@ -235,7 +235,7 @@ struct CashFlowForecastView: View {
                             .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
                             .annotation(
                                 position: .top,
-                                overflowResolution: .init(x: .fit(to: .chart), y: .disabled)
+                                overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))
                             ) {
                                 balanceCallout(date: closest.date, balance: closest.balance)
                             }
