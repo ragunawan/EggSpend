@@ -20,13 +20,14 @@ A SwiftUI personal finance app for tracking transactions, budgets, accounts, and
 - Spending metrics and monthly review with "what changed this month" insights
 - Optional on-device AI narratives (when Apple Intelligence available)
 - Net worth / nest egg tracking with daily balance snapshots
-- Savings goals and debt payoff calculator
+- Savings goals (manually tracked or account-linked) fundable by tagging a transfer as a contribution, and debt payoff calculator
 - Data export (CSV and full JSON backup)
 - Auto-categorization from manual patterns
 - Face ID/Touch ID app lock with passcode fallback
-- First-run onboarding (skippable)
+- First-run onboarding (skippable) and helpful empty states that guide new users to their first transaction, account, or budget
+- Self-heals duplicate recurring transactions created by multi-device CloudKit sync races
 - Locale-aware currency display
-- VoiceOver support across charts and controls
+- VoiceOver support across charts and controls, with Dynamic Type support up to accessibility text sizes
 - Redesigned five-tab interface with compact ledger rows, Quick Add, and unified Nest Egg tracking
 
 ## Stack
@@ -61,11 +62,11 @@ Useful launch arguments (set in the Xcode scheme or via `ProcessInfo`):
 
 - `EggSpend/` — app source
   - `Models/` — Nine SwiftData models: `Transaction`, `TransactionCategory`, `Account`, `Budget`, `RecurringTransaction`, `SavingsGoal`, `Transfer`, `BalanceSnapshot`, `CategoryRule`
-  - `Views/` — SwiftUI feature screens (Accounts, Budget, Categories, Components, Dashboard, Forecast, Import, Metrics, NetWorth, Onboarding, Recurring, SafeSpend, SavingsGoals, Settings, Subscriptions, Transactions)
+  - `Views/` — SwiftUI feature screens (Accounts, Budget, Categories, Components, Dashboard, Forecast, Import, Metrics, MonthlyReview, NetWorth, Onboarding, QuickAdd, Recurring, SafeSpend, SavingsGoals, Settings, Subscriptions, Transactions)
   - `Persistence/` — `ModelContainer` setup and default data seeding
-  - `Utilities/` — business logic (`CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`)
+  - `Utilities/` — business logic (`CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`, `TransactionEntryService`, `TransferBalanceService`, `BudgetAlertCoordinator`, `NotificationScheduler`, `SavingsGoalContributionService`)
   - `EggSpendTheme.swift` — shared colors, gradients, and view modifiers
-- `EggSpendTests/` — 469 XCTest cases covering models, metrics, budgets, forecasting, persistence, and more
+- `EggSpendTests/` — 516 XCTest cases covering models, metrics, budgets, forecasting, persistence, and more
 - `generate_project.py` — generates `EggSpend.xcodeproj/project.pbxproj` and registers resources; keep in sync when adding/removing Swift files
 - `docs/` — GitHub Pages site (privacy policy, support page)
 - `screenshots/` — App Store screenshot sets
