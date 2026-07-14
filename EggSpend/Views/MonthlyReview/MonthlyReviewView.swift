@@ -52,10 +52,14 @@ struct MonthlyReviewView: View {
             NestBackground()
 
             List {
-                summarySection
-                savingsRateSection
-                if !review.topCategories.isEmpty { topCategoriesSection }
-                if !review.budgetOverruns.isEmpty { budgetOverrunsSection }
+                if hasMonthActivity {
+                    summarySection
+                    savingsRateSection
+                    if !review.topCategories.isEmpty { topCategoriesSection }
+                    if !review.budgetOverruns.isEmpty { budgetOverrunsSection }
+                } else {
+                    noActivitySection
+                }
                 netWorthChangeSection
             }
             .listStyle(.insetGrouped)
@@ -69,7 +73,15 @@ struct MonthlyReviewView: View {
             monthNavigationBar
         }
         .onAppear(perform: refreshReview)
-        .onChange(of: reviewInputSignature) { _, _ in refreshReview() }
+        .onChange(of: reviewInputSignature) { _, _ in
+            withAnimation(.easeInOut(duration: 0.16)) {
+                refreshReview()
+            }
+        }
+    }
+
+    private var hasMonthActivity: Bool {
+        review.income > 0 || review.expenses > 0
     }
 
     // MARK: - Month navigation
@@ -85,6 +97,7 @@ struct MonthlyReviewView: View {
             }
             .buttonStyle(.plain)
             .frame(width: 32, height: 32)
+            .accessibilityLabel("Previous month")
 
             Spacer(minLength: 8)
 
@@ -106,6 +119,7 @@ struct MonthlyReviewView: View {
             .buttonStyle(.plain)
             .disabled(isCurrentMonth)
             .frame(width: 32, height: 32)
+            .accessibilityLabel("Next month")
         }
         .padding(.horizontal, 20)
         .frame(height: 36)
@@ -148,17 +162,39 @@ struct MonthlyReviewView: View {
 
     private func statChip(title: String, value: Double, color: Color, icon: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
+            // .titleAndIcon guards against .automatic collapsing to icon-only
+            // under the narrow width three equal chips propose at larger
+            // Dynamic Type sizes (the same failure mode fixed in the Metrics
+            // chart callouts).
             Label(title, systemImage: icon)
+                .labelStyle(.titleAndIcon)
                 .font(.caption2).foregroundStyle(color)
+                .lineLimit(1)
             Text(value, format: .currency(code: CurrencyFormat.code))
                 .font(.system(.caption, design: .rounded, weight: .semibold))
                 .foregroundStyle(Color.nestBrown)
                 .minimumScaleFactor(0.6).lineLimit(1)
+                .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
         .frame(height: 72, alignment: .topLeading)
         .nestCard()
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - Empty state
+
+    private var noActivitySection: some View {
+        Section {
+            EmptyStateView(
+                title: "No Activity",
+                icon: "moon.zzz.fill",
+                description: "No income or expenses were recorded this month.",
+                context: .listRow
+            )
+        }
+        .listRowBackground(Color.clear)
     }
 
     // MARK: - Savings rate
@@ -173,6 +209,7 @@ struct MonthlyReviewView: View {
                         Text("\(Int((rate * 100).rounded()))%")
                             .font(NestType.hero)
                             .foregroundStyle(rate >= 0 ? Color.nestLeafGreen : Color.negative)
+                            .contentTransition(.numericText())
                     } else {
                         Text("—")
                             .font(NestType.hero)
@@ -205,10 +242,12 @@ struct MonthlyReviewView: View {
                     }
                     Text(entry.name)
                         .font(.subheadline)
+                        .lineLimit(1)
                     Spacer()
                     Text(entry.amount, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .medium))
                         .foregroundStyle(Color.nestBrown)
+                        .contentTransition(.numericText())
                     if review.expenses > 0 {
                         Text("(\(Int((entry.amount / review.expenses * 100).rounded()))%)")
                             .font(.caption).foregroundStyle(.tertiary)
@@ -216,6 +255,7 @@ struct MonthlyReviewView: View {
                 }
                 .padding(.vertical, 2)
                 .listRowBackground(Color.clear)
+                .accessibilityElement(children: .combine)
             }
         } header: {
             Label("Top Spending Categories", systemImage: "chart.pie.fill")
@@ -232,10 +272,12 @@ struct MonthlyReviewView: View {
                     HStack {
                         Text(overrun.name)
                             .font(.subheadline).foregroundStyle(.primary)
+                            .lineLimit(1)
                         Spacer()
                         Text("+\(overrun.overage, format: .currency(code: CurrencyFormat.code))")
                             .font(.system(.caption, design: .rounded, weight: .semibold))
                             .foregroundStyle(Color.negative)
+                            .contentTransition(.numericText())
                     }
                     ProgressView(value: min(overrun.progress, 1.5), total: 1.5)
                         .tint(Color.negative)
@@ -248,6 +290,7 @@ struct MonthlyReviewView: View {
                 }
                 .padding(.vertical, 4)
                 .listRowBackground(Color.clear)
+                .accessibilityElement(children: .combine)
             }
         } header: {
             Label("Budget Overruns", systemImage: "exclamationmark.triangle.fill")
@@ -265,6 +308,7 @@ struct MonthlyReviewView: View {
                     Text(review.netWorthAtStart, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                         .foregroundStyle(Color.nestBrown)
+                        .contentTransition(.numericText())
                 }
                 Spacer()
                 VStack(alignment: .center, spacing: 2) {
@@ -274,6 +318,7 @@ struct MonthlyReviewView: View {
                             .font(.caption2)
                         Text(abs(review.netWorthChange), format: .currency(code: CurrencyFormat.code))
                             .font(.system(.callout, design: .rounded, weight: .semibold))
+                            .contentTransition(.numericText())
                     }
                     .foregroundStyle(review.netWorthChange >= 0 ? Color.nestLeafGreen : Color.negative)
                 }
@@ -283,9 +328,11 @@ struct MonthlyReviewView: View {
                     Text(review.netWorthAtEnd, format: .currency(code: CurrencyFormat.code))
                         .font(.system(.callout, design: .rounded, weight: .semibold))
                         .foregroundStyle(Color.nestBrown)
+                        .contentTransition(.numericText())
                 }
             }
             .padding(.vertical, 6)
+            .accessibilityElement(children: .combine)
         } header: {
             Label("Nest Egg Change", systemImage: "chart.pie.fill")
                 .foregroundStyle(Color.twig)
