@@ -76,7 +76,7 @@ struct OnboardingView: View {
                 .foregroundStyle(Color.nestBrown)
                 .multilineTextAlignment(.center)
 
-            Text("EggSpend helps you track transactions, budgets, and your nest egg all in one place — so you always know where your money stands.")
+            Text("EggSpend helps you track transactions, budgets, subscriptions, and your nest egg all in one place — so you always know where your money stands and what's coming next.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

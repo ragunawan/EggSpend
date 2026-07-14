@@ -11,9 +11,10 @@ EggSpend is a private, SwiftUI personal finance app for tracking day-to-day spen
 - Five-tab dashboard for Home, Transactions, Budget, Nest Egg, and Metrics
 - Quick transaction entry, CSV import, duplicate detection, and learned auto-categorization
 - Budget tracking, safe-to-spend guidance, cash-flow forecasts, and monthly review insights
-- Recurring transaction management with subscription detection
-- Net worth history, savings goals, debt payoff planning, and exportable backups
+- Recurring transaction management with subscription detection, and self-healing duplicate cleanup for multi-device CloudKit sync
+- Net worth history, savings goals (fundable directly from a tagged transfer), debt payoff planning, and exportable backups
 - Optional Face ID or Touch ID app lock
+- First-run onboarding and empty-state guidance for new users
 
 ## App Store Screenshots
 

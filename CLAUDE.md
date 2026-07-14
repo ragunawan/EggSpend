@@ -53,7 +53,7 @@ Nine SwiftData `@Model` classes: `Transaction`, `TransactionCategory`, `Account`
 
 Domain logic lives outside views in:
 
-- `EggSpend/Utilities/` — `CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`, `TransactionEntryService`, `TransferBalanceService`, `BudgetAlertCoordinator`, `NotificationScheduler`
+- `EggSpend/Utilities/` — `CSVParser`, `AccountBalanceService`, `MonthlyReviewCalculator`, `NetWorthCalculator`, `SafeSpendCalculator`, `RecurringProjection`, `TransactionFilter`, `AmountParser`, `DebtPayoffCalculator`, `CurrencyFormat`, `DataExporter`, `BalanceSnapshotService`, `SubscriptionDetector`, `CategoryRuleEngine`, `SpendingDeltaCalculator`, `NarrativeGenerator`, `AppLockController`, `TransactionGrouping`, `DuplicateSweeper`, `TransactionEntryService`, `TransferBalanceService`, `BudgetAlertCoordinator`, `NotificationScheduler`, `SavingsGoalContributionService`
 - `EggSpend/Views/Forecast/ForecastEngine.swift` — forecast math lives here (in Views/, not Utilities/)
 - `EggSpend/Models/RecurringTransaction.swift` — `processRecurringTransactions(_:context:)` is a top-level function called from `EggSpendApp.onAppear`; it generates `Transaction` records for every overdue due date and advances `nextDueDate`
 
@@ -62,6 +62,8 @@ Domain logic lives outside views in:
 **AccountBalanceService.** When creating, editing, or deleting a transaction that is linked to an account, you must call `AccountBalanceService.apply(_:to:)` or `AccountBalanceService.reverse(_:from:)` manually. The model does not auto-update balances. `TransferBalanceService.apply/reverse` is the equivalent for `Transfer` (debits fromAccount, credits toAccount).
 
 **TransactionEntryService.** The shared creation path for transactions (used by AddTransactionView and QuickAdd). It trims input, inserts the model, applies the account balance, and runs the budget-alert check — prefer it over inserting `Transaction` directly from a view.
+
+**SavingsGoalContributionService.** A `Transfer` can be tagged with a `SavingsGoal` in the New/Edit Transfer form — but only goals tracked manually (not linked to an account, since an account-linked goal already derives progress from that account's live balance). `SavingsGoalContributionService.apply/reverse` credits or reverses the goal's `manualCurrentAmount` and must be called alongside `TransferBalanceService.apply/reverse` any time a tagged transfer is created, edited, or deleted.
 
 **Budget alerts & notifications.** `BudgetAlertCoordinator.checkBudgets` must be called after any transaction mutation that could move a budget's spend; it fires threshold notifications via `NotificationScheduler`. Notification code depends on `NotificationCenterProtocol` (a testable abstraction over `UNUserNotificationCenter`) — inject it rather than calling the real center in logic/tests.
 
@@ -89,7 +91,7 @@ Domain logic lives outside views in:
 
 - When adding Swift files, keep both `EggSpend.xcodeproj/project.pbxproj` and `generate_project.py` in sync (now also registers resources: PrivacyInfo.xcprivacy, Localizable.xcstrings).
 - Use `Decimal` or currency-safe formatting for any new money logic; avoid `Double` arithmetic for financial totals (the existing codebase uses `Double` — be intentional about extending that pattern).
-- Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes. Test suite has ~500 XCTest cases across 31 files; every test file includes the 9-model schema list.
+- Tests use an in-memory `ModelContainer` set up in `setUpWithError` and torn down in `tearDownWithError`. Follow this pattern for new test classes. Test suite has ~516 XCTest cases across 32 files; every test file includes the 9-model schema list.
 - Loop/agent working docs live at the repo root (`IMPLEMENTATION_PLAN.md`, `AGENT_LOOP_LOG.md`, `BUGS_AND_RISKS.md`, `FEATURE_BACKLOG.md`, `CHANGELOG.md`, `TODO.md`) — keep them updated when completing tracked tasks.
 
 ## Running & Screenshots
