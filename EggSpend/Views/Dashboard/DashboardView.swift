@@ -202,7 +202,9 @@ struct DashboardView: View {
     }
 
     private var quickAddDetents: Set<PresentationDetent> {
-        dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(460), .large]
+        // 460 clipped the keypad's bottom row and the "More options" button;
+        // 600 fits the full keypad plus all default rows without scrolling.
+        dynamicTypeSize.isAccessibilitySize ? [.large] : [.height(600), .large]
     }
 
     @ViewBuilder

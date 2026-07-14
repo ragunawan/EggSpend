@@ -84,11 +84,6 @@ struct QuickAddSheet: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: Space.md) {
-                        Capsule()
-                            .fill(Color.secondary.opacity(0.25))
-                            .frame(width: 36, height: 5)
-                            .accessibilityHidden(true)
-
                         Text("Quick Add")
                             .font(.headline)
                             .foregroundStyle(.primary)
