@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Fixed the Budget detail "Spending Trajectory" chart's line colors and legend.** The actual-spend line now always renders solid yellow (previously a dynamic status color that a Swift Charts style-domain quirk was rendering as the pace line's green dashed style instead, making the two series indistinguishable). Target pace stays dashed green and the budgeted-amount limit line stays dashed red (now full opacity and its own legend chip — previously undocumented in the legend).
 - **Tapping an account in Nest Egg now opens that account's filtered transaction list** instead of the edit sheet, matching the drill-down pattern used elsewhere in the app (e.g. tapping a category in Metrics). Editing an account moved to a leading-edge swipe "Edit" action, now available on asset rows as well as liability rows (previously liability-only). Transfers into or out of the account are included in the filtered list; the transaction filter's account criteria now also apply to transfers, which it previously ignored.
 - **Completed the EggSpend UI redesign.** The app now uses the five-tab redesigned interface with shared design tokens, compact ledger rows, Quick Add, unified Nest Egg tracking, Settings manage links, and refreshed iPhone/iPad screenshot sets. The old standalone `AccountsView.swift` screen was retired; account and liability management now lives in the Nest Egg and Settings flows. Accessibility was re-checked across the five tabs and Quick Add, including large Dynamic Type layout, contrast, and 44pt touch targets.
 

@@ -308,7 +308,7 @@ struct BudgetDetailView: View {
                     )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [statusColor.opacity(0.25), statusColor.opacity(0.04)],
+                            colors: [Color.yolk.opacity(0.25), Color.yolk.opacity(0.04)],
                             startPoint: .top, endPoint: .bottom
                         )
                     )
@@ -321,7 +321,7 @@ struct BudgetDetailView: View {
                         x: .value("Spend Day", point.date),
                         y: .value("Spent", point.cumulative)
                     )
-                    .foregroundStyle(statusColor)
+                    .foregroundStyle(Color.yolk)
                     .lineStyle(StrokeStyle(lineWidth: 2.5))
                     .symbol(Circle().strokeBorder(lineWidth: 2))
                     .symbolSize(24)
@@ -330,8 +330,8 @@ struct BudgetDetailView: View {
 
                 // Budget limit rule
                 RuleMark(y: .value("Limit", budget.limitAmount))
-                    .foregroundStyle(Color.negative.opacity(0.4))
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [6, 4]))
+                    .foregroundStyle(Color.negative)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
                     .annotation(position: .top, alignment: .trailing) {
                         Text(budget.limitAmount, format: .currency(code: CurrencyFormat.code).precision(.fractionLength(0)))
                             .font(.caption2)
@@ -356,10 +356,12 @@ struct BudgetDetailView: View {
             .accessibilityLabel("Spending trajectory")
             .accessibilityValue(spendingChartAccessibilityValue)
 
-            // Legend
-            HStack(spacing: 20) {
-                legendChip(color: statusColor, label: "Actual spend")
-                legendChip(color: .nestLeafGreen.opacity(0.5), dashed: true, label: "Target pace")
+            // Legend (adaptive grid so a third chip wraps instead of clipping at
+            // larger Dynamic Type sizes or narrow widths)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 16)], alignment: .leading, spacing: 6) {
+                legendChip(color: .yolk, label: "Actual spend")
+                legendChip(color: .nestLeafGreen, dashed: true, label: "Target pace")
+                legendChip(color: .negative, dashed: true, label: "Budgeted amount")
             }
             .font(.caption2)
         }
