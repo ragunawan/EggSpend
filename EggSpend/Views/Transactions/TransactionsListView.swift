@@ -43,10 +43,17 @@ struct TransactionsListView: View {
     private var filteredTransfers: [Transfer] {
         guard filter.type == nil && !hideTransfers else { return [] }
         return transfers.filter { transfer in
-            searchText.isEmpty
+            let matchesSearch = searchText.isEmpty
                 || transfer.notes.localizedCaseInsensitiveContains(searchText)
                 || (transfer.fromAccount?.name.localizedCaseInsensitiveContains(searchText) ?? false)
                 || (transfer.toAccount?.name.localizedCaseInsensitiveContains(searchText) ?? false)
+            guard matchesSearch else { return false }
+            if !filter.accountIDs.isEmpty {
+                let fromMatches = transfer.fromAccount.map { filter.accountIDs.contains($0.id) } ?? false
+                let toMatches = transfer.toAccount.map { filter.accountIDs.contains($0.id) } ?? false
+                guard fromMatches || toMatches else { return false }
+            }
+            return true
         }
     }
 
