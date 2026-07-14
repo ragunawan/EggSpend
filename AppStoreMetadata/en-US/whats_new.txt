@@ -1,0 +1,25 @@
+EggSpend has a new look and a lot of new muscle.
+
+WHAT'S NEW
+
+• Redesigned from the ground up — five focused tabs (Home, Transactions, Budget, Nest Egg, Metrics), a faster Quick Add, and one consistent ledger row throughout the app.
+• Guided first-run setup — new installs now walk you through adding your first account and, optionally, importing history or setting a budget. Skip it anytime.
+• Face ID / Touch ID app lock — an optional privacy gate in Settings that locks the app when it's backgrounded.
+• Auto-categorization gets smarter — categorizing a transaction now teaches EggSpend that merchant, and it applies automatically to future transactions and CSV imports.
+• "What changed this month?" — Home now surfaces the categories that moved most versus your recent average, with an optional on-device AI–enriched summary on supported devices.
+• Savings goals can now be funded from a transfer — tag any transfer as a contribution to a manually-tracked goal and its progress updates immediately.
+• Subscriptions audit — detected recurring charges now show price changes at a glance and convert to tracked recurring transactions in one tap.
+• Big performance and accessibility pass — large transaction lists scroll noticeably faster, date headers now follow your device's language, and VoiceOver/Dynamic Type support was extended across charts, budgets, and the redesigned tabs.
+• Sync gets more resilient — EggSpend now automatically detects and cleans up duplicate recurring transactions that can appear when multiple devices sync at once.
+
+FIXES AND POLISH
+
+• Fixed several chart issues: tooltip text disappearing during selection, mismatched trajectory line colors on Budget detail, and callouts on Nest Egg and Metrics clipping near the edges of the chart.
+• Budget detail's "Projected" and "Days Left" tiles now show their labels correctly.
+• The savings goal progress bar no longer pokes out past its card's rounded corners.
+• Tapping an account in Nest Egg now opens its transaction history; editing moved to a swipe action for both assets and liabilities.
+• Quick Add's keypad now fills digits from the right, like a cash register, and no longer clips on smaller screens.
+• Settings was reorganized into clearer sections.
+• Monthly Review now shows a proper empty state for months with no activity and animates its numbers when you switch months.
+
+Thanks for using EggSpend — keep the feedback coming from Settings.
