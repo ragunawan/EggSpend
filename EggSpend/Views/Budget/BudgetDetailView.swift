@@ -79,21 +79,28 @@ struct BudgetDetailView: View {
         return dict.map { ($0.key, $0.value) }.sorted { $0.date < $1.date }
     }
 
-    // Running cumulative spending for trend line
+    // Running cumulative spending for trend line. Seeded with a (periodStart, 0)
+    // point so the series always has ≥2 points — Charts can't draw a line/area
+    // from a single point, which left the "Actual spend" trace invisible for
+    // budgets with only one transaction this period.
     private var cumulativeSpending: [(date: Date, cumulative: Double)] {
         var running = 0.0
-        return dailySpending.map { point in
+        var points = [(date: periodStart, cumulative: 0.0)]
+        points.append(contentsOf: dailySpending.map { point in
             running += point.amount
             return (point.date, running)
-        }
+        })
+        return points
     }
 
-    // Ideal pace: a straight line from 0 on periodStart to limit on periodEnd
+    // Ideal pace: a straight line from 0 on periodStart to limit on periodEnd,
+    // spanning the whole budget period (not just the days elapsed so far) so it
+    // reads as a fixed reference line rather than a ramp that dead-ends today.
     private var paceLine: [(date: Date, pace: Double)] {
         let daily = budget.limitAmount / Double(daysInPeriod)
-        return (0...daysElapsed).compactMap { offset in
+        return (0...daysInPeriod).compactMap { offset in
             guard let date = Calendar.current.date(byAdding: .day, value: offset, to: periodStart) else { return nil }
-            return (date, daily * Double(offset + 1))
+            return (date, daily * Double(offset))
         }
     }
 
