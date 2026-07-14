@@ -212,7 +212,20 @@ struct QuickAddSheet: View {
     }
 
     private var defaultsRow: some View {
-        HStack(spacing: Space.sm) {
+        // Horizontally scrollable, like suggestionChips above — a plain HStack
+        // would compress these pills to fit the screen width once all four
+        // (category/account/budget/date) are present, truncating long account
+        // names and dates ("Apple...", "Jul 14, 2...") instead of scrolling.
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: Space.sm) {
+                defaultsRowContent
+            }
+            .padding(.vertical, 1)
+        }
+    }
+
+    private var defaultsRowContent: some View {
+        Group {
             Menu {
                 Button("None") { selectedCategory = nil }
                 ForEach(availableCategories) { category in
