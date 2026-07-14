@@ -30,6 +30,10 @@ extension Animation {
 private struct ChartDetailCalloutStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
+            // Chart annotations propose a constrained width during selection-driven
+            // re-layout; without this, currency text inside can truncate ("$...")
+            // instead of the callout growing to fit its content.
+            .fixedSize()
             .padding(.horizontal, Space.sm)
             .padding(.vertical, 5)
             .background(
