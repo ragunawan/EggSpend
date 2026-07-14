@@ -530,14 +530,19 @@ struct MetricsView: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(date, format: calloutDateFormat)
                 .font(.caption2).foregroundStyle(Color.primary.opacity(0.72))
-            VStack(alignment: .leading, spacing: 3) {
-                Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
-                      systemImage: "arrow.down.circle.fill")
-                    .font(.caption).foregroundStyle(Color.nestLeafGreen)
-                Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
-                      systemImage: "arrow.up.circle.fill")
-                    .font(.caption).foregroundStyle(Color.negative)
-            }
+            // Explicit lineLimit + fixedSize keep these single-line under the narrow
+            // width the chart annotation can propose during selection — without it,
+            // SwiftUI wraps the currency text one character per line (icon stays put).
+            Label(income.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
+                  systemImage: "arrow.down.circle.fill")
+                .font(.caption).foregroundStyle(Color.nestLeafGreen)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+            Label(expenses.formatted(.currency(code: CurrencyFormat.code).precision(.fractionLength(0))),
+                  systemImage: "arrow.up.circle.fill")
+                .font(.caption).foregroundStyle(Color.negative)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
         .chartDetailCalloutStyle()
     }
