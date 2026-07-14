@@ -495,7 +495,7 @@ struct MetricsView: View {
                 }
             }
             .chartXSelection(value: $selectedCashFlowDate)
-            .chartXScale(domain: selectedPeriod.xAxisDomain)
+            .chartXScale(domain: selectedPeriod.xAxisDomain, range: .plotDimension(padding: 16))
             .chartYScale(domain: yDomain)
             .chartYAxis {
                 AxisMarks { value in
