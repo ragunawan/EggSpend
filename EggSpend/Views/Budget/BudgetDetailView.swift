@@ -445,10 +445,9 @@ private struct StatCard: View {
                 .foregroundStyle(Color.nestBrown)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
+            Text(title).font(.caption).foregroundStyle(.secondary)
             if let sub = subtitle {
-                Text(sub).font(.caption2).foregroundStyle(.secondary)
-            } else {
-                Text(title).font(.caption).foregroundStyle(.secondary)
+                Text(sub).font(.caption2).foregroundStyle(color)
             }
         }
         .padding(Space.md)
