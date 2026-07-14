@@ -223,6 +223,22 @@ struct NetWorthView: View {
 
                 let yDomain = ChartYAxisDomain.range(for: netWorthTimeline.map(\.worth))
                 Chart {
+                    // Gradient area fill, matching the Metrics tab's net worth chart.
+                    ForEach(netWorthTimeline, id: \.date) { point in
+                        AreaMark(
+                            x: .value("Date", point.date),
+                            yStart: .value("Base", yDomain.lowerBound),
+                            yEnd: .value("Net worth", point.worth)
+                        )
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color.eggBlue.opacity(0.28), Color.eggBlue.opacity(0.0)],
+                                startPoint: .top, endPoint: .bottom
+                            )
+                        )
+                        .interpolationMethod(.catmullRom)
+                        .accessibilityHidden(true)
+                    }
                     ForEach(netWorthTimeline, id: \.date) { point in
                         LineMark(
                             x: .value("Date", point.date),
@@ -237,10 +253,14 @@ struct NetWorthView: View {
                 }
                 .chartYScale(domain: yDomain)
                 .chartYAxis(.hidden)
+                // Plot padding keeps the line and the outermost axis labels off the
+                // card's edges — without it the trailing date label (e.g. "Jul 12")
+                // gets clipped to "J…" by the chart's own frame.
+                .chartXScale(range: .plotDimension(padding: 16))
                 .chartXAxis {
                     AxisMarks(values: trendSundayMarks) { _ in
                         AxisGridLine()
-                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                        AxisValueLabel(format: .dateTime.month(.abbreviated).day(), centered: true)
                     }
                 }
                 .frame(height: 96)
