@@ -89,6 +89,7 @@
 		AA0200000000000000000063 /* TransactionGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000007E /* TransactionGrouping.swift */; };
 		AA0200000000000000000065 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000080 /* OnboardingView.swift */; };
 		AA0200000000000000000066 /* DuplicateSweeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000081 /* DuplicateSweeper.swift */; };
+		AA0200000000000000000079 /* SavingsGoalContributionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000094 /* SavingsGoalContributionService.swift */; };
 		AA0200000000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000012 /* Assets.xcassets */; };
 		AA0200000000000000000039 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000051 /* PrivacyInfo.xcprivacy */; };
 		AA0200000000000000000068 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000083 /* Localizable.xcstrings */; };
@@ -123,6 +124,7 @@
 		AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000082 /* DuplicateSweeperTests.swift */; };
 		AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010000000000000000008F /* TransactionEntryServiceTests.swift */; };
 		AA0200000000000000000077 /* MerchantSuggestionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000092 /* MerchantSuggestionTests.swift */; };
+		AA020000000000000000007A /* SavingsGoalContributionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100000000000000000095 /* SavingsGoalContributionServiceTests.swift */; };
 		/* End PBXBuildFile section */
 
 		/* Begin PBXContainerItemProxy section */
@@ -220,6 +222,7 @@
 		AA010000000000000000007E /* TransactionGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionGrouping.swift; sourceTree = "<group>"; };
 		AA0100000000000000000080 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		AA0100000000000000000081 /* DuplicateSweeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSweeper.swift; sourceTree = "<group>"; };
+		AA0100000000000000000094 /* SavingsGoalContributionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalContributionService.swift; sourceTree = "<group>"; };
 		AA0100000000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA010000000000000000001D /* EggSpend.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EggSpend.entitlements; sourceTree = "<group>"; };
 		AA0100000000000000000051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -255,6 +258,7 @@
 		AA0100000000000000000082 /* DuplicateSweeperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSweeperTests.swift; sourceTree = "<group>"; };
 		AA010000000000000000008F /* TransactionEntryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionEntryServiceTests.swift; sourceTree = "<group>"; };
 		AA0100000000000000000092 /* MerchantSuggestionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MerchantSuggestionTests.swift; sourceTree = "<group>"; };
+		AA0100000000000000000095 /* SavingsGoalContributionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingsGoalContributionServiceTests.swift; sourceTree = "<group>"; };
 		/* End PBXFileReference section */
 
 		/* Begin PBXFrameworksBuildPhase section */
@@ -506,6 +510,7 @@
 				AA010000000000000000007C /* AppLockController.swift */,
 				AA010000000000000000007E /* TransactionGrouping.swift */,
 				AA0100000000000000000081 /* DuplicateSweeper.swift */,
+				AA0100000000000000000094 /* SavingsGoalContributionService.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -596,6 +601,7 @@
 				AA0100000000000000000082 /* DuplicateSweeperTests.swift */,
 				AA010000000000000000008F /* TransactionEntryServiceTests.swift */,
 				AA0100000000000000000092 /* MerchantSuggestionTests.swift */,
+				AA0100000000000000000095 /* SavingsGoalContributionServiceTests.swift */,
 			);
 			path = EggSpendTests;
 			sourceTree = "<group>";
@@ -784,6 +790,7 @@
 				AA0200000000000000000063 /* TransactionGrouping.swift in Sources */,
 				AA0200000000000000000065 /* OnboardingView.swift in Sources */,
 				AA0200000000000000000066 /* DuplicateSweeper.swift in Sources */,
+				AA0200000000000000000079 /* SavingsGoalContributionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -822,6 +829,7 @@
 				AA0200000000000000000067 /* DuplicateSweeperTests.swift in Sources */,
 				AA0200000000000000000074 /* TransactionEntryServiceTests.swift in Sources */,
 				AA0200000000000000000077 /* MerchantSuggestionTests.swift in Sources */,
+				AA020000000000000000007A /* SavingsGoalContributionServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

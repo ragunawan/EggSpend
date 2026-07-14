@@ -136,7 +136,7 @@ enum DataExporter {
     /// Current schema version for `fullBackupJSON`'s output. Bump this (and
     /// teach `validateBackup` / a future restore path about the delta) any
     /// time `BackupEnvelope` or a DTO's shape changes.
-    static let currentSchemaVersion = 3
+    static let currentSchemaVersion = 4
 
     /// Builds a full, versioned JSON backup of all 7 persistent models.
     /// `appVersion`/`buildNumber` default to `Bundle.main`'s Info.plist
@@ -288,6 +288,7 @@ enum DataExporter {
             context.insert(recurring)
         }
 
+        var savingsGoalsByID: [UUID: SavingsGoal] = [:]
         for dto in envelope.savingsGoals {
             let goal = SavingsGoal(
                 name: dto.name,
@@ -303,6 +304,7 @@ enum DataExporter {
             goal.id = dto.id
             goal.createdAt = dto.createdAt
             context.insert(goal)
+            savingsGoalsByID[dto.id] = goal
         }
 
         for dto in envelope.transfers {
@@ -311,6 +313,7 @@ enum DataExporter {
                 date: dto.date,
                 fromAccount: dto.fromAccountID.flatMap { accountsByID[$0] },
                 toAccount: dto.toAccountID.flatMap { accountsByID[$0] },
+                savingsGoal: dto.savingsGoalID.flatMap { savingsGoalsByID[$0] },
                 notes: dto.notes
             )
             transfer.id = dto.id
@@ -664,6 +667,8 @@ struct TransferDTO: Codable, Equatable {
     var fromAccountName: String?
     var toAccountID: UUID?
     var toAccountName: String?
+    var savingsGoalID: UUID?
+    var savingsGoalName: String?
 
     init(_ transfer: Transfer) {
         id = transfer.id
@@ -675,5 +680,7 @@ struct TransferDTO: Codable, Equatable {
         fromAccountName = transfer.fromAccount?.name
         toAccountID = transfer.toAccount?.id
         toAccountName = transfer.toAccount?.name
+        savingsGoalID = transfer.savingsGoal?.id
+        savingsGoalName = transfer.savingsGoal?.name
     }
 }

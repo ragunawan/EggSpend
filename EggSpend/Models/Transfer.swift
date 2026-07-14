@@ -15,11 +15,18 @@ final class Transfer {
     @Relationship(deleteRule: .nullify)
     var toAccount: Account?
 
+    /// Optional savings goal this transfer counts toward. Nullify (not cascade)
+    /// so deleting the goal leaves the transfer intact — same rationale as
+    /// `Transaction.budget`.
+    @Relationship(deleteRule: .nullify)
+    var savingsGoal: SavingsGoal?
+
     init(
         amount: Double,
         date: Date = .now,
         fromAccount: Account?,
         toAccount: Account?,
+        savingsGoal: SavingsGoal? = nil,
         notes: String = ""
     ) {
         self.id = UUID()
@@ -27,6 +34,7 @@ final class Transfer {
         self.date = date
         self.fromAccount = fromAccount
         self.toAccount = toAccount
+        self.savingsGoal = savingsGoal
         self.notes = notes
         self.createdAt = .now
     }

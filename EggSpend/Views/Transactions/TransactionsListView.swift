@@ -463,6 +463,7 @@ struct TransactionsListView: View {
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
                     TransferBalanceService.reverse(transfer)
+                    SavingsGoalContributionService.reverse(transfer)
                     modelContext.delete(transfer)
                 } label: {
                     Label("Delete", systemImage: "trash")
@@ -507,6 +508,7 @@ struct TransactionsListView: View {
                 modelContext.delete(tx)
             case .transfer(let transfer):
                 TransferBalanceService.reverse(transfer)
+                SavingsGoalContributionService.reverse(transfer)
                 modelContext.delete(transfer)
             case .upcoming:
                 continue

@@ -20,6 +20,7 @@ struct AddTransactionView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @Query private var categoryRules: [CategoryRule]
     @Query private var budgets: [Budget]
+    @Query private var savingsGoals: [SavingsGoal]
     @AppStorage("lastUsedAccountID") private var lastUsedAccountID = ""
 
     var editingTransaction: Transaction? = nil
@@ -41,6 +42,7 @@ struct AddTransactionView: View {
     @State private var selectedBudget: Budget? = nil
     @State private var fromAccount: Account? = nil
     @State private var toAccount: Account? = nil
+    @State private var selectedSavingsGoal: SavingsGoal? = nil
     @State private var notes = ""
     @State private var showValidationError = false
 
@@ -83,6 +85,15 @@ struct AddTransactionView: View {
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
+    // Only manually-tracked goals can meaningfully receive a "contribution" —
+    // a goal linked to an account already derives its progress live from that
+    // account's balance, so tagging a transfer to it wouldn't move anything.
+    private var availableSavingsGoals: [SavingsGoal] {
+        savingsGoals
+            .filter { ($0.isActive && !$0.tracksLinkedAccount) || $0.id == selectedSavingsGoal?.id }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
     private var amount: Double { AmountParser.parse(amountText) ?? 0 }
 
     private var payeeSuggestions: [MerchantSuggestion] {
@@ -108,6 +119,7 @@ struct AddTransactionView: View {
                 if selectedEntryKind == .transfer {
                     transferDetailsSection
                     transferAccountsSection
+                    savingsGoalSection
                 } else {
                     detailsSection
                     accountSection
@@ -166,6 +178,9 @@ struct AddTransactionView: View {
                     }
                     if newKind != .expense {
                         selectedBudget = nil
+                    }
+                    if newKind != .transfer {
+                        selectedSavingsGoal = nil
                     }
                 }
             }
@@ -314,6 +329,26 @@ struct AddTransactionView: View {
         }
     }
 
+    private var savingsGoalSection: some View {
+        Section {
+            if availableSavingsGoals.isEmpty {
+                Text("No manually-tracked savings goals")
+                    .foregroundStyle(.secondary)
+            } else {
+                Picker("Savings Goal", selection: $selectedSavingsGoal) {
+                    Text("None").tag(Optional<SavingsGoal>.none)
+                    ForEach(availableSavingsGoals) { goal in
+                        Label(goal.name, systemImage: goal.icon).tag(Optional(goal))
+                    }
+                }
+            }
+        } header: {
+            Text("Savings Goal")
+        } footer: {
+            Text("Tag this transfer as a contribution toward a savings goal you're tracking manually. Goals linked to an account already track progress from that account's balance and don't need tagging.")
+        }
+    }
+
     private var categorySection: some View {
         Section("Category") {
             if availableCategories.isEmpty {
@@ -408,6 +443,7 @@ struct AddTransactionView: View {
                 date: date,
                 fromAccount: fromAccount,
                 toAccount: toAccount,
+                savingsGoal: selectedSavingsGoal,
                 notes: notes
             )
         } else {
@@ -416,6 +452,7 @@ struct AddTransactionView: View {
                 date: date,
                 fromAccount: fromAccount,
                 toAccount: toAccount,
+                savingsGoal: selectedSavingsGoal,
                 notes: notes,
                 context: modelContext
             )
@@ -438,6 +475,7 @@ struct AddTransactionView: View {
             date = transfer.date
             fromAccount = transfer.fromAccount
             toAccount = transfer.toAccount
+            selectedSavingsGoal = transfer.savingsGoal
             notes = transfer.notes
         } else {
             selectedEntryKind = initialEntryKind
