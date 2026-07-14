@@ -3,9 +3,10 @@ import SwiftData
 import UniformTypeIdentifiers
 import LocalAuthentication
 
-/// Data export entry point. Presented as a sheet from `DashboardView`'s
-/// toolbar gear button. Scope for this task is export only — no sync
-/// status, restore, or currency controls here (those are separate tasks).
+/// App settings. Presented as a sheet from `DashboardView`'s toolbar gear
+/// button. Sections read top-to-bottom as: display, content management,
+/// bulk import/export, privacy/intelligence toggles, then a Danger Zone
+/// for irreversible resets kept last and visually separate from the rest.
 struct SettingsView: View {
     /// Shared UserDefaults key for the on-device AI narrative toggle. Read by
     /// both this view's Toggle and `DashboardView`'s narrative enrichment via
@@ -129,56 +130,6 @@ struct SettingsView: View {
                     Text("Auto matches this device's light or dark appearance.")
                 }
 
-                Section("Data") {
-                    Button {
-                        showTransactionImport = true
-                    } label: {
-                        Label("Import Transactions (CSV)", systemImage: "square.and.arrow.down.fill")
-                    }
-
-                    Button {
-                        showAccountImport = true
-                    } label: {
-                        Label("Import Accounts (CSV)", systemImage: "building.columns.badge.plus")
-                    }
-
-                    ShareLink(item: transactionsFile, preview: SharePreview(transactionsFile.filename)) {
-                        Label("Export Transactions (CSV)", systemImage: "list.bullet.rectangle.fill")
-                    }
-
-                    ShareLink(item: accountsFile, preview: SharePreview(accountsFile.filename)) {
-                        Label("Export Accounts (CSV)", systemImage: "building.columns.fill")
-                    }
-
-                    ShareLink(item: transfersFile, preview: SharePreview(transfersFile.filename)) {
-                        Label("Export Transfers (CSV)", systemImage: "arrow.left.arrow.right.circle.fill")
-                    }
-
-                    if let backupFile {
-                        ShareLink(item: backupFile, preview: SharePreview(backupFile.filename)) {
-                            Label("Full Backup (JSON)", systemImage: "externaldrive.fill")
-                        }
-                    }
-
-                    Button {
-                        showBackupImporter = true
-                    } label: {
-                        Label("Import Full Backup (JSON)", systemImage: "externaldrive.badge.plus")
-                    }
-
-                    Button(role: .destructive) {
-                        pendingResetMode = .sampleData
-                    } label: {
-                        Label("Reset All Data and use Sample Data", systemImage: "wand.and.stars")
-                    }
-
-                    Button(role: .destructive) {
-                        pendingResetMode = .empty
-                    } label: {
-                        Label("Reset All Data", systemImage: "trash.fill")
-                    }
-                }
-
                 Section("Manage") {
                     NavigationLink {
                         CategoryManagementView()
@@ -196,6 +147,46 @@ struct SettingsView: View {
                         SubscriptionAuditView()
                     } label: {
                         Label("Subscription audit", systemImage: "magnifyingglass.circle.fill")
+                    }
+                }
+
+                Section("Import") {
+                    Button {
+                        showTransactionImport = true
+                    } label: {
+                        Label("Import Transactions (CSV)", systemImage: "square.and.arrow.down.fill")
+                    }
+
+                    Button {
+                        showAccountImport = true
+                    } label: {
+                        Label("Import Accounts (CSV)", systemImage: "building.columns.fill")
+                    }
+
+                    Button {
+                        showBackupImporter = true
+                    } label: {
+                        Label("Import Full Backup (JSON)", systemImage: "externaldrive.badge.plus")
+                    }
+                }
+
+                Section("Export") {
+                    ShareLink(item: transactionsFile, preview: SharePreview(transactionsFile.filename)) {
+                        Label("Export Transactions (CSV)", systemImage: "list.bullet.rectangle.fill")
+                    }
+
+                    ShareLink(item: accountsFile, preview: SharePreview(accountsFile.filename)) {
+                        Label("Export Accounts (CSV)", systemImage: "building.columns.fill")
+                    }
+
+                    ShareLink(item: transfersFile, preview: SharePreview(transfersFile.filename)) {
+                        Label("Export Transfers (CSV)", systemImage: "arrow.left.arrow.right.circle.fill")
+                    }
+
+                    if let backupFile {
+                        ShareLink(item: backupFile, preview: SharePreview(backupFile.filename)) {
+                            Label("Full Backup (JSON)", systemImage: "externaldrive.fill")
+                        }
                     }
                 }
 
@@ -229,6 +220,24 @@ struct SettingsView: View {
                     } footer: {
                         Text("Rewrites the \"What changed this month?\" summary in a more natural tone. Processing happens entirely on this device — nothing is ever sent anywhere — and every number always comes from your actual data.")
                     }
+                }
+
+                Section {
+                    Button(role: .destructive) {
+                        pendingResetMode = .sampleData
+                    } label: {
+                        Label("Reset All Data and use Sample Data", systemImage: "wand.and.stars")
+                    }
+
+                    Button(role: .destructive) {
+                        pendingResetMode = .empty
+                    } label: {
+                        Label("Reset All Data", systemImage: "trash.fill")
+                    }
+                } header: {
+                    Text("Danger Zone")
+                } footer: {
+                    Text("These actions permanently delete transactions, accounts, budgets, goals, recurring items, category rules, transfers, and custom categories on this device. This can't be undone.")
                 }
             }
             .sheet(isPresented: $showTransactionImport) {
