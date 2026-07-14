@@ -31,18 +31,35 @@ struct NetWorthView: View {
     }
     private var includedLiabilities: [Account] { liabilities.filter(\.includeInNetWorth) }
     private var archivedAccounts: [Account] { accounts.filter(\.isArchived) }
-    private var creditCardExpenseTotals: [UUID: Double] {
+    // Charges from the most recently closed billing cycle, not a rolling 30-day
+    // window: the month-long period ending one cycle before each card's next due
+    // date (due dates roll monthly, so that's the cycle already reflected in what's owed).
+    private var previousBillingCycleTotals: [UUID: Double] {
         let calendar = Calendar.current
-        guard let start = calendar.date(byAdding: .day, value: -30, to: Date.now) else { return [:] }
-        return transactions.reduce(into: [:]) { totals, transaction in
+        let cycleWindows: [UUID: (start: Date, end: Date)] = accounts.reduce(into: [:]) { result, account in
+            guard account.type == .credit,
+                  let upcomingDue = account.nextDueDate,
+                  let cycleEnd = calendar.date(byAdding: .month, value: -1, to: upcomingDue),
+                  let cycleStart = calendar.date(byAdding: .month, value: -1, to: cycleEnd)
+            else { return }
+            result[account.id] = (cycleStart, cycleEnd)
+        }
+
+        // Seed every card with a computable cycle at $0 so cards with no charges
+        // that cycle still show "$0.00" instead of disappearing from the row.
+        var totals = cycleWindows.mapValues { _ in 0.0 }
+        for transaction in transactions {
             guard transaction.type == .expense,
                   !transaction.isAdjustment,
-                  transaction.date >= start,
                   let account = transaction.account,
-                  account.type == .credit
-            else { return }
+                  account.type == .credit,
+                  let window = cycleWindows[account.id],
+                  transaction.date > window.start,
+                  transaction.date <= window.end
+            else { continue }
             totals[account.id, default: 0] += transaction.amount
         }
+        return totals
     }
 
     private var totalAssets: Double { NetWorthCalculator.totals(accounts: Array(accounts)).assets }
@@ -242,7 +259,7 @@ struct NetWorthView: View {
                 } else {
                     ForEach(assets) { account in
                         Button { editingAccount = account } label: {
-                            AccountRowView(account: account, recentExpenseTotal: nil)
+                            AccountRowView(account: account, previousCycleTotal: nil)
                         }
                         .buttonStyle(.plain)
                         .listRowInsets(compactAccountRowInsets)
@@ -266,12 +283,12 @@ struct NetWorthView: View {
                     Text("No liabilities added yet")
                         .foregroundStyle(.secondary)
                 } else {
-                    let recentExpenseTotals = creditCardExpenseTotals
+                    let previousCycleTotals = previousBillingCycleTotals
                     ForEach(liabilities) { account in
                         Button { editingAccount = account } label: {
                             AccountRowView(
                                 account: account,
-                                recentExpenseTotal: account.type == .credit ? recentExpenseTotals[account.id, default: 0] : nil
+                                previousCycleTotal: account.type == .credit ? previousCycleTotals[account.id] : nil
                             )
                         }
                         .buttonStyle(.plain)
@@ -304,7 +321,7 @@ struct NetWorthView: View {
         if !archivedAccounts.isEmpty {
             Section("Archived") {
                 ForEach(archivedAccounts) { account in
-                    AccountRowView(account: account, recentExpenseTotal: nil)
+                    AccountRowView(account: account, previousCycleTotal: nil)
                         .opacity(0.55)
                         .listRowInsets(compactAccountRowInsets)
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
@@ -339,7 +356,7 @@ struct NetWorthView: View {
 
 private struct AccountRowView: View {
     let account: Account
-    let recentExpenseTotal: Double?
+    let previousCycleTotal: Double?
 
     var body: some View {
         HStack(spacing: 8) {
@@ -361,8 +378,8 @@ private struct AccountRowView: View {
                         Text("Due \(dueDate, format: .dateTime.month(.abbreviated).day())")
                             .foregroundStyle(Color.warningTone)
                     }
-                    if let recentExpenseTotal {
-                        Text("30d \(recentExpenseTotal, format: .currency(code: CurrencyFormat.code))")
+                    if let previousCycleTotal {
+                        Text(previousCycleTotal, format: .currency(code: CurrencyFormat.code))
                             .foregroundStyle(Color.negative)
                     }
                     if account.isLiability && !account.includeInNetWorth {
