@@ -366,19 +366,26 @@ struct MetricsView: View {
                     RuleMark(x: .value("Selected", closest.date))
                         .foregroundStyle(Color.nestBrown.opacity(0.4))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 4]))
-                        .annotation(position: .top,
-                                    overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
-                            netWorthCallout(date: closest.date, worth: closest.worth)
-                        }
                         // Selection state is already exposed via the LineMark's own
                         // label/value; hide this redundant highlight from VoiceOver.
                         .accessibilityHidden(true)
+                    // The callout anchors to this PointMark rather than the RuleMark
+                    // above: a RuleMark(x:) spans the chart's full height, so a "top"
+                    // annotation on it floats at the top of the *plot area* regardless
+                    // of the data value — which let the callout overlap this dot
+                    // whenever the selected value sat near the top of the y-domain.
+                    // Anchoring to the point keeps a consistent gap between the dot
+                    // and the callout above it.
                     PointMark(
                         x: .value("Selected", closest.date),
                         y: .value("Worth", closest.worth)
                     )
                     .foregroundStyle(Color.eggBlue)
                     .symbolSize(64)
+                    .annotation(position: .top,
+                                overflowResolution: .init(x: .fit(to: .chart), y: .fit(to: .chart))) {
+                        netWorthCallout(date: closest.date, worth: closest.worth)
+                    }
                     .accessibilityHidden(true)
                 }
             }
