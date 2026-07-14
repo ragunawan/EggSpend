@@ -273,10 +273,15 @@ struct BudgetDetailView: View {
 
             Chart {
                 // Pace target area (shaded region under ideal line)
+                // Uses "Pace Day"/"Pace Base" (not "Day"/"Base") so Swift Charts
+                // doesn't fold this series' style into the actual-spend series below —
+                // marks that share value-label strings across ForEach loops can be
+                // treated as one style domain, which previously made the actual-spend
+                // line render with the pace line's green dashed style.
                 ForEach(paceLine, id: \.date) { point in
                     AreaMark(
-                        x: .value("Day", point.date),
-                        yStart: .value("Base", 0),
+                        x: .value("Pace Day", point.date),
+                        yStart: .value("Pace Base", 0),
                         yEnd:   .value("Pace", point.pace)
                     )
                     .foregroundStyle(Color.nestLeafGreen.opacity(0.08))
@@ -286,7 +291,7 @@ struct BudgetDetailView: View {
                 // Pace target line
                 ForEach(paceLine, id: \.date) { point in
                     LineMark(
-                        x: .value("Day", point.date),
+                        x: .value("Pace Day", point.date),
                         y: .value("Pace", point.pace)
                     )
                     .foregroundStyle(Color.nestLeafGreen.opacity(0.5))
@@ -297,8 +302,8 @@ struct BudgetDetailView: View {
                 // Actual cumulative spend area
                 ForEach(cumulativeSpending, id: \.date) { point in
                     AreaMark(
-                        x: .value("Day", point.date),
-                        yStart: .value("Base", 0),
+                        x: .value("Spend Day", point.date),
+                        yStart: .value("Spend Base", 0),
                         yEnd:   .value("Spent", point.cumulative)
                     )
                     .foregroundStyle(
@@ -313,7 +318,7 @@ struct BudgetDetailView: View {
                 // Actual cumulative spend line
                 ForEach(cumulativeSpending, id: \.date) { point in
                     LineMark(
-                        x: .value("Day", point.date),
+                        x: .value("Spend Day", point.date),
                         y: .value("Spent", point.cumulative)
                     )
                     .foregroundStyle(statusColor)

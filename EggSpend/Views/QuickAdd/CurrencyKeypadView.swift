@@ -2,20 +2,23 @@ import SwiftUI
 
 struct CurrencyKeypadView: View {
     @Binding var amountText: String
-    var locale: Locale = .current
 
     @ScaledMetric(relativeTo: .title3) private var keyHeight: CGFloat = 52
 
+    // Cents fill in from the right as you type — "1999" reads as $19.99,
+    // "225" as $2.25 — so there's no manual decimal placement; "00" takes
+    // that key's place as the standard complement (quickly reaches whole-
+    // dollar amounts, e.g. "5" then "00" → $5.00).
     private let rows = [
         ["1", "2", "3"],
         ["4", "5", "6"],
         ["7", "8", "9"],
-        ["decimal", "0", "backspace"]
+        ["00", "0", "backspace"]
     ]
 
-    private var decimalDisplay: String {
-        locale.decimalSeparator.flatMap { $0.isEmpty ? nil : $0 } ?? "."
-    }
+    // Caps entry at $99,999,999.99 — generous for any real transaction,
+    // just a guard against runaway digit-mashing overflowing Int.
+    private static let maxDigits = 10
 
     private var resolvedKeyHeight: CGFloat {
         max(44, keyHeight)
@@ -55,8 +58,6 @@ struct CurrencyKeypadView: View {
     @ViewBuilder
     private func label(for key: String) -> some View {
         switch key {
-        case "decimal":
-            Text(decimalDisplay)
         case "backspace":
             Image(systemName: "delete.left")
                 .accessibilityHidden(true)
@@ -67,7 +68,7 @@ struct CurrencyKeypadView: View {
 
     private func accessibilityLabel(for key: String) -> Text {
         switch key {
-        case "decimal": Text("Decimal separator")
+        case "00": Text("Double zero")
         case "backspace": Text("Backspace")
         default: Text(key)
         }
@@ -76,23 +77,32 @@ struct CurrencyKeypadView: View {
     private func handle(_ key: String) {
         switch key {
         case "backspace":
-            guard !amountText.isEmpty else { return }
-            amountText.removeLast()
-        case "decimal":
-            guard !amountText.contains(".") else { return }
-            amountText = amountText.isEmpty ? "0." : amountText + "."
+            setCents(currentCents / 10)
+        case "00":
+            appendDigits("00")
         default:
-            appendDigit(key)
+            appendDigits(key)
         }
     }
 
-    private func appendDigit(_ digit: String) {
-        guard digit.count == 1, digit.first?.isNumber == true else { return }
-        if amountText == "0" {
-            amountText = digit
-        } else {
-            amountText += digit
-        }
+    /// Shifts `digits` in from the right, as if typed on a cents-entry
+    /// register: existing digits move left and the rightmost two digits
+    /// are always the cents place (e.g. current "19.99" + "9" → "199.99").
+    private func appendDigits(_ digits: String) {
+        guard !digits.isEmpty, digits.allSatisfy(\.isNumber) else { return }
+        let combined = String(currentCents) + digits
+        guard combined.count <= Self.maxDigits else { return }
+        setCents(Int(combined) ?? currentCents)
+    }
+
+    private var currentCents: Int {
+        let digitsOnly = amountText.filter(\.isNumber)
+        return digitsOnly.isEmpty ? 0 : (Int(digitsOnly) ?? 0)
+    }
+
+    private func setCents(_ cents: Int) {
+        let cents = max(0, cents)
+        amountText = "\(cents / 100).\(String(format: "%02d", cents % 100))"
     }
 }
 
