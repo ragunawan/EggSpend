@@ -1,0 +1,26 @@
+EggSpend is personal finance that stays out of your way — track spending, keep budgets honest, and watch your nest egg grow, all in one calm, fast app.
+
+No mandatory sign-up. No ads. No selling your data. Your finances sync privately across your devices with iCloud when you're signed in, and EggSpend works completely offline if you're not.
+
+WHY EGGSPEND
+
+• See where you stand at a glance — Home shows your balances, this month's spending pace, and what changed, in plain English.
+• Log a transaction in seconds — Quick Add's cents-first keypad gets amount, account, category, and date entered without breaking your stride.
+• Budgets that actually track reality — set a limit per category, watch an egg-shaped progress ring fill up, and get a heads-up before you go over.
+• A real picture of your net worth — link checking, savings, credit cards, and loans; EggSpend nets it all together and charts your Nest Egg over time with daily balance history.
+• Cash-flow forecasting — a 30/60/90-day projection blends your recent spending pace with upcoming bills and recurring charges, so surprises are rare.
+• Subscriptions, found automatically — EggSpend spots recurring charges in your history, flags price increases, and lets you track them with one tap.
+• Savings goals you can fund directly — track a goal manually or link it to an account, then tag a transfer as a contribution and watch progress update immediately.
+• Smarter every time you categorize — EggSpend learns which category a merchant belongs to and applies it automatically next time, including on CSV imports.
+• Debt payoff and mortgage planning — model payoff timelines and amortization so you can see the finish line.
+• Monthly Review — a end-of-month recap of income, spending, and what moved the needle, with optional on-device AI–enriched summaries on supported devices (Apple Intelligence, no data ever leaves your phone).
+• Import your history — bring in transactions from a CSV with duplicate detection, or back up everything to CSV/JSON whenever you want.
+
+BUILT TO BE TRUSTED
+
+• Face ID / Touch ID app lock keeps your data private if your phone changes hands.
+• Data stays in your iCloud account — EggSpend has no server and no analytics pipeline.
+• Full VoiceOver support and Dynamic Type up to accessibility text sizes.
+• Currency, dates, and number formatting automatically match your device's region.
+
+EggSpend is built for people who want to actually understand their money — without spreadsheets, without a lecture, and without handing their financial life to another company's servers.
