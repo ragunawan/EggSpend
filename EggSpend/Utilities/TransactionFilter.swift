@@ -12,6 +12,7 @@ struct TransactionFilter: Equatable {
     var minAmount: Double? = nil
     var maxAmount: Double? = nil
     var generatedOnly: Bool = false
+    var adjustmentsOnly: Bool = false
 
     /// Whether any criteria beyond the defaults are set.
     var isActive: Bool {
@@ -24,6 +25,7 @@ struct TransactionFilter: Equatable {
             || minAmount != nil
             || maxAmount != nil
             || generatedOnly
+            || adjustmentsOnly
     }
 
     /// Number of distinct filter groups currently applied, for a compact badge/summary.
@@ -36,6 +38,7 @@ struct TransactionFilter: Equatable {
         if startDate != nil || endDate != nil { count += 1 }
         if minAmount != nil || maxAmount != nil { count += 1 }
         if generatedOnly { count += 1 }
+        if adjustmentsOnly { count += 1 }
         return count
     }
 
@@ -73,6 +76,9 @@ struct TransactionFilter: Equatable {
             return false
         }
         if generatedOnly && !transaction.isGenerated {
+            return false
+        }
+        if adjustmentsOnly && !transaction.isAdjustment {
             return false
         }
         return true

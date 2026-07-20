@@ -23,6 +23,7 @@ struct TransactionsListView: View {
     @State private var selectedTransfer: Transfer?
     @State private var showRecurringTransactions = false
     @State private var quickAddDraft: QuickAddDraft?
+    @State private var pendingUndo: PendingUndo?
 
     init(initialFilter: TransactionFilter = TransactionFilter(), hideTransfers: Bool = false, showUpcoming: Bool = true) {
         _filter = State(initialValue: initialFilter)
@@ -230,6 +231,7 @@ struct TransactionsListView: View {
                 .padding(.trailing, Space.lg)
                 .padding(.bottom, Space.lg)
             }
+            .overlay(alignment: .bottom) { undoToast }
             .navigationTitle("Transactions")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
@@ -424,8 +426,11 @@ struct TransactionsListView: View {
             .buttonStyle(.plain)
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
-                    AccountBalanceService.reverse(tx, from: tx.account)
-                    modelContext.delete(tx)
+                    withAnimation {
+                        pendingUndo = .transaction(
+                            TransactionEntryService.deleteTransaction(tx, context: modelContext)
+                        )
+                    }
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
@@ -462,9 +467,11 @@ struct TransactionsListView: View {
             .buttonStyle(.plain)
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
-                    TransferBalanceService.reverse(transfer)
-                    SavingsGoalContributionService.reverse(transfer)
-                    modelContext.delete(transfer)
+                    withAnimation {
+                        pendingUndo = .transfer(
+                            TransactionEntryService.deleteTransfer(transfer, context: modelContext)
+                        )
+                    }
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
@@ -504,18 +511,63 @@ struct TransactionsListView: View {
         for index in offsets {
             switch items[index] {
             case .transaction(let tx):
-                AccountBalanceService.reverse(tx, from: tx.account)
-                modelContext.delete(tx)
+                TransactionEntryService.deleteTransaction(tx, context: modelContext)
             case .transfer(let transfer):
-                TransferBalanceService.reverse(transfer)
-                SavingsGoalContributionService.reverse(transfer)
-                modelContext.delete(transfer)
+                TransactionEntryService.deleteTransfer(transfer, context: modelContext)
             case .upcoming:
                 continue
             case .upcomingPayment:
                 continue
             }
         }
+    }
+
+    // MARK: - Undo toast
+
+    /// Post-delete "Undo" affordance. Restoring goes back through
+    /// `TransactionEntryService`, which re-applies balances and savings-goal
+    /// contributions symmetrically, so undo is exact — not just a visual
+    /// re-insert. Auto-dismisses after a few seconds; a second delete before
+    /// then forfeits the first undo (only the latest delete is restorable).
+    @ViewBuilder
+    private var undoToast: some View {
+        if let pendingUndo {
+            HStack(spacing: Space.md) {
+                Text(pendingUndo.message)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.white)
+
+                Button("Undo") { performUndo() }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color.yolk)
+            }
+            .padding(.horizontal, Space.lg)
+            .padding(.vertical, Space.sm)
+            .background(Color.nestBrown, in: Capsule())
+            .shadow(color: Color.nestBrown.opacity(0.25), radius: 10, y: 4)
+            // Sits above the 56pt floating quick-add button + its bottom padding.
+            .padding(.bottom, 88)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .task(id: pendingUndo.id) {
+                // `task(id:)` cancels this sleep if a newer delete replaces the
+                // toast or the toast leaves the tree, so a stale timer can
+                // never clear a newer pending undo.
+                try? await Task.sleep(for: .seconds(6))
+                guard !Task.isCancelled else { return }
+                withAnimation { self.pendingUndo = nil }
+            }
+        }
+    }
+
+    private func performUndo() {
+        guard let pendingUndo else { return }
+        switch pendingUndo {
+        case .transaction(let snapshot):
+            TransactionEntryService.restoreTransaction(snapshot, context: modelContext)
+        case .transfer(let snapshot):
+            TransactionEntryService.restoreTransfer(snapshot, context: modelContext)
+        }
+        withAnimation { self.pendingUndo = nil }
     }
 
     private func matchesFilter(_ occurrence: RecurringOccurrence) -> Bool {
@@ -547,7 +599,7 @@ struct TransactionsListView: View {
         if let maxAmount = filter.maxAmount, occurrence.amount > maxAmount {
             return false
         }
-        if filter.generatedOnly {
+        if filter.generatedOnly || filter.adjustmentsOnly {
             return false
         }
         return true
@@ -577,10 +629,31 @@ struct TransactionsListView: View {
         if let maxAmount = filter.maxAmount, payment.amount > maxAmount {
             return false
         }
-        if filter.generatedOnly {
+        if filter.generatedOnly || filter.adjustmentsOnly {
             return false
         }
         return true
+    }
+}
+
+/// Snapshot of the most recent ledger delete, kept only while its Undo toast
+/// is visible.
+private enum PendingUndo: Identifiable {
+    case transaction(TransactionEntryService.DeletedTransaction)
+    case transfer(TransactionEntryService.DeletedTransfer)
+
+    var id: UUID {
+        switch self {
+        case .transaction(let snapshot): return snapshot.id
+        case .transfer(let snapshot): return snapshot.id
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .transaction: return "Transaction deleted"
+        case .transfer: return "Transfer deleted"
+        }
     }
 }
 

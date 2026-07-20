@@ -22,6 +22,7 @@ struct EggSpendApp: App {
                 for: schema,
                 configurations: [ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)]
             )
+            SyncStatus.current = .cloudKitActive
             return (container, .cloudKitActive)
         } catch {
             print("CloudKit ModelContainer init failed, falling back to local-only store: \(error)")
@@ -29,7 +30,9 @@ struct EggSpendApp: App {
                 for: schema,
                 configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, cloudKitDatabase: .none)]
             )
-            return (fallback, .localOnly(reason: error.localizedDescription))
+            let status = SyncStatus.localOnly(reason: error.localizedDescription)
+            SyncStatus.current = status
+            return (fallback, status)
         }
     }()
 

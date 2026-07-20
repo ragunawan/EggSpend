@@ -222,4 +222,106 @@ final class TransactionEntryServiceTests: XCTestCase {
         XCTAssertEqual(goalB.manualCurrentAmount, 350, accuracy: 0.001, "Newly tagged goalB should receive the contribution")
         XCTAssertEqual(transfer.savingsGoal?.id, goalB.id)
     }
+
+    // MARK: - Delete + undo restore
+
+    func testDeleteTransactionReversesBalanceAndRestoreReappliesExactly() throws {
+        let account = Account(name: "Checking", type: .checking, balance: 100)
+        let category = TransactionCategory(name: "Dining", icon: "fork.knife", colorHex: "#000000", typeFilter: .expense)
+        context.insert(account)
+        context.insert(category)
+        let transaction = TransactionEntryService.createTransaction(
+            title: "Lunch", amount: 20, date: Date(timeIntervalSince1970: 1_000),
+            type: .expense, category: category, account: account, notes: "tacos",
+            context: context, budgetAlertChecker: { _ in }
+        )
+        let originalID = transaction.id
+        let originalCreatedAt = transaction.createdAt
+        XCTAssertEqual(account.balance, 80, accuracy: 0.001)
+
+        let snapshot = TransactionEntryService.deleteTransaction(transaction, context: context)
+        try context.save()
+
+        XCTAssertEqual(account.balance, 100, accuracy: 0.001, "Delete must reverse the balance effect")
+        XCTAssertTrue(try context.fetch(FetchDescriptor<Transaction>()).isEmpty)
+
+        let restored = TransactionEntryService.restoreTransaction(snapshot, context: context)
+        try context.save()
+
+        XCTAssertEqual(account.balance, 80, accuracy: 0.001, "Restore must re-apply the balance effect")
+        XCTAssertEqual(restored.id, originalID, "Restore must preserve the original id")
+        XCTAssertEqual(restored.createdAt, originalCreatedAt)
+        XCTAssertEqual(restored.title, "Lunch")
+        XCTAssertEqual(restored.amount, 20, accuracy: 0.001)
+        XCTAssertEqual(restored.type, .expense)
+        XCTAssertEqual(restored.notes, "tacos")
+        XCTAssertEqual(restored.category?.id, category.id)
+        XCTAssertEqual(restored.account?.id, account.id)
+    }
+
+    func testRestoreTransactionDoesNotRecordCategoryRule() throws {
+        let category = TransactionCategory(name: "Dining", icon: "fork.knife", colorHex: "#000000", typeFilter: .expense)
+        context.insert(category)
+        let transaction = Transaction(title: "Lunch", amount: 20, type: .expense, category: category)
+        context.insert(transaction)
+
+        let snapshot = TransactionEntryService.deleteTransaction(transaction, context: context)
+        TransactionEntryService.restoreTransaction(snapshot, context: context)
+
+        XCTAssertTrue(try context.fetch(FetchDescriptor<CategoryRule>()).isEmpty,
+                      "Undo is not a fresh categorization signal")
+    }
+
+    func testRestoreTransactionWithDeletedCategoryResolvesToNil() throws {
+        let category = TransactionCategory(name: "Dining", icon: "fork.knife", colorHex: "#000000", typeFilter: .expense)
+        context.insert(category)
+        let transaction = Transaction(title: "Lunch", amount: 20, type: .expense, category: category)
+        context.insert(transaction)
+
+        let snapshot = TransactionEntryService.deleteTransaction(transaction, context: context)
+        context.delete(category)
+        try context.save()
+
+        let restored = TransactionEntryService.restoreTransaction(snapshot, context: context)
+        XCTAssertNil(restored.category, "A dangling category ID must resolve to nil, not crash")
+        XCTAssertEqual(restored.title, "Lunch")
+    }
+
+    func testDeleteAndRestoreTransferRoundTripsBalancesAndGoal() throws {
+        let checking = Account(name: "Checking", type: .checking, balance: 1_000)
+        let savings = Account(name: "Savings", type: .savings, balance: 500)
+        let goal = SavingsGoal(name: "Vacation", targetAmount: 2_000, currentAmount: 100)
+        context.insert(checking)
+        context.insert(savings)
+        context.insert(goal)
+        let transfer = TransactionEntryService.createTransfer(
+            amount: 300, date: Date(timeIntervalSince1970: 2_000),
+            fromAccount: checking, toAccount: savings, savingsGoal: goal,
+            notes: "monthly", context: context
+        )
+        let originalID = transfer.id
+        XCTAssertEqual(checking.balance, 700, accuracy: 0.001)
+        XCTAssertEqual(savings.balance, 800, accuracy: 0.001)
+        XCTAssertEqual(goal.manualCurrentAmount, 400, accuracy: 0.001)
+
+        let snapshot = TransactionEntryService.deleteTransfer(transfer, context: context)
+        try context.save()
+
+        XCTAssertEqual(checking.balance, 1_000, accuracy: 0.001)
+        XCTAssertEqual(savings.balance, 500, accuracy: 0.001)
+        XCTAssertEqual(goal.manualCurrentAmount, 100, accuracy: 0.001, "Delete must reverse the goal contribution")
+        XCTAssertTrue(try context.fetch(FetchDescriptor<Transfer>()).isEmpty)
+
+        let restored = TransactionEntryService.restoreTransfer(snapshot, context: context)
+        try context.save()
+
+        XCTAssertEqual(restored.id, originalID)
+        XCTAssertEqual(checking.balance, 700, accuracy: 0.001)
+        XCTAssertEqual(savings.balance, 800, accuracy: 0.001)
+        XCTAssertEqual(goal.manualCurrentAmount, 400, accuracy: 0.001, "Restore must re-apply the goal contribution")
+        XCTAssertEqual(restored.fromAccount?.id, checking.id)
+        XCTAssertEqual(restored.toAccount?.id, savings.id)
+        XCTAssertEqual(restored.savingsGoal?.id, goal.id)
+        XCTAssertEqual(restored.notes, "monthly")
+    }
 }

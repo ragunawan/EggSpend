@@ -129,8 +129,7 @@ struct TransactionDetailView: View {
     }
 
     private func deleteAndDismiss() {
-        AccountBalanceService.reverse(transaction, from: transaction.account)
-        modelContext.delete(transaction)
+        TransactionEntryService.deleteTransaction(transaction, context: modelContext)
         BudgetAlertCoordinator.checkBudgets(context: modelContext)
         dismiss()
     }

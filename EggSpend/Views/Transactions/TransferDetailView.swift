@@ -106,9 +106,7 @@ struct TransferDetailView: View {
     }
 
     private func deleteAndDismiss() {
-        TransferBalanceService.reverse(transfer)
-        SavingsGoalContributionService.reverse(transfer)
-        modelContext.delete(transfer)
+        TransactionEntryService.deleteTransfer(transfer, context: modelContext)
         dismiss()
     }
 }

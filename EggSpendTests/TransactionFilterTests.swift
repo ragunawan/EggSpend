@@ -151,6 +151,19 @@ final class TransactionFilterTests: XCTestCase {
         XCTAssertFalse(filter.matches(manual))
     }
 
+    func testAdjustmentsOnlyFilter() {
+        var filter = TransactionFilter()
+        filter.adjustmentsOnly = true
+
+        let adjustment = Transaction(title: "Balance adjustment", amount: 25, type: .income, isAdjustment: true)
+        let regular = Transaction(title: "Groceries", amount: 25, type: .expense)
+
+        XCTAssertTrue(filter.isActive)
+        XCTAssertEqual(filter.activeCount, 1)
+        XCTAssertTrue(filter.matches(adjustment))
+        XCTAssertFalse(filter.matches(regular))
+    }
+
     func testCombinedFiltersRequireAllToMatch() throws {
         let category = TransactionCategory(name: "Subscriptions", icon: "play.rectangle", colorHex: "8E44AD")
         context.insert(category)

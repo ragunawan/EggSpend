@@ -38,7 +38,7 @@ Working register for the agent loop. Full analysis with reproduction detail: `do
 | # | Risk | Mitigation task |
 |---|------|-----------------|
 | R1 | `try?` saves swallow financial-data write failures | T6 — fixed(2026-07-08); note: recurring-failure UI surfacing remains backlog item |
-| R2 | Silent CloudKit→local fallback; user may believe data is backed up | surface SyncStatus (SettingsView is dedicated host, awaits R2 as its own task) | open |
+| R2 | Silent CloudKit→local fallback; user may believe data is backed up | surface SyncStatus (SettingsView is dedicated host, awaits R2 as its own task) | resolved(2026-07-20) — `SyncStatus.current` set at launch by `EggSpendApp`'s container initializer; SettingsView "iCloud Sync" section shows active/local-only state with guidance + Full Backup pointer. Follow-up: status is launch-time only (no live CK account-change observation) |
 | R3 | No app lock | T20 | resolved(2026-07-10) |
 | R4 | No data export/portability | T13a/T13b | fixed(2026-07-09) — DataExporter engine + SettingsView with ShareLink export UI; CSV (transactions/accounts/transfers) and versioned JSON backup accessible via gear icon on Home tab |
 | R5 | No CI — regressions land unnoticed | T11 | fixed(2026-07-09) — CI green confirmed (Tests run 16 on commit 56edc99); workflow passed on GitHub runner for first time |

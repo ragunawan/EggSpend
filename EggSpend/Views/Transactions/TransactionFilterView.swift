@@ -273,6 +273,12 @@ struct TransactionFilterView: View {
                     .font(.subheadline)
             }
             .tint(.yolk)
+
+            Toggle(isOn: $draft.adjustmentsOnly) {
+                Label("Balance adjustments only", systemImage: "slider.horizontal.2.square")
+                    .font(.subheadline)
+            }
+            .tint(.yolk)
         }
     }
 

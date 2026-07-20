@@ -130,6 +130,46 @@ struct SettingsView: View {
                     Text("Auto matches this device's light or dark appearance.")
                 }
 
+                // Resolved once at launch; nil in previews/tests, where the
+                // section is simply omitted (there's no real store to
+                // describe). Surfacing this closes the "silent local-only
+                // fallback" trust gap — a user whose CloudKit container
+                // failed to open should never believe their data is backed
+                // up when it isn't (risk register R2).
+                if let syncStatus = SyncStatus.current {
+                    Section {
+                        switch syncStatus {
+                        case .cloudKitActive:
+                            Label {
+                                Text("Syncing with iCloud")
+                            } icon: {
+                                Image(systemName: "checkmark.icloud.fill")
+                                    .foregroundStyle(Color.nestLeafGreen)
+                            }
+                        case .localOnly:
+                            Label {
+                                Text("On this device only")
+                            } icon: {
+                                Image(systemName: "exclamationmark.icloud.fill")
+                                    .foregroundStyle(Color.warningTone)
+                            }
+                        }
+                    } header: {
+                        Text("iCloud Sync")
+                    } footer: {
+                        switch syncStatus {
+                        case .cloudKitActive:
+                            Text("Your data is stored in your personal iCloud and syncs across your devices signed into the same Apple Account.")
+                        case .localOnly(let reason):
+                            if let reason, !reason.isEmpty {
+                                Text("iCloud sync isn't available, so your data is stored only on this device and is not backed up to iCloud. Sign in to iCloud in the Settings app and reopen EggSpend to enable sync. You can also keep a manual copy with Full Backup below. (\(reason))")
+                            } else {
+                                Text("iCloud sync isn't available, so your data is stored only on this device and is not backed up to iCloud. Sign in to iCloud in the Settings app and reopen EggSpend to enable sync. You can also keep a manual copy with Full Backup below.")
+                            }
+                        }
+                    }
+                }
+
                 Section("Manage") {
                     NavigationLink {
                         CategoryManagementView()
@@ -147,6 +187,24 @@ struct SettingsView: View {
                         SubscriptionAuditView()
                     } label: {
                         Label("Subscription audit", systemImage: "magnifyingglass.circle.fill")
+                    }
+
+                    // Audit trail of "Balance adjustment" corrections created
+                    // by account balance edits — the data already lives in the
+                    // ledger as isAdjustment transactions; this is a saved,
+                    // pre-filtered view of it.
+                    NavigationLink {
+                        TransactionsListView(
+                            initialFilter: {
+                                var filter = TransactionFilter()
+                                filter.adjustmentsOnly = true
+                                return filter
+                            }(),
+                            hideTransfers: true,
+                            showUpcoming: false
+                        )
+                    } label: {
+                        Label("Balance adjustments", systemImage: "slider.horizontal.2.square")
                     }
                 }
 
